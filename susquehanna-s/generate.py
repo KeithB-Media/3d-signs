@@ -24,6 +24,7 @@ R_YELLOW = 6.80            # yellow pinstripe ring
 R_BLACK = 6.62             # inner black ring
 R_FIELD = 6.45             # blue field / flag area
 S_SMOOTH = 0.02           # smoothing radius applied to the traced S
+S_OFFSET = (0.0, 0.0)      # move the traced S (in); (0,0) = as on the head-on photo
 S_OUTLINE = 0.21           # yellow outline width around the S
 SUPPORT_INSET = 0.06       # hidden support under the S is inset this much
 MIN_HALF = 0.045          # stripe pieces: features thinner than 0.09" are trimmed
@@ -50,7 +51,7 @@ def letter_s():
     # remove pixel noise from the trace: close small nicks, then open off specks,
     # leaving smooth curves and slightly softened (still pointed) spurs
     shape = shape.buffer(S_SMOOTH).buffer(-2 * S_SMOOTH).buffer(S_SMOOTH)
-    return shape.simplify(0.004)
+    return affinity.translate(shape.simplify(0.004), *S_OFFSET)
 
 
 def star(cx, cy, r, rot=0.0):
