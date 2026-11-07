@@ -27,6 +27,7 @@ S_WIDTH = 6.70
 S_CENTER = (0.10, -0.30)
 S_OUTLINE = 0.17           # yellow outline width around the S
 SUPPORT_INSET = 0.06       # hidden support under the S is inset this much
+MIN_HALF = 0.045          # stripe pieces: features thinner than 0.09" are trimmed
 STAR_R = 0.43              # star outer radius (≈0.86" across)
 
 COLORS = {
@@ -104,13 +105,34 @@ def star(cx, cy, r, rot=0.0):
     return Polygon(pts)
 
 
-# Flag stripes: boundary curves in normalised coords (u, v in [-1, 1] of R_FIELD)
+# Flag stripes: boundary curves in normalised coords (u, v in [-1, 1] of R_FIELD).
+# Top edge of the stripes, traced relative to the S serif in the reference close-ups:
+# it runs ~1.5" below the serif top, then rises to the right side of the circle.
+WAVE_PTS = [(-1.30, -0.33), (-1.0, -0.34), (-0.75, -0.355), (-0.5, -0.355), (-0.3, -0.29),
+            (0.0, -0.17), (0.5, -0.05), (1.0, 0.02), (1.30, 0.05)]
+
+
+def _catmull(pts, u):
+    for k in range(1, len(pts) - 2):
+        if pts[k][0] <= u <= pts[k + 1][0]:
+            break
+    else:
+        k = 1 if u < pts[1][0] else len(pts) - 3
+    (x0, y0), (x1, y1), (x2, y2), (x3, y3) = pts[k - 1:k + 3]
+    t = (u - x1) / (x2 - x1)
+    m1 = (y2 - y0) / (x2 - x0) * (x2 - x1)
+    m2 = (y3 - y1) / (x3 - x1) * (x2 - x1)
+    h00, h10 = 2 * t**3 - 3 * t**2 + 1, t**3 - 2 * t**2 + t
+    h01, h11 = -2 * t**3 + 3 * t**2, t**3 - t**2
+    return h00 * y1 + h10 * m1 + h01 * y2 + h11 * m2
+
+
 def wave_top(u):
-    return -0.10 + 0.13 * u - 0.05 * math.cos(math.pi * u)
+    return _catmull(WAVE_PTS, u)
 
 
 def band_t(u):
-    return 0.150 + 0.030 * u     # stripe thickness, a touch wider on the right
+    return 0.100 + 0.012 * u     # stripe thickness (~0.65"), a touch wider on the right
 
 
 def boundary(i, u):
@@ -131,14 +153,28 @@ def below(i, n=200):
     return Polygon(top + [(1.05 * R_FIELD, -2 * R_FIELD), (-1.05 * R_FIELD, -2 * R_FIELD)])
 
 
-def swoosh(n=120):
-    """Thin white crescent in the blue field just above the stripes (left side)."""
-    a, b = -0.97, -0.18
-    us = [a + (b - a) * k / n for k in range(n + 1)]
-    lo = [(u, wave_top(u) + 0.055) for u in us]
-    hi = [(u, wave_top(u) + 0.055 + 0.045 * abs(math.sin(math.pi * (u - a) / (b - a))) ** 0.8)
-          for u in reversed(us)]
-    return affinity.scale(Polygon(lo + hi), R_FIELD, R_FIELD, origin=(0, 0))
+# Swoosh: crescent that sweeps up from the left rim, passes BEHIND the lower serif
+# of the S near its top, and ends in the S's lower counter (as on the locomotive).
+SWOOSH = [(-5.75, -1.80), (-3.55, -1.62), (-1.62, -0.92)]   # quadratic Bezier centreline, inches
+SWOOSH_W = 0.24          # max width, reached about where it passes behind the serif
+SWOOSH_TIP = 0.07        # tips are blunted to this width so they survive cutting
+
+
+def swoosh(n=160):
+    (x0, y0), (x1, y1), (x2, y2) = SWOOSH
+    lo, hi = [], []
+    for k in range(n + 1):
+        t = k / n
+        x = (1 - t) ** 2 * x0 + 2 * (1 - t) * t * x1 + t * t * x2
+        y = (1 - t) ** 2 * y0 + 2 * (1 - t) * t * y1 + t * t * y2
+        dx = 2 * (1 - t) * (x1 - x0) + 2 * t * (x2 - x1)
+        dy = 2 * (1 - t) * (y1 - y0) + 2 * t * (y2 - y1)
+        L = math.hypot(dx, dy)
+        nx, ny = -dy / L, dx / L
+        w = SWOOSH_TIP + (SWOOSH_W - SWOOSH_TIP) * math.sin(math.pi * t ** 1.36) ** 0.75
+        lo.append((x, y))
+        hi.append((x + nx * w, y + ny * w))
+    return Polygon(lo + hi[::-1]).buffer(0)
 
 
 # Star positions (fraction of R_BASE), traced from the reference photos
@@ -155,7 +191,7 @@ def build():
     support = s_outline.buffer(-SUPPORT_INSET)          # hidden under layer 7
 
     swish = swoosh()
-    stripes = below(0).intersection(field)
+    stripes = below(0).intersection(field).buffer(-MIN_HALF).buffer(MIN_HALF)
     keepout = unary_union([s_outline, stripes, swish]).buffer(0.14)
     room = field.buffer(-0.18)
     stars = []
@@ -174,8 +210,10 @@ def build():
         stars.append(best)
 
     white = unary_union([stripes, swish, *stars, support])
-    reds = [band(i).intersection(field) for i in range(1, 12, 2)]
-    red = unary_union(reds + [support])
+    reds = [band(i).intersection(field) for i in range(1, 30, 2)]
+    # trim knife-edge points where stripes meet the rim (anything thinner than 2*MIN_HALF)
+    red = unary_union(reds).buffer(-MIN_HALF).buffer(MIN_HALF)
+    red = unary_union([red, support])
 
     return [
         # (file stem, colour, geometry, thickness in, note)

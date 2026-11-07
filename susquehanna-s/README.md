@@ -11,6 +11,10 @@ Each layer is cut, painted one colour, then stacked and glued, bottom (1) to top
 
 ![layers](renders/layer_sheet.png)
 
+Swoosh passing behind the serif:
+
+![detail](renders/detail_swoosh.png)
+
 ## Cut files (`svg/`)
 
 All files are 14 in × 14 in on the same centre, so every layer lines up. They contain
@@ -46,8 +50,12 @@ covered by layers 7 and 8.
   pieces show from an angle.
 * Kerf is not compensated. With a typical 0.004–0.008" kerf, the pieces come out
   a few thousandths undersize, which is fine for stacked art.
-* Smallest pieces: stars are about 0.86" across, and the swoosh tapers to a fine
-  point. Use a honeycomb bed with hold-downs, or leave tabs.
+* Smallest pieces: stars are about 0.86" across. Swoosh tips are blunted to 0.07", and
+  stripe points at the rim are trimmed, so no part of the stripe layers is thinner than
+  about 0.09". Use hold-downs or tabs for the stars.
+* The white swoosh passes behind the S's lower serif, as on the locomotive. It is
+  cut as part of the white stripe piece and joined to it through the hidden S support,
+  so both visible ends line up on their own.
 * Glue order: 1 → 2 → 3 → 4 (all concentric discs), then 5 using the template,
   then 6, 7, 8.
 
