@@ -11,6 +11,10 @@ Each layer is cut, painted one colour, then stacked and glued, bottom (1) to top
 
 ![layers](renders/layer_sheet.png)
 
+Compared with the locomotive (left: head-on photo, right: faded photo):
+
+![compare](renders/compare_to_photo.png)
+
 Swoosh passing behind the serif:
 
 ![detail](renders/detail_swoosh.png)
@@ -50,10 +54,11 @@ covered by layers 7 and 8.
   pieces show from an angle.
 * Kerf is not compensated. With a typical 0.004–0.008" kerf, the pieces come out
   a few thousandths undersize, which is fine for stacked art.
-* Smallest pieces: stars are about 0.86" across. Swoosh tips are blunted to 0.07", and
+* Stars are about 1.3" across, as on the locomotive. Three that crowd the S are slightly
+  smaller (72–90%). Smallest pieces: Swoosh tips are blunted to 0.07", and
   stripe points at the rim are trimmed, so no part of the stripe layers is thinner than
   about 0.09". Use hold-downs or tabs for the stars.
-* The stripe edges and the swoosh were measured from a close-up photo of the logo
+* The stripe edges, swoosh and star positions were measured from a head-on photo of the logo
   (pixel scans, fitted with smooth curves): six bands under the blue, white-red-white-red-white,
   then a wide red band at the bottom.
 * The white swoosh passes behind the S's lower serif, as on the locomotive. It is

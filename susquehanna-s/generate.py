@@ -24,13 +24,13 @@ R_BASE = DIAM / 2          # 7.00  black outer rim (base)
 R_YELLOW = 6.80            # yellow pinstripe ring
 R_BLACK = 6.62             # inner black ring
 R_FIELD = 6.45             # blue field / flag area
-S_HEIGHT = 9.60            # height of the letter S
-S_WIDTH = 7.50
-S_CENTER = (0.30, -0.05)
+S_HEIGHT = 9.94            # height of the letter S
+S_WIDTH = 7.44
+S_CENTER = (0.52, 0.26)
 S_OUTLINE = 0.17           # yellow outline width around the S
 SUPPORT_INSET = 0.06       # hidden support under the S is inset this much
 MIN_HALF = 0.045          # stripe pieces: features thinner than 0.09" are trimmed
-STAR_R = 0.43              # star outer radius (≈0.86" across)
+STAR_R = 0.66              # star outer radius (≈1.25" across; photo stars are ~1.4" but the S here is fuller)
 
 COLORS = {
     "black": "#141414",
@@ -108,26 +108,27 @@ def star(cx, cy, r, rot=0.0):
 
 
 # ----------------------------------------------------------- flag stripes
-# Stripe boundaries measured from a close-up photo of the locomotive logo
-# (pixel scans, normalised to the outer circle and scaled to this 14" sign).
+# Stripe boundaries measured from a head-on photo of the locomotive logo
+# (pixel scans of unit 3634, normalised to the outer circle and scaled to this 14" sign).
 # Top to bottom: blue | b0 | white | b1 | red | b2 | white | b3 | red | b4 | white | b5 | red (to rim)
-PHOTO_C, PHOTO_RX, PHOTO_RY = (538.5, 1038.5), 524.5, 698.5
+PHOTO_C, PHOTO_RX, PHOTO_RY = (511, 795), 190, 208
 BOUNDARY_PX = [
-    [(120, 1194), (160, 1202), (200, 1205), (240, 1202), (400, 1186.5), (440, 1179.5), (480, 1171),
-     (520, 1162), (560, 1153), (840, 1049.5), (880, 1039), (920, 1030), (960, 1022), (1000, 1017)],
-    [(120, 1233), (160, 1242), (200, 1250), (220, 1252), (240, 1255), (400, 1244), (440, 1239.5),
-     (480, 1234), (520, 1227.5), (560, 1220.5), (600, 1207.5), (640, 1195.5), (840, 1122.5),
-     (880, 1113.5), (920, 1105.5), (960, 1099), (1000, 1094)],
-    [(120, 1277), (160, 1290), (200, 1301), (220, 1306), (240, 1314), (440, 1318.5), (480, 1315.5),
-     (520, 1311.5), (560, 1307.5), (600, 1296.5), (640, 1285), (680, 1272.5), (880, 1210.5),
-     (920, 1205), (960, 1200.5), (1000, 1197.5)],
-    [(120, 1308), (160, 1325), (200, 1339), (220, 1346), (240, 1352), (480, 1364), (520, 1366.5),
-     (560, 1365.5), (600, 1356.5), (640, 1347), (680, 1337), (880, 1293.5), (920, 1288), (960, 1283)],
-    [(160, 1378), (200, 1396), (220, 1405), (240, 1412), (260, 1420), (280, 1428), (300, 1434.5),
-     (320, 1440), (340, 1447), (360, 1452.5), (400, 1462), (840, 1419.5), (880, 1416), (920, 1413)],
-    [(200, 1455), (220, 1465), (240, 1475), (260, 1485), (280, 1493), (300, 1502), (320, 1510),
-     (340, 1518), (360, 1526), (400, 1540), (440, 1553), (480, 1564.5), (520, 1575), (560, 1583.5),
-     (600, 1579.5), (640, 1574.5), (680, 1566.5), (720, 1558.5), (760, 1549.5), (800, 1541)],
+    [(380, 889.5), (390, 889.5), (400, 884.5), (410, 883.5), (420, 880.5), (480, 854.5), (490, 851.5),
+     (500, 846.5), (510, 840.5), (520, 836.5), (530, 829.5), (540, 825.5), (600, 788.5), (610, 789.5),
+     (620, 783.5), (630, 779.5), (640, 776), (650, 772.5), (660, 767.5), (670, 765.5)],
+    [(380, 901.5), (390, 900.5), (400, 898.5), (410, 896.5), (420, 894.5), (430, 893.5), (490, 867.5),
+     (500, 862.5), (510, 857.5), (520, 853), (530, 847.5), (540, 842.5), (550, 839.5), (620, 803.5),
+     (630, 800.5), (640, 796.5), (650, 793.5), (660, 791.5), (670, 788.5)],
+    [(380, 914), (390, 915.5), (400, 914.5), (410, 913.5), (420, 911.5), (430, 910.5), (500, 888),
+     (510, 884.5), (520, 879.5), (530, 876.5), (540, 872.5), (550, 869.5), (560, 865.5), (570, 861.5),
+     (630, 836.5), (640, 833.5), (650, 831.5), (660, 829.5), (670, 828.5)],
+    [(400, 926), (410, 926.5), (420, 925.5), (430, 924.5), (530, 893.5), (540, 890.5), (550, 887.5),
+     (560, 885.5), (570, 881.5), (630, 864), (640, 862.5), (650, 860.5), (660, 858.5), (670, 857.5)],
+    [(410, 943.5), (430, 943.5), (440, 943.5), (450, 942.5), (460, 941.5), (470, 940.5), (480, 938.5),
+     (490, 937.5), (500, 935.5), (630, 906.5), (640, 906.5), (650, 904.5), (660, 904.5)],
+    [(440, 966.5), (450, 964.5), (460, 964.5), (470, 963.5), (480, 963.5), (490, 963.5), (500, 962.5),
+     (510, 960.5), (520, 959.5), (530, 959.5), (540, 958.5), (550, 957.5), (560, 957.5), (570, 955.5),
+     (580, 954.5), (590, 953.5), (600, 951.5), (610, 950.5), (620, 947.5), (630, 946.5)],
 ]
 
 
@@ -161,9 +162,9 @@ def band(i):
 
 # Swoosh: white crescent from the left rim, passing behind the S serif and ending in
 # the S's lower counter. Top/bottom edges measured from the same photo (pixels).
-SWOOSH_TOP_PX = [(120, 1117), (160, 1123), (200, 1126), (240, 1126), (360, 1109), (400, 1106)]
-SWOOSH_BOT_PX = [(120, 1122), (160, 1132), (200, 1138), (240, 1142), (360, 1123), (400, 1114)]
-SWOOSH_TIPS_PX = [(100, 1115), (432, 1099)]
+SWOOSH_TOP_PX = [(390, 859), (400, 856), (410, 854), (420, 849), (460, 831), (470, 828)]
+SWOOSH_BOT_PX = [(390, 863), (400, 861), (410, 860), (420, 857), (460, 838), (470, 834)]
+SWOOSH_TIPS_PX = [(355, 865), (494, 819)]
 SWOOSH_TIP = 0.07        # tips are blunted to this width so they survive cutting
 
 
@@ -185,11 +186,10 @@ def swoosh():
     return Polygon(upper + lower).buffer(0.0)
 
 
-# Star positions (fraction of R_BASE), traced from the reference photos
-STARS = [(-0.15, 0.80, 0.10), (-0.51, 0.62, -0.05), (0.50, 0.66, 0.05),
-         (-0.75, 0.38, 0.0), (-0.56, 0.12, 0.08), (-0.84, -0.06, -0.06),
-         (0.16, 0.33, 0.0), (0.79, 0.38, -0.08), (0.80, 0.14, 0.05),
-         (0.48, 0.05, 0.10)]
+# Star centres (photo pixels, same head-on photo) and size
+STARS_PX = [(455, 625), (568, 640), (400, 680), (625, 675), (527, 702),
+            (357, 735), (642, 733), (578, 753), (405, 780), (357, 833)]
+STAR_ROT = [0.10, -0.05, 0.0, 0.08, 0.0, -0.06, 0.05, 0.12, 0.0, -0.08]
 
 
 def build():
@@ -200,21 +200,29 @@ def build():
 
     swish = swoosh()
     stripes = below(0).intersection(field).buffer(-MIN_HALF).buffer(MIN_HALF)
-    keepout = unary_union([s_outline, stripes, swish]).buffer(0.14)
-    room = field.buffer(-0.18)
+    keepout = unary_union([s_outline, stripes, swish]).buffer(0.07)
+    room = field.buffer(-0.02)
     stars = []
-    for u, v, rot in STARS:
-        x0, y0 = u * R_BASE, v * R_BASE
+    for (px, py), rot in zip(STARS_PX, STAR_ROT):
+        x0, y0 = px_to_in(px, py)
         best = None
-        for k in range(400):          # spiral search for the nearest clear spot
-            rr, a = 0.05 * k ** 0.5 * 1.6, k * 2.39996
-            x, y = x0 + rr * math.cos(a), y0 + rr * math.sin(a)
-            st = star(x, y, STAR_R, rot)
-            if room.contains(st) and not st.intersects(keepout):
-                best = st
+        # keep each star close to its photo position: try a short nudge first,
+        # then shrink it a little before resorting to a longer move
+        for scale, reach in ((1.0, 120), (0.9, 120), (0.8, 160), (0.72, 200), (0.72, 2500)):
+            for k in range(reach):
+                rr, a = 0.03 * k ** 0.5 * 1.6, k * 2.39996
+                x, y = x0 + rr * math.cos(a), y0 + rr * math.sin(a)
+                st = star(x, y, STAR_R * scale, rot)
+                if room.contains(st) and not st.intersects(keepout) and \
+                        not any(st.distance(o) < 0.15 for o in stars):
+                    best = st
+                    break
+            if best is not None:
                 break
         if best is None:
-            raise SystemExit(f"no room for star near {u},{v}")
+            raise SystemExit(f"no room for star near {x0:.2f},{y0:.2f}")
+        if rr > 0.05 or scale < 1:
+            print(f"  star at ({x0:.2f},{y0:.2f}): moved {rr:.2f}\", size {scale:.0%}")
         stars.append(best)
 
     white = unary_union([stripes, swish, *stars, support])
