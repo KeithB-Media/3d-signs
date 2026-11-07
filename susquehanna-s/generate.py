@@ -2,15 +2,14 @@
 """Generate laser-cut SVG layers for a 14" round stacked 'S' sign (flag background).
 
 Units are inches. Origin of the design is the sign centre with +y up; SVG output
-flips y. Run:  python3 generate.py   (needs: pip install shapely fonttools)
+flips y. Run:  python3 generate.py   (needs: pip install shapely numpy)
 """
+import json
 import math
 import os
 
 import numpy as np
 
-from fontTools.pens.basePen import BasePen
-from fontTools.ttLib import TTFont
 from shapely import affinity
 from shapely.geometry import Polygon, Point, MultiPolygon
 from shapely.ops import unary_union
@@ -24,10 +23,8 @@ R_BASE = DIAM / 2          # 7.00  black outer rim (base)
 R_YELLOW = 6.80            # yellow pinstripe ring
 R_BLACK = 6.62             # inner black ring
 R_FIELD = 6.45             # blue field / flag area
-S_HEIGHT = 9.94            # height of the letter S
-S_WIDTH = 7.44
-S_CENTER = (0.52, 0.26)
-S_OUTLINE = 0.17           # yellow outline width around the S
+S_SMOOTH = 0.02           # smoothing radius applied to the traced S
+S_OUTLINE = 0.21           # yellow outline width around the S
 SUPPORT_INSET = 0.06       # hidden support under the S is inset this much
 MIN_HALF = 0.045          # stripe pieces: features thinner than 0.09" are trimmed
 STAR_R = 0.66              # star outer radius (≈1.25" across; photo stars are ~1.4" but the S here is fuller)
@@ -46,56 +43,15 @@ def circle(r, n=720):
     return Point(0, 0).buffer(r, quad_segs=n // 4)
 
 
-class FlattenPen(BasePen):
-    """Collect glyph contours as polylines (curves sampled)."""
-
-    def __init__(self, glyphSet, steps=24):
-        super().__init__(glyphSet)
-        self.contours, self.cur, self.steps = [], [], steps
-
-    def _moveTo(self, p):
-        self.cur = [p]
-
-    def _lineTo(self, p):
-        self.cur.append(p)
-
-    def _curveToOne(self, p1, p2, p3):
-        p0 = self.cur[-1]
-        for i in range(1, self.steps + 1):
-            t = i / self.steps
-            mt = 1 - t
-            self.cur.append((
-                mt**3 * p0[0] + 3 * mt * mt * t * p1[0] + 3 * mt * t * t * p2[0] + t**3 * p3[0],
-                mt**3 * p0[1] + 3 * mt * mt * t * p1[1] + 3 * mt * t * t * p2[1] + t**3 * p3[1]))
-
-    def _qCurveToOne(self, p1, p2):
-        p0 = self.cur[-1]
-        for i in range(1, self.steps + 1):
-            t = i / self.steps
-            mt = 1 - t
-            self.cur.append((mt * mt * p0[0] + 2 * mt * t * p1[0] + t * t * p2[0],
-                             mt * mt * p0[1] + 2 * mt * t * p1[1] + t * t * p2[1]))
-
-    def _closePath(self):
-        if len(self.cur) > 2:
-            self.contours.append(self.cur)
-        self.cur = []
-
-    _endPath = _closePath
-
-
 def letter_s():
-    font = TTFont(os.path.join(HERE, "fonts", "OldStandard-Bold.ttf"))
-    gs = font.getGlyphSet()
-    pen = FlattenPen(gs)
-    gs[font.getBestCmap()[ord("S")]].draw(pen)
-    shape = Polygon()
-    for c in pen.contours:
-        shape = shape.symmetric_difference(Polygon(c).buffer(0))
-    x0, y0, x1, y1 = shape.bounds
-    shape = affinity.translate(shape, -(x0 + x1) / 2, -(y0 + y1) / 2)
-    shape = affinity.scale(shape, S_WIDTH / (x1 - x0), S_HEIGHT / (y1 - y0), origin=(0, 0))
-    return affinity.translate(shape, *S_CENTER)
+    """The S, traced from a head-on photo of the locomotive logo (see trace_s.py)."""
+    with open(os.path.join(HERE, "s_logo_trace.json")) as f:
+        pts = json.load(f)["core"]
+    shape = Polygon(pts).buffer(0)
+    # remove pixel noise from the trace: close small nicks, then open off specks,
+    # leaving smooth curves and slightly softened (still pointed) spurs
+    shape = shape.buffer(S_SMOOTH).buffer(-2 * S_SMOOTH).buffer(S_SMOOTH)
+    return shape.simplify(0.004)
 
 
 def star(cx, cy, r, rot=0.0):
@@ -291,7 +247,6 @@ def main():
         f.write(svg_doc(body, "Glue-up placement template (print 1:1)"))
 
     # data for the renderer
-    import json
     with open(os.path.join(OUT, "layers.json"), "w") as f:
         json.dump([{"stem": s, "color": COLORS[c], "d": d, "z": z, "t": t}
                    for s, c, d, z, t in preview], f)

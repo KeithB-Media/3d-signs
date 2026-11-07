@@ -71,9 +71,14 @@ covered by layers 7 and 8.
 The geometry is fully parametric (sizes, S position, stars, stripe waves) in `generate.py`.
 
 ```
-pip install shapely fonttools
+pip install shapely numpy
 python3 generate.py        # writes svg/
 node render.js             # writes renders/ (needs Playwright + Chromium)
 ```
-The S letterform is from Old Standard TT Bold (`fonts/`, SIL Open Font License), scaled to fit the logo.
-Its thinnest stroke is wider than 0.25", so it cuts cleanly.
+The S letterform (`s_logo_trace.json`) was traced from a head-on photo of the
+locomotive logo with `trace_s.py`. The script reads the black letter inside the
+yellow outline, smooths the curves, and keeps the serif corners and spurs sharp.
+It also repairs a glare dent on the top-left curve. To re-trace from a photo:
+`pip install opencv-python-headless scipy`, then `python3 trace_s.py photo.jpg`.
+The yellow outline is 0.21" wide, as measured from the photo, and the thinnest
+stroke of the S is wider than 0.3".
