@@ -56,8 +56,8 @@ covered by layers 7 and 8.
   a few thousandths undersize, which is fine for stacked art.
 * Stars keep one shape, but each has its own size (1.3–1.9" across), tilt and position,
   fitted to the matching star in the photo. As on the locomotive, the two stars at the
-  left edge run under the ring and are clipped by it. Three stars next to the S are cut
-  at 90% so they clear its outline. Smallest pieces: Swoosh tips are blunted to 0.07", and
+  left edge run under the ring and are clipped by it. Three stars next to the S are scaled
+  to 90% so they clear its outline. Swoosh tips are blunted to 0.07", and
   stripe points at the rim are trimmed, so no part of the stripe layers is thinner than
   about 0.09". Use hold-downs or tabs for the stars.
 * The stripe edges, swoosh and star positions were measured from a head-on photo of the logo
