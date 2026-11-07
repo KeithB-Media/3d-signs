@@ -82,7 +82,7 @@ class FlattenPen(BasePen):
 
 
 def letter_s():
-    font = TTFont(os.path.join(HERE, "fonts", "DejaVuSerif-Bold.ttf"))
+    font = TTFont(os.path.join(HERE, "fonts", "OldStandard-Bold.ttf"))
     gs = font.getGlyphSet()
     pen = FlattenPen(gs)
     gs[font.getBestCmap()[ord("S")]].draw(pen)

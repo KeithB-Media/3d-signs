@@ -59,4 +59,5 @@ pip install shapely fonttools
 python3 generate.py        # writes svg/
 node render.js             # writes renders/ (needs Playwright + Chromium)
 ```
-The S letterform is from DejaVu Serif Bold (`fonts/`, free licence), scaled to fit the logo.
+The S letterform is from Old Standard TT Bold (`fonts/`, SIL Open Font License), scaled to fit the logo.
+Its thinnest stroke is wider than 0.25", so it cuts cleanly.
