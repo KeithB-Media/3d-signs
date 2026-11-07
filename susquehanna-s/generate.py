@@ -152,7 +152,8 @@ STARS = [
 ]
 
 
-def build():
+def parts():
+    """The logo's artwork as separate shapes (inches, sign centre origin)."""
     field = circle(R_FIELD)
     s = letter_s()
     s_outline = s.buffer(S_OUTLINE, join_style="round")
@@ -189,11 +190,18 @@ def build():
             print(f"  star at ({x0:.2f},{y0:.2f}): moved {rr:.2f}\", size {scale:.0%} of photo")
         stars.append(best)
 
-    white = unary_union([stripes, swish, *stars, support])
     reds = [band(1).intersection(field), band(3).intersection(field), below(5).intersection(field)]
     # trim knife-edge points where stripes meet the rim (anything thinner than 2*MIN_HALF)
     red = unary_union(reds).buffer(-MIN_HALF).buffer(MIN_HALF)
-    red = unary_union([red, support])
+    return dict(field=field, s=s, s_outline=s_outline, support=support, stripes=stripes,
+                red=red, swoosh=swish, stars=stars)
+
+
+def build():
+    p = parts()
+    field, s, s_outline, support = p["field"], p["s"], p["s_outline"], p["support"]
+    white = unary_union([p["stripes"], p["swoosh"], *p["stars"], support])
+    red = unary_union([p["red"], support])
 
     return [
         # (file stem, colour, geometry, thickness in, note)

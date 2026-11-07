@@ -86,3 +86,28 @@ The yellow outline is 0.21" wide, as measured from the photo, and the thinnest
 stroke of the S is wider than 0.3". The S is centred on the sign: the photos disagree
 slightly about where it sits on the curved locomotive nose. `S_OFFSET` in `generate.py`
 moves it; set it to `(0, 0)` to place it exactly as on the head-on photo.
+
+## Engraved coaster version (`coaster/`)
+
+A simplified, one-tone version of the design for laser-engraving round coasters
+(for example skateboard-wood coasters).
+
+![coaster](coaster/coaster_4in_preview.png)
+
+| File | Size |
+|------|------|
+| `coaster/coaster_4in.svg` | 4" round |
+| `coaster/coaster_3.5in.svg` | 3.5" round |
+
+* **Black fill = engrave.** The outer ring, blue field, red stripes and the S are engraved.
+  The pinstripe, white stripes, stars, swoosh and the S outline are left as bare wood.
+* **Red hairline circle = optional cut.** Turn that layer off if your coasters are already round.
+* **Simplifications from the sign:** the three thin rings become one engraved ring plus a bare
+  pinstripe. The S outline is widened (0.34" at sign scale) so the S reads at coaster size.
+  Stars next to the S are shrunk (down to 60%) to keep a wood gap. Details thinner than
+  0.02" are dropped.
+* **Other sizes:** run `python3 coaster.py 3.75`, for example. Run `node coaster_render.js
+  coaster/coaster_3.75in.svg` to preview it.
+* **Engraving tip:** this is a fill (raster) engrave. Engrave with the art right-way-up on the
+  top face. Coasters are small, so a lower line interval (around 270–340 LPI) keeps the
+  stars and pinstripe crisp.
