@@ -111,3 +111,21 @@ A simplified, one-tone version of the design for laser-engraving round coasters
 * **Engraving tip:** this is a fill (raster) engrave. Engrave with the art right-way-up on the
   top face. Coasters are small, so a lower line interval (around 270–340 LPI) keeps the
   stars and pinstripe crisp.
+
+### Slate coaster (4" square)
+
+![slate](coaster/slate_coaster_3.5in_on_4in_preview.png)
+
+`coaster/slate_coaster_3.5in_on_4in.svg` is for 4" × 4" slate coasters.
+
+* **Inverted artwork.** A laser turns slate pale grey, so this file engraves the logo's light
+  parts: the pinstripe ring, white stripes, stars, swoosh and the outline of the S. The dark
+  slate itself becomes the blue field, the red stripes and the S.
+* **Size.** The design is 3.5" across, centred on the 4" tile, which leaves 1/4" clear of the
+  chipped edges.
+* **Two layers.** Black fill = engrave. The blue square is only an alignment guide the size of
+  the tile: set it to *not output* (or delete it) before running the job.
+* **Other sizes.** For a 3.25" design, run `python3 coaster.py slate 4 3.25`.
+* **Engraving tip.** Slate needs only light power: you're bleaching the surface, not cutting
+  into it. Run a small test on the back or a spare tile first. A wipe with a little mineral
+  oil afterwards deepens the dark slate and makes the engraving pop.

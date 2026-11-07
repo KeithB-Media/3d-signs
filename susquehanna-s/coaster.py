@@ -8,6 +8,10 @@ the S outline is widened so the S still reads at coaster size.
 
 Usage: python3 coaster.py [diameter_in ...]     (default: 4.0 and 3.5)
 Writes coaster/coaster_<D>in.svg (black fill = engrave, red hairline = optional cut).
+
+Slate:  python3 coaster.py slate [tile_in design_in]   (default: 4.0 3.5)
+Writes an INVERTED file for slate, which engraves light: the logo's light parts are
+engraved and the dark slate shows as the field, red stripes and S.
 """
 import contextlib
 import io
@@ -76,7 +80,42 @@ def svg(geom, diam):
             f'stroke-width="0.003"/></g>\n</svg>\n')
 
 
+def slate_svg(art, tile=4.0, design=3.5):
+    """Slate: the laser turns slate pale grey, so engrave the logo's LIGHT parts
+    (pinstripe, white stripes, stars, swoosh, S outline) and let the natural dark slate be
+    the blue field, red stripes and S. The design circle (pinstripe outer edge) is `design`
+    inches, centred on a `tile`-inch square, leaving a margin for the chipped edges."""
+    scale = design / (2 * RING_IN)
+    light = clean(g.circle(RING_IN).difference(art), scale)
+    geom = affinity.scale(light, scale, scale, origin=(0, 0))
+    c = tile / 2
+    polys = geom.geoms if isinstance(geom, MultiPolygon) else [geom]
+    d = []
+    for p in polys:
+        for ring in [p.exterior, *p.interiors]:
+            pts = list(ring.coords)[:-1]
+            d.append("M" + " L".join(f"{x + c:.4f},{c - y:.4f}" for x, y in pts) + " Z")
+    return (f'<?xml version="1.0" encoding="UTF-8"?>\n'
+            f'<svg xmlns="http://www.w3.org/2000/svg" width="{tile}in" height="{tile}in" '
+            f'viewBox="0 0 {tile} {tile}">\n'
+            f'<title>Susquehanna S slate coaster - {design}in design on {tile}in tile - '
+            f'black = engrave, blue = alignment guide only</title>\n'
+            f'<g id="guide"><rect x="0.002" y="0.002" width="{tile - 0.004}" height="{tile - 0.004}" '
+            f'fill="none" stroke="#0000FF" stroke-width="0.004"/></g>\n'
+            f'<g id="engrave"><path d="{" ".join(d)}" fill="#000000" fill-rule="evenodd"/></g>\n'
+            f'</svg>\n')
+
+
 def main():
+    if sys.argv[1:2] == ["slate"]:
+        os.makedirs(OUT, exist_ok=True)
+        args = [float(a) for a in sys.argv[2:]]
+        tile, design = (args + [4.0, 3.5][len(args):])[:2]
+        name = f"slate_coaster_{design:g}in_on_{tile:g}in.svg"
+        with open(os.path.join(OUT, name), "w") as f:
+            f.write(slate_svg(artwork(), tile, design))
+        print("wrote", os.path.join("coaster", name))
+        return
     sizes = [float(a) for a in sys.argv[1:]] or [4.0, 3.5]
     os.makedirs(OUT, exist_ok=True)
     art = artwork()
