@@ -7,6 +7,8 @@ flips y. Run:  python3 generate.py   (needs: pip install shapely fonttools)
 import math
 import os
 
+import numpy as np
+
 from fontTools.pens.basePen import BasePen
 from fontTools.ttLib import TTFont
 from shapely import affinity
@@ -22,9 +24,9 @@ R_BASE = DIAM / 2          # 7.00  black outer rim (base)
 R_YELLOW = 6.80            # yellow pinstripe ring
 R_BLACK = 6.62             # inner black ring
 R_FIELD = 6.45             # blue field / flag area
-S_HEIGHT = 9.40            # height of the letter S
-S_WIDTH = 6.70
-S_CENTER = (0.10, -0.30)
+S_HEIGHT = 9.60            # height of the letter S
+S_WIDTH = 7.50
+S_CENTER = (0.30, -0.05)
 S_OUTLINE = 0.17           # yellow outline width around the S
 SUPPORT_INSET = 0.06       # hidden support under the S is inset this much
 MIN_HALF = 0.045          # stripe pieces: features thinner than 0.09" are trimmed
@@ -105,76 +107,82 @@ def star(cx, cy, r, rot=0.0):
     return Polygon(pts)
 
 
-# Flag stripes: boundary curves in normalised coords (u, v in [-1, 1] of R_FIELD).
-# Top edge of the stripes, traced relative to the S serif in the reference close-ups:
-# it runs ~1.5" below the serif top, then rises to the right side of the circle.
-WAVE_PTS = [(-1.30, -0.33), (-1.0, -0.34), (-0.75, -0.355), (-0.5, -0.355), (-0.3, -0.29),
-            (0.0, -0.17), (0.5, -0.05), (1.0, 0.02), (1.30, 0.05)]
+# ----------------------------------------------------------- flag stripes
+# Stripe boundaries measured from a close-up photo of the locomotive logo
+# (pixel scans, normalised to the outer circle and scaled to this 14" sign).
+# Top to bottom: blue | b0 | white | b1 | red | b2 | white | b3 | red | b4 | white | b5 | red (to rim)
+PHOTO_C, PHOTO_RX, PHOTO_RY = (538.5, 1038.5), 524.5, 698.5
+BOUNDARY_PX = [
+    [(120, 1194), (160, 1202), (200, 1205), (240, 1202), (400, 1186.5), (440, 1179.5), (480, 1171),
+     (520, 1162), (560, 1153), (840, 1049.5), (880, 1039), (920, 1030), (960, 1022), (1000, 1017)],
+    [(120, 1233), (160, 1242), (200, 1250), (220, 1252), (240, 1255), (400, 1244), (440, 1239.5),
+     (480, 1234), (520, 1227.5), (560, 1220.5), (600, 1207.5), (640, 1195.5), (840, 1122.5),
+     (880, 1113.5), (920, 1105.5), (960, 1099), (1000, 1094)],
+    [(120, 1277), (160, 1290), (200, 1301), (220, 1306), (240, 1314), (440, 1318.5), (480, 1315.5),
+     (520, 1311.5), (560, 1307.5), (600, 1296.5), (640, 1285), (680, 1272.5), (880, 1210.5),
+     (920, 1205), (960, 1200.5), (1000, 1197.5)],
+    [(120, 1308), (160, 1325), (200, 1339), (220, 1346), (240, 1352), (480, 1364), (520, 1366.5),
+     (560, 1365.5), (600, 1356.5), (640, 1347), (680, 1337), (880, 1293.5), (920, 1288), (960, 1283)],
+    [(160, 1378), (200, 1396), (220, 1405), (240, 1412), (260, 1420), (280, 1428), (300, 1434.5),
+     (320, 1440), (340, 1447), (360, 1452.5), (400, 1462), (840, 1419.5), (880, 1416), (920, 1413)],
+    [(200, 1455), (220, 1465), (240, 1475), (260, 1485), (280, 1493), (300, 1502), (320, 1510),
+     (340, 1518), (360, 1526), (400, 1540), (440, 1553), (480, 1564.5), (520, 1575), (560, 1583.5),
+     (600, 1579.5), (640, 1574.5), (680, 1566.5), (720, 1558.5), (760, 1549.5), (800, 1541)],
+]
 
 
-def _catmull(pts, u):
-    for k in range(1, len(pts) - 2):
-        if pts[k][0] <= u <= pts[k + 1][0]:
-            break
-    else:
-        k = 1 if u < pts[1][0] else len(pts) - 3
-    (x0, y0), (x1, y1), (x2, y2), (x3, y3) = pts[k - 1:k + 3]
-    t = (u - x1) / (x2 - x1)
-    m1 = (y2 - y0) / (x2 - x0) * (x2 - x1)
-    m2 = (y3 - y1) / (x3 - x1) * (x2 - x1)
-    h00, h10 = 2 * t**3 - 3 * t**2 + 1, t**3 - 2 * t**2 + t
-    h01, h11 = -2 * t**3 + 3 * t**2, t**3 - t**2
-    return h00 * y1 + h10 * m1 + h01 * y2 + h11 * m2
+def px_to_in(x, y):
+    return ((x - PHOTO_C[0]) / PHOTO_RX * R_BASE, (PHOTO_C[1] - y) / PHOTO_RY * R_BASE)
 
 
-def wave_top(u):
-    return _catmull(WAVE_PTS, u)
+def _fit(points, deg=3):
+    xs, ys = zip(*(px_to_in(*p) for p in points))
+    return np.poly1d(np.polyfit(xs, ys, deg))
 
 
-def band_t(u):
-    return 0.100 + 0.012 * u     # stripe thickness (~0.65"), a touch wider on the right
+BOUNDARIES = [_fit(pts) for pts in BOUNDARY_PX]
 
 
-def boundary(i, u):
-    return wave_top(u) - i * band_t(u)
+def _curve(i, n=240):
+    xs = np.linspace(-R_FIELD - 0.3, R_FIELD + 0.3, n)
+    return [(x, float(BOUNDARIES[i](x))) for x in xs]
 
 
-def band(i, n=200):
-    """Region between boundary i (top) and i+1 (bottom), scaled to inches."""
-    us = [-1.05 + 2.1 * k / n for k in range(n + 1)]
-    top = [(u * R_FIELD, boundary(i, u) * R_FIELD) for u in us]
-    bot = [(u * R_FIELD, boundary(i + 1, u) * R_FIELD) for u in reversed(us)]
-    return Polygon(top + bot)
+def below(i):
+    """Everything below boundary i."""
+    c = _curve(i)
+    return Polygon(c + [(c[-1][0], -2 * R_BASE), (c[0][0], -2 * R_BASE)])
 
 
-def below(i, n=200):
-    us = [-1.05 + 2.1 * k / n for k in range(n + 1)]
-    top = [(u * R_FIELD, boundary(i, u) * R_FIELD) for u in us]
-    return Polygon(top + [(1.05 * R_FIELD, -2 * R_FIELD), (-1.05 * R_FIELD, -2 * R_FIELD)])
+def band(i):
+    """Region between boundary i (top) and i+1 (bottom)."""
+    return below(i).difference(below(i + 1))
 
 
-# Swoosh: crescent that sweeps up from the left rim, passes BEHIND the lower serif
-# of the S near its top, and ends in the S's lower counter (as on the locomotive).
-SWOOSH = [(-5.75, -1.80), (-3.55, -1.62), (-1.62, -0.92)]   # quadratic Bezier centreline, inches
-SWOOSH_W = 0.24          # max width, reached about where it passes behind the serif
+# Swoosh: white crescent from the left rim, passing behind the S serif and ending in
+# the S's lower counter. Top/bottom edges measured from the same photo (pixels).
+SWOOSH_TOP_PX = [(120, 1117), (160, 1123), (200, 1126), (240, 1126), (360, 1109), (400, 1106)]
+SWOOSH_BOT_PX = [(120, 1122), (160, 1132), (200, 1138), (240, 1142), (360, 1123), (400, 1114)]
+SWOOSH_TIPS_PX = [(100, 1115), (432, 1099)]
 SWOOSH_TIP = 0.07        # tips are blunted to this width so they survive cutting
 
 
-def swoosh(n=160):
-    (x0, y0), (x1, y1), (x2, y2) = SWOOSH
-    lo, hi = [], []
-    for k in range(n + 1):
-        t = k / n
-        x = (1 - t) ** 2 * x0 + 2 * (1 - t) * t * x1 + t * t * x2
-        y = (1 - t) ** 2 * y0 + 2 * (1 - t) * t * y1 + t * t * y2
-        dx = 2 * (1 - t) * (x1 - x0) + 2 * t * (x2 - x1)
-        dy = 2 * (1 - t) * (y1 - y0) + 2 * t * (y2 - y1)
-        L = math.hypot(dx, dy)
-        nx, ny = -dy / L, dx / L
-        w = SWOOSH_TIP + (SWOOSH_W - SWOOSH_TIP) * math.sin(math.pi * t ** 1.36) ** 0.75
-        lo.append((x, y))
-        hi.append((x + nx * w, y + ny * w))
-    return Polygon(lo + hi[::-1]).buffer(0)
+def swoosh():
+    tl, tr = (px_to_in(*p) for p in SWOOSH_TIPS_PX)
+    top = [tl] + [px_to_in(*p) for p in SWOOSH_TOP_PX] + [tr]
+    bot = [tl] + [px_to_in(*p) for p in SWOOSH_BOT_PX] + [tr]
+
+    def smooth(pts, n=200):
+        xs, ys = zip(*pts)
+        f = np.poly1d(np.polyfit(xs, ys, 3))
+        return xs[0], xs[-1], f
+
+    x0, x1, ft = smooth(top)
+    _, _, fb = smooth(bot)
+    xs = np.linspace(x0, x1, 200)
+    upper = [(x, float(ft(x)) + SWOOSH_TIP / 2) for x in xs]
+    lower = [(x, float(min(fb(x), ft(x))) - SWOOSH_TIP / 2) for x in xs[::-1]]
+    return Polygon(upper + lower).buffer(0.0)
 
 
 # Star positions (fraction of R_BASE), traced from the reference photos
@@ -210,7 +218,7 @@ def build():
         stars.append(best)
 
     white = unary_union([stripes, swish, *stars, support])
-    reds = [band(i).intersection(field) for i in range(1, 30, 2)]
+    reds = [band(1).intersection(field), band(3).intersection(field), below(5).intersection(field)]
     # trim knife-edge points where stripes meet the rim (anything thinner than 2*MIN_HALF)
     red = unary_union(reds).buffer(-MIN_HALF).buffer(MIN_HALF)
     red = unary_union([red, support])

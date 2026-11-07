@@ -53,6 +53,9 @@ covered by layers 7 and 8.
 * Smallest pieces: stars are about 0.86" across. Swoosh tips are blunted to 0.07", and
   stripe points at the rim are trimmed, so no part of the stripe layers is thinner than
   about 0.09". Use hold-downs or tabs for the stars.
+* The stripe edges and the swoosh were measured from a close-up photo of the logo
+  (pixel scans, fitted with smooth curves): six bands under the blue, white-red-white-red-white,
+  then a wide red band at the bottom.
 * The white swoosh passes behind the S's lower serif, as on the locomotive. It is
   cut as part of the white stripe piece and joined to it through the hidden S support,
   so both visible ends line up on their own.
