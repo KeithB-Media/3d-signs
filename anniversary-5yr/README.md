@@ -13,6 +13,7 @@ rings between the years.
 | File | What it is |
 |------|------------|
 | `slate_5th_anniversary.svg` | Ready to engrave: 2021 → 2026, no names |
+| `slate_5th_anniversary_keith_tracy.svg` | **Keith & Tracy**, 2021 → 2026 |
 | `slate_5th_anniversary_alex_sam.svg` | Example with a names line (placeholder names) |
 
 * **Black fill = engrave.** Slate engraves pale grey, so everything drawn is the light part
