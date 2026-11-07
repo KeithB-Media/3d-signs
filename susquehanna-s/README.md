@@ -56,7 +56,7 @@ covered by layers 7 and 8.
   a few thousandths undersize, which is fine for stacked art.
 * Stars keep one shape, but each has its own size (1.3–1.9" across), tilt and position,
   fitted to the matching star in the photo. As on the locomotive, the two stars at the
-  left edge run under the ring and are clipped by it. Three stars next to the S are scaled
+  left edge run under the ring and are clipped by it. Five stars next to the S are scaled
   to 90% so they clear its outline. Swoosh tips are blunted to 0.07", and
   stripe points at the rim are trimmed, so no part of the stripe layers is thinner than
   about 0.09". Use hold-downs or tabs for the stars.
@@ -83,4 +83,6 @@ yellow outline, smooths the curves, and keeps the serif corners and spurs sharp.
 It also repairs a glare dent on the top-left curve. To re-trace from a photo:
 `pip install opencv-python-headless scipy`, then `python3 trace_s.py photo.jpg`.
 The yellow outline is 0.21" wide, as measured from the photo, and the thinnest
-stroke of the S is wider than 0.3".
+stroke of the S is wider than 0.3". The S is centred on the sign: the photos disagree
+slightly about where it sits on the curved locomotive nose. `S_OFFSET` in `generate.py`
+moves it; set it to `(0, 0)` to place it exactly as on the head-on photo.

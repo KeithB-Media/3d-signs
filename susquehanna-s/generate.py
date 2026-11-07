@@ -24,7 +24,7 @@ R_YELLOW = 6.80            # yellow pinstripe ring
 R_BLACK = 6.62             # inner black ring
 R_FIELD = 6.45             # blue field / flag area
 S_SMOOTH = 0.02           # smoothing radius applied to the traced S
-S_OFFSET = (0.0, 0.0)      # move the traced S (in); (0,0) = as on the head-on photo
+S_OFFSET = (-0.42, -0.12)  # S centred on the sign; (0,0) = as on the head-on photo
 S_OUTLINE = 0.21           # yellow outline width around the S
 SUPPORT_INSET = 0.06       # hidden support under the S is inset this much
 MIN_HALF = 0.045          # stripe pieces: features thinner than 0.09" are trimmed
