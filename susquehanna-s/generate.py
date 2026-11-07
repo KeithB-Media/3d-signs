@@ -27,7 +27,6 @@ S_SMOOTH = 0.02           # smoothing radius applied to the traced S
 S_OUTLINE = 0.21           # yellow outline width around the S
 SUPPORT_INSET = 0.06       # hidden support under the S is inset this much
 MIN_HALF = 0.045          # stripe pieces: features thinner than 0.09" are trimmed
-STAR_R = 0.66              # star outer radius (≈1.25" across; photo stars are ~1.4" but the S here is fuller)
 
 COLORS = {
     "black": "#141414",
@@ -142,10 +141,14 @@ def swoosh():
     return Polygon(upper + lower).buffer(0.0)
 
 
-# Star centres (photo pixels, same head-on photo) and size
-STARS_PX = [(455, 625), (568, 640), (400, 680), (625, 675), (527, 702),
-            (357, 735), (642, 733), (578, 753), (405, 780), (357, 833)]
-STAR_ROT = [0.10, -0.05, 0.0, 0.08, 0.0, -0.06, 0.05, 0.12, 0.0, -0.08]
+# Stars: centre (in), outer radius (in) and tilt (deg), each fitted to the matching
+# star in the head-on photo (best overlap of this star shape with the photo's star)
+STARS = [
+    (-1.87, 5.46, 0.82, 3), (2.15, 5.20, 0.79, -9), (4.34, 4.08, 0.69, -9),
+    (-4.04, 3.75, 0.96, 3), (0.64, 2.96, 0.88, -3), (4.85, 2.06, 0.75, -6),
+    (-5.64, 1.96, 0.93, -3), (2.46, 1.31, 0.81, -6), (-3.84, 0.46, 1.00, 3),
+    (-5.65, -1.36, 0.97, 3),
+]
 
 
 def build():
@@ -159,18 +162,22 @@ def build():
     keepout = unary_union([s_outline, stripes, swish]).buffer(0.07)
     room = field.buffer(-0.02)
     stars = []
-    for (px, py), rot in zip(STARS_PX, STAR_ROT):
-        x0, y0 = px_to_in(px, py)
+    for x0, y0, r0, rot_deg in STARS:
+        rot = math.radians(rot_deg)
         best = None
-        # keep each star close to its photo position: try a short nudge first,
-        # then shrink it a little before resorting to a longer move
-        for scale, reach in ((1.0, 120), (0.9, 120), (0.8, 160), (0.72, 200), (0.72, 2500)):
+        # keep each star where it is on the locomotive: if it touches the S, shrink it a
+        # little first; only then allow a small move
+        for scale, reach in ((1.0, 1), (0.95, 1), (0.9, 1), (0.9, 60), (0.85, 120), (0.8, 2500)):
             for k in range(reach):
                 rr, a = 0.03 * k ** 0.5 * 1.6, k * 2.39996
                 x, y = x0 + rr * math.cos(a), y0 + rr * math.sin(a)
-                st = star(x, y, STAR_R * scale, rot)
-                if room.contains(st) and not st.intersects(keepout) and \
-                        not any(st.distance(o) < 0.15 for o in stars):
+                full = star(x, y, r0 * scale, rot)
+                # like the logo, stars at the edge may run under the ring: clip them to
+                # the field, as long as most of the star is still showing
+                st = full.intersection(room)
+                if st.area >= 0.8 * full.area and st.geom_type == "Polygon" and \
+                        not st.intersects(keepout) and \
+                        not any(st.distance(o) < 0.1 for o in stars):
                     best = st
                     break
             if best is not None:
@@ -178,7 +185,7 @@ def build():
         if best is None:
             raise SystemExit(f"no room for star near {x0:.2f},{y0:.2f}")
         if rr > 0.05 or scale < 1:
-            print(f"  star at ({x0:.2f},{y0:.2f}): moved {rr:.2f}\", size {scale:.0%}")
+            print(f"  star at ({x0:.2f},{y0:.2f}): moved {rr:.2f}\", size {scale:.0%} of photo")
         stars.append(best)
 
     white = unary_union([stripes, swish, *stars, support])

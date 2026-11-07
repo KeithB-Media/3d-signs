@@ -55,7 +55,7 @@ def resample(pts, step):
 SERIF_BOXES = [(-3.5, -4.8, -1.4, -0.9), (2.2, 1.7, 4.2, 5.0)]
 
 
-def clean(pts, step=0.02, corner_win=0.14, corner_deg=55, sigma=0.40):
+def clean(pts, step=0.02, corner_win=0.14, corner_deg=55, sigma=0.40, merge_dist=0.15):
     """Smooth the traced outline but keep serif corners and spur tips sharp."""
     p = resample(pts, step)
     n, w = len(p), max(2, int(corner_win / step))
@@ -77,8 +77,20 @@ def clean(pts, step=0.02, corner_win=0.14, corner_deg=55, sigma=0.40):
             i = j + 1
         else:
             i += 1
-    if not corners:
-        corners = [0]
+    # corners closer together than merge_dist are one corner seen twice: smoothing between
+    # them leaves a tiny extra point, so keep only the sharper one
+    merged = []
+    for c in corners:
+        if merged and np.hypot(*(p[c] - p[merged[-1]])) < merge_dist:
+            if ang[c] < ang[merged[-1]]:
+                merged[-1] = c
+        else:
+            merged.append(c)
+    if len(merged) > 1 and np.hypot(*(p[merged[0]] - p[merged[-1]])) < merge_dist:
+        if ang[merged[-1]] < ang[merged[0]]:
+            merged[0] = merged[-1]
+        merged.pop()
+    corners = merged or [0]
     out = []
     sg = sigma / step
     for k, c0 in enumerate(corners):
