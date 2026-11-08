@@ -47,39 +47,32 @@ vdim(X(-2.5), oy, H(oy, 28), "28 in top height")
 line(X(-4), oy, X(64), oy, "#000", sw=2)
 text(X(22.5), oy+5.5, "4 in = Bambu's 100 mm side clearance", 10)
 
-# ---------- SIDE ELEVATION (depth, wings up) ----------
-ox2, oy2 = 80, 72
-text(ox2+42, 3, "SIDE ELEVATION — wings up (material feeds front ⇄ back)", 13, weight="bold")
+# ---------- SIDE ELEVATION (depth) ----------
+ox2, oy2 = 100, 72
+text(ox2+18, 3, "SIDE ELEVATION — material feeds front ⇄ back", 13, weight="bold")
 Y = lambda v: ox2 + v
-rect(Y(24), H(oy2, 28), 36, 0.75, PLY); text(Y(42), H(oy2, 28)+2, "", 9)
-rect(Y(0), H(oy2, 28), 24, 0.75, PLY); rect(Y(60), H(oy2, 28), 24, 0.75, PLY)
-text(Y(12), H(oy2, 28)-0.8, "FRONT WING 24 in (infeed)", 10); text(Y(72), H(oy2, 28)-0.8, "REAR WING 24 in (outfeed)", 10)
-# frame
-rect(Y(27), H(oy2, 27.25), 30, 3.5, LUM); rect(Y(27), H(oy2, 8.5), 30, 3.5, LUM)
-for lx in (27, 53.5):
+rect(Y(0), H(oy2, 28), 36, 0.75, PLY)
+rect(Y(3), H(oy2, 27.25), 30, 3.5, LUM); rect(Y(3), H(oy2, 8.5), 30, 3.5, LUM)
+for lx in (3, 29.5):
     rect(Y(lx), H(oy2, 27.25), 3.5, 26.25, POST); rect(Y(lx+1.25), H(oy2, 1), 1, 1, "#777")
-rect(Y(27), H(oy2, 9.25), 30, 0.75, PLY)
-# stiles + brackets
-for sx, dirn in ((25.5, -1), (57, 1)):
-    rect(Y(sx), H(oy2, 27.25), 1.5, 22.25, LUM)
-    edge = sx if dirn < 0 else sx + 1.5
-    line(Y(edge), H(oy2, 27.25), Y(edge + dirn*20), H(oy2, 27.25), "#555", sw=3)
-    line(Y(edge), H(oy2, 27.25-13), Y(edge + dirn*17), H(oy2, 27.25), "#555", sw=3)
-text(Y(14), H(oy2, 18), "20 in folding", 10); text(Y(14), H(oy2, 16.5), "shelf brackets", 10)
-# R1
-rect(Y(29), H(oy2, 36), 26, 8, R1C, dash="4 2"); rect(Y(29), H(oy2, 44), 26, 8, R1C, dash="4 2")
-text(Y(42), H(oy2, 32)+0.4, "Riser Base", 10); text(Y(42), H(oy2, 40)+0.4, "R1", 10)
-# stock through
-line(Y(-6), H(oy2, 37), Y(90), H(oy2, 37), "#a40", dash="8 4", sw=2)
-text(Y(42), H(oy2, 47.5), "long stock / conveyor rails pass through (feed height ≈ verify on your unit)", 10)
-dim(Y(0), oy2+2.5, Y(84), "84 in overall depth, wings up  (36 in, wings down)")
-dim(Y(24), H(oy2, 50), Y(60), "36 in top")
-dim(Y(27), oy2+5.5, Y(57), "30 in frame")
-line(Y(-8), oy2, Y(92), oy2, "#000", sw=2)
+rect(Y(3), H(oy2, 9.25), 30, 0.75, PLY)
+# R1 (26 in deep, centered)
+rect(Y(5), H(oy2, 36), 26, 8, R1C, dash="4 2"); rect(Y(5), H(oy2, 44), 26, 8, R1C, dash="4 2")
+text(Y(18), H(oy2, 32)+0.4, "Riser Base", 10); text(Y(18), H(oy2, 40)+0.4, "R1", 10)
+# stock overhanging both ends, carried by the conveyor rails
+line(Y(-14), H(oy2, 37), Y(50), H(oy2, 37), "#a40", dash="8 4", sw=2)
+text(Y(-8), H(oy2, 38.5), "← stock overhangs", 10); text(Y(44), H(oy2, 38.5), "overhangs →", 10)
+text(Y(18), H(oy2, 50.5), "Bambu: allow (stock − 400 mm) in front,", 10)
+text(Y(18), H(oy2, 48.5), "(stock − 550 mm) behind, kept clear at feed height", 10)
+text(Y(-10), H(oy2, 30), "FRONT", 11, weight="bold"); text(Y(46), H(oy2, 30), "REAR", 11, weight="bold")
+dim(Y(0), oy2+2.5, Y(36), "36 in top")
+dim(Y(3), oy2+5.5, Y(33), "30 in frame")
+dim(Y(5), H(oy2, 46), Y(31), "26 in (660 mm)")
+line(Y(-16), oy2, Y(52), oy2, "#000", sw=2)
 
 # ---------- PLYWOOD LAYOUT ----------
 oy3 = 82
-text(6+48, oy3, "3/4 in PLYWOOD LAYOUT (4x8 sheets, 96 x 48)", 13, weight="bold")
+text(6+48, oy3, "3/4 in PLYWOOD LAYOUT (one 4x8 sheet)", 13, weight="bold")
 def sheet(x0, y0, title, parts):
     rect(x0, y0, 48, 24, "#fafafa")  # half scale: 0.5
     text(x0+24, y0-0.6, title, 11, weight="bold")
@@ -87,8 +80,7 @@ def sheet(x0, y0, title, parts):
         rect(x0+px/2, y0+py/2, pw/2, ph/2, PLY)
         text(x0+(px+pw/2)/2, y0+(py+ph/2)/2+0.4, lab, 10)
 sheet(6, oy3+3, "Sheet 1", [(0, 0, 45, 36, "A  Top 45 x 36"), (45.125, 0, 42, 30, "C  Shelf 42 x 30"), (0, 36.125, 45, 11.875, "offcut 45 x 11.9"), (45.125, 30.125, 42, 17.875, "offcut 42 x 17.9")])
-sheet(60, oy3+3, "Sheet 2", [(0, 0, 45, 24, "B  Front wing 45 x 24"), (45.125, 0, 45, 24, "B  Rear wing 45 x 24"), (0, 24.125, 96, 23.875, "offcut 96 x 23.9")])
-text(6, oy3+30, "Both ¾ in sheets can be cabinet-grade. Notch C 3-1/2 x 3-1/2 at all four corners for the legs.", 10, anchor="start")
+text(6, oy3+30, "Notch C 3-1/2 x 3-1/2 at all four corners for the legs.", 10, anchor="start")
 
 W, Ht = 170*S, 116*S
 svg = f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{Ht}" viewBox="0 0 {W} {Ht}"><rect width="100%" height="100%" fill="white"/>' + "".join(out) + "</svg>"
