@@ -32,7 +32,7 @@ rect(X(4), H(oy, 28+33.5), 37, 17.5, "none", "#557", dash="2 3"); text(X(22.5), 
 # top
 rect(X(0), H(oy, 28), 45, 0.75, PLY)
 # aprons
-rect(X(1.5), H(oy, 27.25), 42, 3.5, LUM); rect(X(1.5), H(oy, 8.5), 42, 3.5, LUM)
+rect(X(1.5), H(oy, 27.25), 42, 5.5, LUM); rect(X(1.5), H(oy, 8.5), 42, 3.5, LUM)
 # legs (visible behind aprons -> draw posts)
 for lx in (1.5, 40):
     rect(X(lx), H(oy, 27.25), 3.5, 26.25, POST)
@@ -52,7 +52,7 @@ ox2, oy2 = 100, 72
 text(ox2+18, 3, "SIDE ELEVATION — material feeds front ⇄ back", 13, weight="bold")
 Y = lambda v: ox2 + v
 rect(Y(0), H(oy2, 28), 36, 0.75, PLY)
-rect(Y(3), H(oy2, 27.25), 30, 3.5, LUM); rect(Y(3), H(oy2, 8.5), 30, 3.5, LUM)
+rect(Y(3), H(oy2, 27.25), 30, 5.5, LUM); rect(Y(3), H(oy2, 8.5), 30, 3.5, LUM)
 for lx in (3, 29.5):
     rect(Y(lx), H(oy2, 27.25), 3.5, 26.25, POST); rect(Y(lx+1.25), H(oy2, 1), 1, 1, "#777")
 rect(Y(3), H(oy2, 9.25), 30, 0.75, PLY)
@@ -67,6 +67,8 @@ text(Y(18), H(oy2, 48.5), "(stock − 550 mm) behind, kept clear at feed height"
 text(Y(-10), H(oy2, 30), "FRONT", 11, weight="bold"); text(Y(46), H(oy2, 30), "REAR", 11, weight="bold")
 dim(Y(0), oy2+2.5, Y(36), "36 in top")
 dim(Y(3), oy2+5.5, Y(33), "30 in frame")
+text(Y(18), H(oy2, 24.5), "2x6 top frame", 10)
+text(Y(18), H(oy2, 6.75), "2x4 shelf frame", 10)
 dim(Y(5), H(oy2, 46), Y(31), "26 in (660 mm)")
 line(Y(-16), oy2, Y(52), oy2, "#000", sw=2)
 
@@ -79,8 +81,8 @@ def sheet(x0, y0, title, parts):
     for (px, py, pw, ph, lab) in parts:
         rect(x0+px/2, y0+py/2, pw/2, ph/2, PLY)
         text(x0+(px+pw/2)/2, y0+(py+ph/2)/2+0.4, lab, 10)
-sheet(6, oy3+3, "Sheet 1", [(0, 0, 45, 36, "A  Top 45 x 36"), (45.125, 0, 42, 30, "C  Shelf 42 x 30"), (0, 36.125, 45, 11.875, "offcut 45 x 11.9"), (45.125, 30.125, 42, 17.875, "offcut 42 x 17.9")])
-text(6, oy3+30, "Notch C 3-1/2 x 3-1/2 at all four corners for the legs.", 10, anchor="start")
+sheet(6, oy3+3, "Sheet 1", [(0, 0, 45, 36, "A  Top 45 x 36"), (45.125, 0, 42, 30, "B  Shelf 42 x 30"), (0, 36.125, 45, 11.875, "offcut 45 x 11.9"), (45.125, 30.125, 42, 17.875, "offcut 42 x 17.9")])
+text(6, oy3+30, "Notch B 3-1/2 x 3-1/2 at all four corners for the legs.", 10, anchor="start")
 
 W, Ht = 170*S, 116*S
 svg = f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{Ht}" viewBox="0 0 {W} {Ht}"><rect width="100%" height="100%" fill="white"/>' + "".join(out) + "</svg>"

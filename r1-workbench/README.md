@@ -29,30 +29,34 @@ What follows from these specs:
 | Qty | Material | Notes |
 |---|---|---|
 | 1 | 4×4 × 10 ft (or 2 × 8 ft) | legs |
-| 5 | 2×4 × 8 ft | frame and joists (most of the last board is spare) |
+| 2 | 2×6 × 8 ft | top frame (aprons and joist), already on hand |
+| 2 | 2×4 × 8 ft | lower shelf frame (buy a 3rd as a spare if you like) |
 | 1 | 3/4 in plywood, 4×8, sanded/cabinet grade (birch or similar) | top and lower shelf |
 
 ## Cut list
 
-Actual sizes: 4×4 = 3½ × 3½, 2×4 = 1½ × 3½, ply = ¾.
+Actual sizes: 4×4 = 3½ × 3½, 2×6 = 1½ × 5½, 2×4 = 1½ × 3½, ply = ¾.
 
 | Part | Qty | Material | Length / size | Where |
 |---|---|---|---|---|
 | Legs | 4 | 4×4 | 26¼ in | corners |
-| Top long aprons (front/back) | 2 | 2×4 | 42 in | top frame, on edge |
-| Top short aprons (sides) | 2 | 2×4 | 27 in | between the long aprons |
-| Top joists | 2 | 2×4 | 27 in | inside the top frame, ~14 in on center |
+| Top long aprons (front/back) | 2 | **2×6** | 42 in | top frame, on edge |
+| Top short aprons (sides) | 2 | **2×6** | 27 in | between the long aprons |
+| Top joist | 1 | **2×6** | 27 in | center of the top frame |
 | Lower long aprons | 2 | 2×4 | 42 in | shelf frame, bottom edge 5 in off the floor |
 | Lower short aprons | 2 | 2×4 | 27 in | shelf frame |
 | Lower joist | 1 | 2×4 | 27 in | center of the shelf frame |
 | A — Top | 1 | ¾ ply | 45 × 36 in | overhangs the frame 1½ in at the sides, 3 in front and back |
 | B — Lower shelf | 1 | ¾ ply | 42 × 30 in | notch 3½ × 3½ at each corner for the legs |
 
-**How the 2×4s come out of 8 ft boards (96 in):**
+**How the boards are cut (8 ft = 96 in):**
 
-* Boards 1–2: 42 + 42 each (the 4 long aprons)
-* Boards 3–4: 27 + 27 + 27 each (6 short pieces)
-* Board 5: 27 (the last short piece), the rest is spare
+* 2×6 #1: 42 + 42 (top long aprons)
+* 2×6 #2: 27 + 27 + 27 (top side aprons and joist)
+* 2×4 #1: 42 + 42 (lower long aprons)
+* 2×4 #2: 27 + 27 + 27 (lower side aprons and joist)
+
+Sight down the 2×6s and install them crown up (any bow pointing up).
 
 **Legs:** cut 4 × 26¼ from the 10 ft 4×4. With two 8 ft posts, cut 2 legs from each.
 
@@ -63,16 +67,16 @@ Actual sizes: 4×4 = 3½ × 3½, 2×4 = 1½ × 3½, ply = ¾.
 | Qty | Item |
 |---|---|
 | 4 | Leveling feet, 3/8-16 thread, with 4 tee nuts or threaded inserts |
-| ~32 | Structural wood screws, ¼ × 3⅛ in (GRK RSS / Spax PowerLag): aprons to legs |
-| ~25 | 3 in construction screws: joists |
+| ~40 | Structural wood screws, ¼ × 3⅛ in (GRK RSS / Spax PowerLag): aprons to legs, 3 per joint on the 2×6, 2 on the 2×4 |
+| ~12 | 3 in construction screws: joists |
 | ~40 | 1⅝ in wood screws: plywood to frame, every 8 in |
 | — | Wood glue, sandpaper, finish (2–3 coats water-based poly, or paint) |
 
 ## Assembly
 
 1. **Legs.** Drill the bottom of each leg for the tee nut or insert and install the leveling feet. Set each foot to stick out about 1 in.
-2. **Top frame.** Screw the two 42 in aprons over the outside faces of the legs, flush with the leg tops, using 2 structural screws per leg. Fit the 27 in side aprons between them, also screwed into the legs. Add the 2 joists at about 14 in spacing, 2 × 3 in screws through each end.
-3. **Shelf frame.** Repeat step 2 with the lower aprons and the center joist. Put the bottom edge of the aprons 4 in above the leg bottoms, which is 5 in off the floor with the feet set.
+2. **Top frame (2×6).** Screw the two 42 in aprons over the outside faces of the legs, flush with the leg tops, using 3 structural screws per leg. Fit the 27 in side aprons between them, also screwed into the legs. Put the joist in the center, flush with the top edges, with 3 × 3 in screws through each end.
+3. **Shelf frame (2×4).** Repeat step 2 with the 2×4 aprons and center joist, using 2 screws per joint. Put the bottom edge of the aprons 4 in above the leg bottoms, which is 5 in off the floor with the feet set.
 4. **Check square.** Measure the diagonals before the plywood goes on. Then glue and screw shelf B onto the lower frame. The plywood stops the frame from racking.
 5. **Top.** Center top A with a 1½ in overhang at each side and 3 in front and back. Glue it and screw it down every 8 in. Countersink the screws so the R1 feet and stock slide smoothly.
 6. **Finish.** Ease the edges, then apply finish (2–3 coats of water-based poly, or paint).
