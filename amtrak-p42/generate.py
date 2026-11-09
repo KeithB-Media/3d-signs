@@ -54,7 +54,8 @@ COLORS = {
     "red": "#d9442f",         # Amtrak Red
     "black": "#161616",
     "white": "#f4f4f2",
-    "gray": "#7d838a",        # coupler, horns, glad hands
+    "gray": "#7d838a",        # horns, antenna, lever, door hardware
+    "coupler": "#6e5a4c",     # rusty brown coupler
     "plug": "#d8d5c8",        # jumper plug heads (light grey)
     "conn_blue": "#2f7fd0",   # outer connector cover in the boxes under the ditch lights
     "yellow": "#e3b53c",      # plug on the cable hanging from under each connector box
@@ -270,10 +271,12 @@ def sill_stripe():
 
 # ------------------------------------------------------------------ lights
 def headlight_recess():
-    """Pocket the twin headlights sit in: cut out of the nose (layer 7), so
-    the lamps sit one layer below the nose surface."""
+    """Pocket the twin headlights sit in, cut out of the nose (layer 7) so the
+    lamps sit one layer below the nose surface. Flat top, coming to a point at
+    the bottom."""
     (x0, y), (x1, _) = HEADLIGHTS
-    return rounded(box(x0 - 0.72, y - 0.66, x1 + 0.72, y + 0.66), 0.4)
+    l, r = x0 - 0.72, x1 + 0.72
+    return rounded(Polygon([(l, y + 0.66), (r, y + 0.66), (r, y - 0.3), (0, y - 0.95), (l, y - 0.3)]), 0.15)
 
 
 def light_housings():
@@ -337,27 +340,36 @@ def conn_caps():
 
 # ------------------------------------------------------------------ pilot opening + coupler
 B = Y0                                            # bottom of the plow (= bottom of the sign)
-PILOT_OPENING = box(-3.0, SILL, 3.0, 6.95)        # cut-out in the bottom of the silver body over the coupler
-NOTCH = box(-1.7, B + 1.7, 1.7, SILL)             # opening in the plow top the coupler sits in
+PILOT_OPENING = box(-3.75, SILL, 3.75, 6.95)        # cut-out in the bottom of the silver body over the coupler
+NOTCH = box(-1.7, B + 2.95, 1.7, SILL)             # opening in the plow top the coupler sits in
 UNDERFRAME = box(-7.5, B + 3.0, 7.5, SILL)        # dark underframe seen above the plow
 SKIRT = mirror([(0, B + 1.2), (7.6, B + 1.2), (8.0, B + 1.6), (8.0, SILL), (0, SILL)])  # behind the plow, out to the edges
 
 
+COUPLER_C = (0.0, B + 3.95)   # centre of the coupler head: its top lines up with the plow tips
+
+
 def coupler_head():
-    """E-type coupler head with the knuckle gap and lock-lift hole. It sits down in
-    the plow notch (layer 7), its top about level with the plow tips; the hoses pass behind it."""
-    head = rounded(Polygon([(-1.0, 0.0), (0.55, 0.0), (1.0, 0.3), (1.0, 1.25), (-1.0, 1.25)]), 0.12)
-    head = head.difference(box(0.05, 0.0, 0.22, 0.7)).difference(Point(-0.55, 0.75).buffer(0.1))
-    return affinity.translate(head, 0, B + 3.2)
+    """E-type coupler head seen end-on (layer 7): the head casting with the guard
+    arm on the left, the knuckle on the right, and the slot between them open at
+    the bottom. Its top is about level with the low point of the plow wings; the
+    hoses pass behind it."""
+    cx, cy = COUPLER_C
+    body = rounded(box(cx - 1.0, cy - 0.7, cx + 0.5, cy + 0.7), 0.18)
+    knuckle = rounded(box(cx + 0.63, cy - 0.62, cx + 1.22, cy + 0.5), 0.18)
+    bridge = box(cx + 0.4, cy + 0.26, cx + 0.8, cy + 0.6)
+    return unary_union([body, knuckle, bridge]).difference(Point(cx - 0.48, cy - 0.18).buffer(0.1))
 
 
-def coupler_shank():
-    return box(-0.42, B + 4.5, 0.42, 6.95)
+def coupler_knuckle_pin():
+    """Knuckle pin cap on top of the knuckle (layer 8)."""
+    cx, cy = COUPLER_C
+    return Point(cx + 0.93, cy + 0.12).buffer(0.13)
 
 
-MU_X = (1.85, 2.65)           # MU receptacles, in the dark gap between the plow wings
+MU_X = (1.85,)                # one MU receptacle each side of the coupler head
 REC_Y = 5.88                  # receptacle centre height
-HOSE_X = (1.0, 1.3)           # air hoses: brake pipe and main reservoir
+HOSE_X = (2.5, 2.92, 3.34)   # three air hoses each side, hanging down behind the plow wings
 
 
 def receptacles():
@@ -371,9 +383,9 @@ def socket_faces():
 
 
 def air_hoses():
-    """Hoses hang from the top of the pilot opening behind the plow; they show in
-    the opening and the plow notch, passing behind the coupler head (layer 7)."""
-    return both(unary_union([stroke(bezier((x, 6.95), (x, 5.6), (x - 0.15, 4.8), (x - 0.2, B + 2.05), 30), 0.17)
+    """Three hoses each side hang from the top of the pilot opening and run down
+    behind the plow wing; only the part above the wing shows (layer 7)."""
+    return both(unary_union([stroke(bezier((x, 6.95), (x, 6.2), (x + 0.05, 5.6), (x + 0.08, 4.6), 30), 0.17)
                              for x in HOSE_X]))
 
 
@@ -389,7 +401,7 @@ def glad_hands():
 def mu_jumper():
     """MU jumper cable draped across the coupler between the inner receptacles."""
     x = MU_X[0]
-    cable = stroke(bezier((-x, REC_Y - 0.2), (-x + 0.3, 5.0), (x - 0.3, 5.0), (x, REC_Y - 0.2), 60), 0.22)
+    cable = stroke(bezier((-x, REC_Y - 0.2), (-x + 0.3, 5.6), (x - 0.3, 5.6), (x, REC_Y - 0.2), 60), 0.22)
     return cable.difference(plugs_mu())
 
 
@@ -411,7 +423,7 @@ def plow():
     """Plow outline (front plate, layer 7): wide bottom, angled lower corners,
     tall outer tips up at the carbody, top edge sloping down to the coupler notch."""
     half = [(0, B), (5.0, B), (7.0, B + 0.95), (7.5, B + 1.6), (7.5, B + 4.6), (7.05, B + 4.65),
-            (1.7, B + 3.2), (1.7, B + 1.7), (0, B + 1.7)]
+            (1.7, B + 3.2), (1.7, B + 2.95), (0, B + 2.95)]
     return rounded(mirror(half), 0.06)
 
 
@@ -428,13 +440,17 @@ def plow_bar():
     return rounded(box(-1.95, B + 0.3, 1.95, B + 1.2), 0.06)
 
 
+HANDLE_X = (3.75, 6.7)
+
+
 def plow_handles():
-    """White grab handles (layer 9): they come forward from the engine over the
-    top of each wing, a rail along the wing with its ends turned down."""
-    xs = [2.6 + i * (6.7 - 2.6) / 30 for i in range(31)]
-    rail = [(x, _plow_top(x) - 0.32) for x in xs]
-    pts = [(2.6, rail[0][1] - 0.4)] + rail + [(6.7, rail[-1][1] - 0.4)]
-    return both(stroke(pts, 0.14))
+    """White grab handles mounted on top of each wing (layer 7): a rail standing
+    above the wing's top edge, with its legs down onto the edge."""
+    x0, x1 = HANDLE_X
+    xs = [x0 + i * (x1 - x0) / 30 for i in range(31)]
+    rail = [(x, _plow_top(x) + 0.38) for x in xs]
+    pts = [(x0, _plow_top(x0) - 0.02)] + rail + [(x1, _plow_top(x1) - 0.02)]
+    return both(stroke(pts, 0.14)).difference(plow())
 
 
 def door_hardware():
@@ -445,9 +461,18 @@ def door_hardware():
     return both(unary_union(parts))
 
 
+def lift_rod():
+    """Lock-lift rod standing on top of the coupler head (layer 8)."""
+    cx, cy = COUPLER_C
+    return box(cx - 0.48, cy + 0.35, cx - 0.32, cy + 0.88)
+
+
 def cut_lever():
-    """Uncoupling lever from the coupler head out onto the left plow door (layer 8)."""
-    return stroke([(-1.0, B + 3.3), (-1.9, B + 3.3), (-2.35, B + 2.8)], 0.15)
+    """Uncoupling lever (layer 7, on the black floor): from the lift rod, out to
+    the left and down until it disappears behind the plow wing."""
+    cx, cy = COUPLER_C
+    lever = stroke([(cx - 0.4, cy + 0.8), (-2.3, cy + 0.8), (-2.3, B + 3.0)], 0.15)
+    return lever.difference(coupler_head()).difference(plow())
 
 
 def silhouette():
@@ -541,13 +566,15 @@ def build():
                           ("blue", nose_.intersection(blue).difference(headlight_recess())),
                           ("chrome", rings(HEADLIGHTS, 0.5, LED_RING_ID / 2)),  # lamps in the recess
                           ("black", gaskets().union(wipers())),
-                          ("gray", coupler_shank().difference(coupler_head())),
-                          ("gray", coupler_head()),                        # sits down in the plow notch
+                          ("coupler", coupler_head()),                     # sits down in the plow notch
                           ("black", receptacles().difference(plow())),
                           ("black", air_hoses().difference(plow()).difference(nose()).difference(coupler_head().buffer(0.03))
-                                    .difference(coupler_shank().buffer(0.03))),
-                          ("black", hanging_cables()[0]), ("yellow", hanging_cables()[1]),
+),
+                          ("black", hanging_cables()[0].difference(plow_handles().buffer(0.03))),
+                          ("yellow", hanging_cables()[1]),
                           ("red", sill_stripe()),
+                          ("white", plow_handles()),
+                          ("gray", cut_lever().difference(lift_rod())),
                           ("plow", plow())],
          "raised nose with headlight + connector recesses, headlight rings, connector plates, gaskets "
          "with wipers, coupler, MU receptacles, air hoses, corner cables + plugs, sill stripe, plow"),
@@ -555,19 +582,21 @@ def build():
                                  ("black", number_board()),
                                  ("white", mark), ("white", word),
                                  ("conn_blue", conn_caps()[0]), ("black", conn_caps()[1]),
-                                 ("gray", socket_faces()),
-                                 ("black", mu_jumper()), ("plug", plugs_mu()),
-                                 ("plug", glad_hands()),
+                                 ("plug", plugs_mu()),
+                                 ("black", mu_jumper().intersection(coupler_head().buffer(-0.05))   # hidden spacer
+                                           .difference(lift_rod().buffer(0.04))
+                                           .difference(coupler_knuckle_pin().buffer(0.04))),
                                  ("black", grab_irons_nose()),
-                                 ("gray", cut_lever().difference(mu_jumper().buffer(0.04))),
-                                 ("plow", plow_doors().difference(cut_lever().buffer(0.03))), ("plow", plow_bar())],
+                                 ("gray", lift_rod()),
+                                 ("coupler", coupler_knuckle_pin()),
+                                 ("plow", plow_doors()), ("plow", plow_bar())],
          "red + ditch light housings, number board, Travelmark, connector caps, MU jumper, socket faces, "
          "glad hands, uncoupling lever, plow doors + centre plate"),
         ("layer09_front_gear", [("chrome", rings(DITCHLIGHTS, 0.5, LED_RING_ID / 2)),
                                 ("red", red_rings())] +
                                ([("white", digits)] if digits else []) +
-                               [("white", plow_handles()),
-                                ("gray", door_hardware())],
+                               [("gray", door_hardware()),
+                                ("black", mu_jumper())],                   # rests on its plugs and the lever
          "ditch light rings, red light rings, number digits, white plow handles, door latches + hinges"),
     ]
     return layers
