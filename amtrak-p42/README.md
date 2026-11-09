@@ -19,10 +19,9 @@ rear lights are 5 mm LEDs that run on a battery holder hidden in a pocket in the
 The layout follows a head-on photo of a Phase V P42, top to bottom:
 
 * **Roof**: horn cluster and radio antenna above the roof line.
-* **Number board** above the windshield, between the panes: black board, white digits
-  (`ROAD_NUMBER`, default 82, or `""` for a blank board).
 * **Windshield**: two wide, short panes with black gaskets and parked wipers.
-* **Nose plate**: the dark plate under the windshield.
+* **Number board** on the nose just under the windshield: black board (layer 8) with
+  white digits on it (layer 9). `ROAD_NUMBER`, default 82, or `""` for a blank board.
 * **Travelmark**: AMTRAK wordmark over three sweeping stripes, in white on the blue.
 * **Light bar**: twin round **headlights** set into a recess in the nose (the recess is cut
   out of layer 7, so the lamps sit one layer in, with a black floor). A **red light**
@@ -42,16 +41,14 @@ The layout follows a head-on photo of a Phase V P42, top to bottom:
   * **Air hoses** (brake pipe and main reservoir, two each side) hang from the
     anticlimber and end in **glad hands**.
   * **Uncoupling lever** across the left plow wing to the coupler, handle at the left.
-  * **Grab irons** beside the steps and on the nose.
-* **Plow**, near-black, in four steps:
+  * **Grab irons** at the lower corners and on the nose.
+* **Plow**, near-black, in four layers:
   1. base (layer 6)
   2. one plate with two wings: the top slopes down to the outer corners, and the
      middle is cut away for the coupler pocket (layer 7)
   3. a lower centre plate and a raised plate on each wing (layer 8)
   4. bolted brackets on the wings and a rib on the centre plate (layer 9)
-* **Corner steps** tucked into the pilot corners, either side of the plow: a black well
-  (layer 6) with two stringers and three treads in grey (layer 7). The **red sill stripe**
-  runs across the top of each well.
+* **Red sill stripe** at the front corners, either side of the pilot.
 
 ## Cut files (`svg/`)
 All files are 16.5" × 23.5" (the sign plus a 1/4" margin) and share the same origin, so
@@ -65,10 +62,10 @@ every layer lines up. They contain cut lines only (red hairline, no fill). The s
 | 3 | `layer03_core.svg` | same as layer 2 |
 | 4 | `layer04_core_wiring.svg` | core: wire channels |
 | 5 | `layer05_glass_wiring.svg` | wire channels; its top shows through the windshield |
-| 6 | `layer06_body.svg` | carbody (blue + silver, windshield cut out), plow base, steps, horns, antenna |
-| 7 | `layer07_nose.svg` | raised nose (blue + silver) with headlight recess, headlight rings, coupler head, pilot face, gaskets with wipers, number board, low grab irons, plow wings |
-| 8 | `layer08_lights_logo.svg` | red light + ditch light housings, nose plate, Travelmark, number digits, lamp boxes, anticlimber, coupler shank, receptacles, air hoses, nose grab irons, plow plates |
-| 9 | `layer09_front_gear.svg` | ditch light rings, red light rings, lamp box lenses, socket faces, MU + HEP jumpers with plugs, glad hands, uncoupling lever, plow brackets |
+| 6 | `layer06_body.svg` | carbody (blue + silver, windshield cut out), headlight recess floor, plow base, coupler pocket floor, horns, antenna |
+| 7 | `layer07_nose.svg` | raised nose (blue + silver) with headlight recess, headlight rings, coupler head, pilot face, gaskets with wipers, low grab irons, sill stripe, plow wings |
+| 8 | `layer08_lights_logo.svg` | red light + ditch light housings, number board, Travelmark, lamp boxes, anticlimber, coupler shank, receptacles, air hoses, nose grab irons, plow plates |
+| 9 | `layer09_front_gear.svg` | ditch light rings, red light rings, number digits, lamp box lenses, socket faces, MU + HEP jumpers with plugs, glad hands, uncoupling lever, plow brackets |
 | – | `back_cover.svg` | battery pocket cover (screws to the back, slot for the switch) |
 
 The stack is 1-1/8" thick. Each piece is cut on its own, so where two paint colours meet
@@ -86,12 +83,12 @@ Other files:
 |---|---|---|
 | Amtrak Blue | `#1f4e79` | top of the carbody and nose (above the wave line) |
 | Platinum Mist | `#cdd1d4` | lower carbody and nose |
-| Near-black | `#26292d` | the four plow steps (darker than prototype so the plow stands out) |
+| Near-black | `#26292d` | the four plow layers (darker than the real one so the plow stands out) |
 | Anthracite Gray | `#4a4f52` | pilot face, low grab irons |
 | Amtrak Red | `#d9442f` | red light rings, sill stripe at the corners |
-| Black | | step wells, gaskets, wipers, number board, nose plate, headlight recess floor, coupler pocket floor, light housings, lamp boxes, anticlimber, receptacles, hoses, jumpers, nose grab irons |
+| Black | | gaskets, wipers, number board, headlight recess floor, coupler pocket floor, light housings, lamp boxes, anticlimber, receptacles, hoses, jumpers, nose grab irons |
 | White | | Travelmark, number digits |
-| Grey | | coupler, uncoupling lever, step treads, horns, antenna, socket faces |
+| Grey | | coupler, uncoupling lever, horns, antenna, socket faces |
 | Light grey | | MU plug heads, glad hands |
 | Chrome/silver | | headlight and ditch light rings |
 | Steel blue | `#5d7690` | lamp box lenses |

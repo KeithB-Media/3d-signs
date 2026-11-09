@@ -236,14 +236,13 @@ def wipers():
     return both(unary_union([arm, pivot]))
 
 
+NUMBER_Y = 16.05
+
+
 def number_board():
-    """Number board above the windshield, between the panes."""
-    return rounded(box(-0.95, 20.15, 0.95, 21.05), 0.12)
-
-
-def nose_plate():
-    """Dark plate on the nose just under the windshield."""
-    return rounded(box(-1.0, 15.75, 1.0, 16.45), 0.1)
+    """Number board on the nose, just under the windshield (layer 8); the
+    digits sit on it (layer 9)."""
+    return rounded(box(-1.15, NUMBER_Y - 0.45, 1.15, NUMBER_Y + 0.45), 0.1)
 
 
 def nose():
@@ -297,23 +296,6 @@ def plow_brackets():
     brk = [rounded(box(x - 0.22, 1.55, x + 0.22, 2.25), 0.05) for x in (3.0, 4.6)]
     rib = rounded(box(-1.9, 0.62, 1.9, 0.86), 0.06)
     return unary_union([both(unary_union(brk)), rib])
-
-
-STEP_WELL = box(6.62, 0.9, 7.9, 3.4)          # corner step well, under the sill
-
-
-def step_wells():
-    """Back of each corner step well (layer 6): painted black, it reads as the
-    dark recess the steps are tucked into."""
-    return both(STEP_WELL)
-
-
-def step_treads():
-    """Steps inside the well (layer 7): two side stringers and three treads, one piece a side."""
-    x0, y0, x1, y1 = STEP_WELL.bounds
-    parts = [box(x0, y0, x0 + 0.16, y1), box(x1 - 0.16, y0, x1, y1)]
-    parts += [box(x0, y, x1, y + 0.2) for y in (y0, 1.85, 2.75)]
-    return both(unary_union(parts))
 
 
 def sill_stripe():
@@ -436,7 +418,7 @@ def cut_lever_brackets():
 
 def silhouette():
     horn, antenna = roof_gear()
-    return unary_union([body(), plow(), both(STEP_WELL), horn, antenna])
+    return unary_union([body(), plow(), horn, antenna])
 
 
 # ------------------------------------------------------------------ electronics
@@ -497,8 +479,8 @@ def build():
     blue = wave()
     cab = body().difference(windows()).difference(leds)
     nose_ = nose().difference(leds)
-    mark, word = travelmark(0.0, 14.7, cap=0.56)
-    digits = text(ROAD_NUMBER, 0.55, 0.0, 20.6, tracking=0.06) if ROAD_NUMBER else None
+    mark, word = travelmark(0.0, 14.5, cap=0.56)
+    digits = text(ROAD_NUMBER, 0.52, 0.0, NUMBER_Y, tracking=0.06) if ROAD_NUMBER else None
 
     layers = [
         # (stem, [(paint, geometry)], note)
@@ -514,36 +496,35 @@ def build():
                           ("black", cab.intersection(headlight_recess())),     # recess floor
                           ("plow", plow().difference(body()).difference(COUPLER_POCKET)),
                           ("black", COUPLER_POCKET.intersection(silhouette())),     # pocket floor
-                          ("black", step_wells()), ("gray", horn), ("gray", antenna)],
-         "carbody (blue wave + silver, windshield cut out), plow base, steps, horns, antenna"),
+                          ("gray", horn), ("gray", antenna)],
+         "carbody (blue wave + silver, windshield cut out), plow base, horns, antenna"),
         ("layer07_nose", [("silver", nose_.difference(blue)),
                           ("blue", nose_.intersection(blue).difference(headlight_recess())),
                           ("chrome", rings(HEADLIGHTS, 0.38, LED_RING_ID / 2)),  # lamps in the recess
                           ("gray", coupler_head()),
                           ("under", pilot_face()),
                           ("black", gaskets().union(wipers())),
-                          ("black", number_board()),
                           ("under", grab_irons_low()),
-                          ("gray", step_treads()),
                           ("red", sill_stripe()),
                           ("plow", plow_wings())],
          "raised nose (blue + silver) with headlight recess, headlight rings, coupler head, "
-         "pilot face, gaskets with wipers, number board, plow wings"),
+         "pilot face, gaskets with wipers, sill stripe, plow wings"),
         ("layer08_lights_logo", [("black", light_housings().difference(leds)),
-                                 ("black", nose_plate()),
-                                 ("white", mark), ("white", word)] +
-                                ([("white", digits)] if digits else []) +
-                                [("black", lamp_boxes()),
+                                 ("black", number_board()),
+                                 ("white", mark), ("white", word),
+                                 ("black", lamp_boxes()),
                                  ("black", anticlimber()),
                                  ("gray", coupler_shank()),
                                  ("black", receptacles()),
                                  ("black", air_hoses().difference(anticlimber())),
                                  ("black", grab_irons_nose()),
                                  ("plow", plow_plates())],
-         "light housings, nose plate, Travelmark, number, lamp boxes, anticlimber, coupler shank, "
-         "receptacles, air hoses, lever brackets, grab irons, plow plates"),
+         "light housings, number board, Travelmark, lamp boxes, anticlimber, coupler shank, "
+         "receptacles, air hoses, grab irons, plow plates"),
         ("layer09_front_gear", [("chrome", rings(DITCHLIGHTS, 0.37, LED_RING_ID / 2)),
-                                ("red", red_rings()),
+                                ("red", red_rings())] +
+                               ([("white", digits)] if digits else []) +
+                               [
                                 ("lens", lamp_box_lenses()),
                                 ("gray", socket_faces()),
                                 ("black", mu_jumper()),
@@ -552,7 +533,7 @@ def build():
                                 ("plug", glad_hands()),
                                 ("gray", cut_lever().difference(mu_jumper().buffer(0.04))),
                                 ("plow", plow_brackets())],
-         "ditch light rings, red light rings, lamp box lenses, socket faces, MU + HEP jumpers "
+         "ditch light rings, red light rings, number digits, lamp box lenses, socket faces, MU + HEP jumpers "
          "with plug heads, glad hands, uncoupling lever, plow brackets"),
     ]
     return layers
