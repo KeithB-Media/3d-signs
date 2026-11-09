@@ -46,7 +46,7 @@ COLORS = {
     "glass": "#26313b",       # top of layer 5, seen through the windshield
     "blue": "#1f4e79",        # Amtrak Blue: roof and nose "wave"
     "silver": "#cdd1d4",      # Platinum Mist
-    "plow": "#b3b8bc",        # plow: Platinum Mist a shade darker so the steps read
+    "plow": "#26292d",        # plow: near-black so it stands out from the silver body
     "under": "#4a4f52",       # Anthracite Gray: pilot face, steps, underbody
     "red": "#d9442f",         # Amtrak Red
     "black": "#161616",
@@ -58,10 +58,12 @@ COLORS = {
 }
 
 # ---- lights (LED positions)
-HEADLIGHTS = [(-0.55, 12.0), (0.55, 12.0)]
-REDLIGHTS = [(-4.3, 12.0), (4.3, 12.0)]
-DITCHLIGHTS = [(-5.6, 9.55), (5.6, 9.55)]
-LAMP_BOXES = [(-5.6, 7.85), (5.6, 7.85)]     # dark boxes under the ditch lights (not lit)
+HEADLIGHTS = [(-0.55, 12.9), (0.55, 12.9)]
+REDLIGHTS = [(-4.3, 12.9), (4.3, 12.9)]
+DITCHLIGHTS = [(-5.6, 10.1), (5.6, 10.1)]
+LAMP_BOXES = [(-5.6, 8.4), (5.6, 8.4)]       # dark boxes under the ditch lights (not lit)
+
+WIN_BOTTOM, WIN_TOP = 17.0, 19.65             # windshield: wide and short, as on the P42
 
 # ---- electronics
 LED_HOLE = 0.25               # 5 mm LEDs push in from the front (loose fit, dab of glue)
@@ -197,7 +199,7 @@ def wave():
     pts = []
     for i in range(-90, 91):
         x = i / 10
-        y = 11.05 + 0.25 * (x / 7) ** 2 + 2.2 * max(0.0, abs(x) - 6.7)
+        y = 11.95 + 0.25 * (x / 7) ** 2 + 2.2 * max(0.0, abs(x) - 6.7)
         pts.append((x, y))
     return Polygon(pts + [(9, TOP + 1), (-9, TOP + 1)])
 
@@ -217,8 +219,9 @@ def roof_gear():
 
 def windows():
     """Windshield openings (each pane leans in with the cab side)."""
-    pane = Polygon([(0.38, 15.75), (5.95, 15.75), (5.35, 19.65), (0.38, 19.65)])
-    return both(rounded(pane, 0.35))
+    lean = 0.157 * (WIN_TOP - WIN_BOTTOM)             # follows the cab side
+    pane = Polygon([(0.38, WIN_BOTTOM), (5.85, WIN_BOTTOM), (5.85 - lean, WIN_TOP), (0.38, WIN_TOP)])
+    return both(rounded(pane, 0.3))
 
 
 def gaskets():
@@ -227,8 +230,9 @@ def gaskets():
 
 def wipers():
     """Parked wipers, joined to the gasket at both ends so they're strong."""
-    arm = stroke([(4.9, 15.63), (0.26, 16.9)], 0.18, cap=2)
-    pivot = Point(4.75, 15.6).buffer(0.16)
+    b = WIN_BOTTOM
+    arm = stroke([(4.8, b - 0.12), (0.26, b + 1.0)], 0.18, cap=2)
+    pivot = Point(4.65, b - 0.15).buffer(0.16)
     return both(unary_union([arm, pivot]))
 
 
@@ -239,19 +243,19 @@ def number_board():
 
 def nose_plate():
     """Dark plate on the nose just under the windshield."""
-    return rounded(box(-1.0, 14.45, 1.0, 15.15), 0.1)
+    return rounded(box(-1.0, 15.75, 1.0, 16.45), 0.1)
 
 
 def nose():
     """Forward-sloping nose under the windshield, raised one layer over the
     cab 'cheeks'. It stops at the anticlimber."""
-    half = [(0, 7.0), (7.5, 7.0), (6.45, 15.3), (0, 15.3)]
+    half = [(0, 7.0), (7.5, 7.0), (6.35, 16.6), (0, 16.6)]
     return rounded(mirror(half), 0.08)
 
 
 def pilot_face():
     """Anthracite pilot face behind the coupler, jumpers and hoses."""
-    return box(-6.6, 3.5, 6.6, 7.0)
+    return box(-6.6, 3.4, 6.6, 7.0).difference(PLOW_TOP).difference(COUPLER_POCKET)
 
 
 def grab_irons_low():
@@ -259,31 +263,40 @@ def grab_irons_low():
 
 
 def grab_irons_nose():
-    return both(stroke([(6.05, 12.75), (5.85, 14.1)], 0.18))
+    return both(stroke([(6.1, 13.6), (5.92, 14.9)], 0.18))
 
 
 # ------------------------------------------------------------------ plow (4 steps)
+PLOW_TOP = mirror([(0, -1), (9, -1), (9, 2.95), (6.25, 3.05), (1.15, 4.2), (0, 4.2)])
+COUPLER_POCKET = box(-1.15, 1.55, 1.15, 4.2)    # opening in the plow the coupler sits in
+
+
 def plow():
+    """Step 1 (layer 6): the plow base."""
     half = [(0, 0.0), (4.3, 0.0), (6.45, 1.85), (6.45, 3.5), (0, 3.5)]
     return mirror(half)
 
 
-def plow_face():
-    """Step 2: the plow plate, inset all round."""
-    return plow().buffer(-0.2, join_style=2).intersection(box(-9, 0, 9, 3.2))
+def plow_wings():
+    """Step 2 (layer 7): one plate with two wings. The top edge slopes down to the
+    outer corners, and the middle is cut away for the coupler pocket."""
+    outline = mirror([(0, 0.0), (4.3, 0.0), (6.45, 1.85), (6.45, 4.3), (0, 4.3)])
+    return outline.buffer(-0.16, join_style=2).intersection(PLOW_TOP).difference(COUPLER_POCKET)
 
 
-def plow_deflector():
-    """Step 3: the angled deflector with three ribs cut as grooves."""
-    d = plow().buffer(-0.45, join_style=2).intersection(box(-9, 0, 9, 2.85))
-    for y, half in ((0.75, 3.6), (1.45, 4.3), (2.15, 4.9)):
-        d = d.difference(box(-half, y, half, y + 0.12))
-    return d
+def plow_plates():
+    """Step 3 (layer 8): a lower centre plate and a raised plate on each wing."""
+    centre = mirror([(0, 0.24), (3.75, 0.24), (2.75, 1.32), (0, 1.32)])
+    wing = plow_wings().buffer(-0.24, join_style=2).intersection(
+        mirror([(0, 0.95), (9, 0.95), (9, 9), (0, 9)])).difference(box(-2.35, -1, 2.35, 9))
+    return unary_union([rounded(centre, 0.06), wing])
 
 
-def plow_nose():
-    """Step 4: the pointed centre reinforcement at the bottom of the plow."""
-    return rounded(Polygon([(-2.3, 0.3), (2.3, 0.3), (1.6, 1.3), (-1.6, 1.3)]), 0.08)
+def plow_brackets():
+    """Step 4 (layer 9): bolted brackets on the wing plates and a rib on the centre plate."""
+    brk = [rounded(box(x - 0.22, 1.55, x + 0.22, 2.25), 0.05) for x in (3.0, 4.6)]
+    rib = rounded(box(-1.9, 0.62, 1.9, 0.86), 0.06)
+    return unary_union([both(unary_union(brk)), rib])
 
 
 def steps():
@@ -295,14 +308,15 @@ def steps():
 
 
 # ------------------------------------------------------------------ lights
+def headlight_recess():
+    """Pocket the twin headlights sit in: cut out of the nose (layer 7), so
+    the lamps sit one layer below the nose surface."""
+    (x0, y), (x1, _) = HEADLIGHTS
+    return rounded(box(x0 - 0.62, y - 0.55, x1 + 0.62, y + 0.55), 0.3)
+
+
 def light_housings():
-    return unary_union([circles(HEADLIGHTS, 0.47), circles(REDLIGHTS, 0.4),
-                        circles(DITCHLIGHTS, 0.5)])
-
-
-def lens_rings():
-    return unary_union([rings(HEADLIGHTS, 0.36, LED_RING_ID / 2),
-                        rings(DITCHLIGHTS, 0.37, LED_RING_ID / 2)])
+    return unary_union([circles(REDLIGHTS, 0.4), circles(DITCHLIGHTS, 0.5)])
 
 
 def red_rings():
@@ -325,18 +339,19 @@ def anticlimber():
 
 
 def coupler_shank():
-    return box(-0.42, 3.55, 0.42, 6.32)
+    return box(-0.42, 3.62, 0.42, 6.32)
 
 
 def coupler_head():
-    """E-type coupler head with the knuckle gap and lock-lift hole (layer 9)."""
-    head = rounded(Polygon([(-1.0, 2.3), (0.55, 2.3), (1.0, 2.6), (1.0, 3.6), (-1.0, 3.6)]), 0.12)
+    """E-type coupler head with the knuckle gap and lock-lift hole. It sits in
+    the coupler pocket (layer 7), on the plow base."""
+    head = rounded(Polygon([(-1.0, 2.3), (0.55, 2.3), (1.0, 2.6), (1.0, 3.5), (-1.0, 3.5)]), 0.12)
     return head.difference(box(0.05, 2.3, 0.22, 3.0)).difference(Point(-0.55, 3.05).buffer(0.1))
 
 
-MU_X = (1.95, 2.55)           # MU receptacles each side of the coupler
-HEP_X = (3.5, 4.5)            # HEP receptacle and its dummy (stowage) socket
-HOSE_X = (1.2, 1.5)           # air hoses: brake pipe and main reservoir
+MU_X = (2.2, 2.75)           # MU receptacles each side of the coupler
+HEP_X = (3.8, 4.8)            # HEP receptacle and its dummy (stowage) socket
+HOSE_X = (1.35, 1.65)         # air hoses: brake pipe and main reservoir
 REC_Y = 4.75                  # receptacle centre height
 
 
@@ -354,7 +369,7 @@ def socket_faces():
 
 def air_hoses():
     """Hoses hang from the anticlimber, curve out and end at glad hands."""
-    return both(unary_union([stroke(bezier((x, 6.35), (x, 4.6), (x + 0.25, 3.3), (x + 0.2, 1.95), 30), 0.17)
+    return both(unary_union([stroke(bezier((x, 6.35), (x, 4.6), (x + 0.25, 3.2), (x + 0.2, 1.62), 30), 0.17)
                              for x in HOSE_X]))
 
 
@@ -393,9 +408,10 @@ def plugs_hep():
 
 
 def cut_lever():
-    """Uncoupling lever across the top of the plow, handle at the left."""
-    bar = stroke([(-5.1, 3.3), (-1.08, 3.3)], 0.16)
-    handle = stroke([(-5.1, 3.3), (-5.25, 2.85), (-4.85, 2.75)], 0.15)
+    """Uncoupling lever across the left plow wing to the coupler, handle at the
+    left. It rests on the wing plate and the air hoses (layer 8)."""
+    bar = stroke([(-5.1, 2.4), (-1.3, 2.4), (-1.08, 2.7)], 0.16)
+    handle = stroke([(-5.1, 2.4), (-5.3, 2.0), (-5.02, 1.9)], 0.15)
     return unary_union([bar, handle])
 
 
@@ -467,7 +483,7 @@ def build():
     blue = wave()
     cab = body().difference(windows()).difference(leds)
     nose_ = nose().difference(leds)
-    mark, word = travelmark(0.0, 13.55, cap=0.56)
+    mark, word = travelmark(0.0, 14.7, cap=0.56)
     digits = text(ROAD_NUMBER, 0.55, 0.0, 20.6, tracking=0.06) if ROAD_NUMBER else None
 
     layers = [
@@ -479,17 +495,24 @@ def build():
         ("layer04_core_wiring", [("core", core.difference(channels()))], "core: wire channels"),
         ("layer05_glass_wiring", [("glass", core.difference(channels()))],
          "core: wire channels; top shows through the windshield"),
-        ("layer06_body", [("silver", cab.difference(blue)), ("blue", cab.intersection(blue)),
-                          ("plow", plow().difference(body())),
+        ("layer06_body", [("silver", cab.difference(blue).difference(COUPLER_POCKET)),
+                          ("blue", cab.intersection(blue).difference(headlight_recess())),
+                          ("black", cab.intersection(headlight_recess())),     # recess floor
+                          ("plow", plow().difference(body()).difference(COUPLER_POCKET)),
+                          ("black", COUPLER_POCKET.intersection(silhouette())),     # pocket floor
                           ("under", steps()), ("gray", horn), ("gray", antenna)],
          "carbody (blue wave + silver, windshield cut out), plow base, steps, horns, antenna"),
-        ("layer07_nose", [("silver", nose_.difference(blue)), ("blue", nose_.intersection(blue)),
+        ("layer07_nose", [("silver", nose_.difference(blue)),
+                          ("blue", nose_.intersection(blue).difference(headlight_recess())),
+                          ("chrome", rings(HEADLIGHTS, 0.38, LED_RING_ID / 2)),  # lamps in the recess
+                          ("gray", coupler_head()),
                           ("under", pilot_face()),
                           ("black", gaskets().union(wipers())),
                           ("black", number_board()),
                           ("under", grab_irons_low()),
-                          ("plow", plow_face())],
-         "raised nose (blue + silver), pilot face, gaskets with wipers, number board, plow plate"),
+                          ("plow", plow_wings())],
+         "raised nose (blue + silver) with headlight recess, headlight rings, coupler head, "
+         "pilot face, gaskets with wipers, number board, plow wings"),
         ("layer08_lights_logo", [("black", light_housings().difference(leds)),
                                  ("black", nose_plate()),
                                  ("white", mark), ("white", word)] +
@@ -499,24 +522,22 @@ def build():
                                  ("gray", coupler_shank()),
                                  ("black", receptacles()),
                                  ("black", air_hoses().difference(anticlimber())),
-                                 ("black", cut_lever_brackets()),
                                  ("black", grab_irons_nose()),
-                                 ("plow", plow_deflector().difference(air_hoses().buffer(0.06)))],
+                                 ("plow", plow_plates())],
          "light housings, nose plate, Travelmark, number, lamp boxes, anticlimber, coupler shank, "
-         "receptacles, air hoses, lever brackets, grab irons, plow deflector"),
-        ("layer09_front_gear", [("chrome", lens_rings()),
+         "receptacles, air hoses, lever brackets, grab irons, plow plates"),
+        ("layer09_front_gear", [("chrome", rings(DITCHLIGHTS, 0.37, LED_RING_ID / 2)),
                                 ("red", red_rings()),
                                 ("lens", lamp_box_lenses()),
-                                ("gray", coupler_head()),
                                 ("gray", socket_faces()),
                                 ("black", mu_jumper()),
                                 ("plug", plugs_mu()),
                                 ("black", hep_jumpers().union(plugs_hep())),  # one piece: glues to the receptacles
-                                ("gray", glad_hands()),
-                                ("black", cut_lever().difference(mu_jumper().buffer(0.04))),
-                                ("plow", plow_nose())],
-         "lens rings, red light rings, lamp box lenses, coupler head, socket faces, MU + HEP jumpers "
-         "with plug heads, glad hands, uncoupling lever, plow nose"),
+                                ("plug", glad_hands()),
+                                ("gray", cut_lever().difference(mu_jumper().buffer(0.04))),
+                                ("plow", plow_brackets())],
+         "ditch light rings, red light rings, lamp box lenses, socket faces, MU + HEP jumpers "
+         "with plug heads, glad hands, uncoupling lever, plow brackets"),
     ]
     return layers
 

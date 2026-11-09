@@ -21,15 +21,18 @@ The layout follows a head-on photo of a Phase V P42, top to bottom:
 * **Roof**: horn cluster and radio antenna above the roof line.
 * **Number board** above the windshield, between the panes: black board, white digits
   (`ROAD_NUMBER`, default 82, or `""` for a blank board).
-* **Windshield**: two panes with black gaskets and parked wipers.
+* **Windshield**: two wide, short panes with black gaskets and parked wipers.
 * **Nose plate**: the dark plate under the windshield.
 * **Travelmark**: AMTRAK wordmark over three sweeping stripes, in white on the blue.
-* **Light bar**: twin round **headlights** in the middle, a **red light** either side.
+* **Light bar**: twin round **headlights** set into a recess in the nose (the recess is cut
+  out of layer 7, so the lamps sit one layer in, with a black floor). A **red light**
+  either side.
 * **Blue/silver line** just under the light bar, sweeping up at the cab corners.
 * **Ditch lights** on the silver, with the **dark lamp boxes** below them.
 * **Anticlimber** across the full width.
 * **Pilot** (anthracite):
   * **Coupler**: draft gear and an E-type head with the knuckle gap and lock-lift hole.
+    The head sits down in a black pocket cut into the plow.
   * **MU receptacles**, two each side of the coupler. A **MU jumper** droops under the
     coupler between the inner pair, with light-grey plug heads. The outer pair have
     round socket faces.
@@ -37,9 +40,14 @@ The layout follows a head-on photo of a Phase V P42, top to bottom:
     to the dummy socket beside it.
   * **Air hoses** (brake pipe and main reservoir, two each side) hang from the
     anticlimber and end in **glad hands**.
-  * **Uncoupling lever** on two brackets, with the handle at the left.
+  * **Uncoupling lever** across the left plow wing to the coupler, handle at the left.
   * **Grab irons** beside the steps and on the nose.
-* **Plow** in four steps: base, inset plate, ribbed deflector, pointed centre nose.
+* **Plow**, near-black, in four steps:
+  1. base (layer 6)
+  2. one plate with two wings: the top slopes down to the outer corners, and the
+     middle is cut away for the coupler pocket (layer 7)
+  3. a lower centre plate and a raised plate on each wing (layer 8)
+  4. bolted brackets on the wings and a rib on the centre plate (layer 9)
 * **Corner steps** at both ends of the plow.
 
 ## Cut files (`svg/`)
@@ -55,9 +63,9 @@ every layer lines up. They contain cut lines only (red hairline, no fill). The s
 | 4 | `layer04_core_wiring.svg` | core: wire channels |
 | 5 | `layer05_glass_wiring.svg` | wire channels; its top shows through the windshield |
 | 6 | `layer06_body.svg` | carbody (blue + silver, windshield cut out), plow base, steps, horns, antenna |
-| 7 | `layer07_nose.svg` | raised nose (blue + silver), pilot face, gaskets with wipers, number board, low grab irons, plow plate |
-| 8 | `layer08_lights_logo.svg` | light housings, nose plate, Travelmark, number digits, lamp boxes, anticlimber, coupler shank, receptacles, air hoses, lever brackets, nose grab irons, plow deflector |
-| 9 | `layer09_front_gear.svg` | chrome lens rings, red light rings, lamp box lenses, coupler head, socket faces, MU + HEP jumpers with plugs, glad hands, uncoupling lever, plow nose |
+| 7 | `layer07_nose.svg` | raised nose (blue + silver) with headlight recess, headlight rings, coupler head, pilot face, gaskets with wipers, number board, low grab irons, plow wings |
+| 8 | `layer08_lights_logo.svg` | red light + ditch light housings, nose plate, Travelmark, number digits, lamp boxes, anticlimber, coupler shank, receptacles, air hoses, nose grab irons, plow plates |
+| 9 | `layer09_front_gear.svg` | ditch light rings, red light rings, lamp box lenses, socket faces, MU + HEP jumpers with plugs, glad hands, uncoupling lever, plow brackets |
 | – | `back_cover.svg` | battery pocket cover (screws to the back, slot for the switch) |
 
 The stack is 1-1/8" thick. Each piece is cut on its own, so where two paint colours meet
@@ -75,13 +83,13 @@ Other files:
 |---|---|---|
 | Amtrak Blue | `#1f4e79` | top of the carbody and nose (above the wave line) |
 | Platinum Mist | `#cdd1d4` | lower carbody and nose |
-| Platinum Mist, a shade darker | `#b3b8bc` | the four plow steps (so the steps read) |
+| Near-black | `#26292d` | the four plow steps (darker than prototype so the plow stands out) |
 | Anthracite Gray | `#4a4f52` | pilot face, steps, low grab irons |
 | Amtrak Red | `#d9442f` | red light rings |
-| Black | | gaskets, wipers, number board, nose plate, light housings, lamp boxes, anticlimber, receptacles, hoses, jumpers, lever, nose grab irons |
+| Black | | gaskets, wipers, number board, nose plate, headlight recess floor, coupler pocket floor, light housings, lamp boxes, anticlimber, receptacles, hoses, jumpers, nose grab irons |
 | White | | Travelmark, number digits |
-| Grey | | coupler, horns, antenna, socket faces, glad hands |
-| Light grey | | MU plug heads |
+| Grey | | coupler, uncoupling lever, horns, antenna, socket faces |
+| Light grey | | MU plug heads, glad hands |
 | Chrome/silver | | headlight and ditch light rings |
 | Steel blue | `#5d7690` | lamp box lenses |
 
@@ -109,8 +117,10 @@ Other files:
   from an angle. Layers 1–5 only show their edges, so paint those black. Paint the top of
   layer 5 dark glass grey: it shows through the windshield.
 * Glue order: 1 → 5 (all the same outline), check the wire channels are clear, then 6, 7,
-  8 and 9. On layer 8, glue the receptacles and air hoses before the jumpers and lever
-  from layer 9, which rest on them.
+  8 and 9. On layer 8, glue the receptacles, air hoses and plow plates before the
+  jumpers and lever from layer 9, which rest on them.
+* Paint the headlight recess floor (on layer 6) and the coupler pocket floor black before
+  gluing layer 7 over them: they're cut as separate pieces so you can paint them on their own.
 * The wipers are joined to the gaskets at both ends, so they don't snap.
 * The smallest parts are the Travelmark stripes and letters (about 0.1" strokes). Cut them
   from good MDF, or from 1/8" hardboard or birch ply, for clean edges.

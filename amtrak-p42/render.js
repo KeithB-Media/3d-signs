@@ -17,8 +17,9 @@ function shade(hex, f) {
   const c = [n >> 16, (n >> 8) & 255, n & 255].map(v => Math.round(Math.min(255, v * f)));
   return `rgb(${c.join(',')})`;
 }
-const paths = (L, fill) => L.pieces.map(p =>
-  `<path d="${p.d}" fill="${fill ? fill(p.color) : p.color}" fill-rule="evenodd"/>`).join('');
+const paths = (L, fill, edge) => L.pieces.map(p =>
+  `<path d="${p.d}" fill="${fill ? fill(p.color) : p.color}" fill-rule="evenodd"` +
+  (edge ? ` stroke="rgba(255,255,255,0.22)" stroke-width="0.025"` : '') + `/>`).join('');
 
 // ---- straight-on view: each layer casts a soft shadow onto the ones below
 function frontHTML(lit, dark) {
@@ -26,7 +27,7 @@ function frontHTML(lit, dark) {
     const s = i === 0 ? 0.12 : 0.03 + 0.06 * Math.min(i, 3) / 3;
     return `<defs><filter id="sh${i}" x="-10%" y="-10%" width="120%" height="120%">` +
       `<feDropShadow dx="${s * 0.8}" dy="${s}" stdDeviation="${s * 0.6}" flood-opacity="0.55"/></filter></defs>` +
-      `<g filter="url(#sh${i})">${paths(L, dark ? c => shade(c, 0.35) : null)}</g>`;
+      `<g filter="url(#sh${i})">${paths(L, dark ? c => shade(c, 0.35) : null, i >= 5 && !dark)}</g>`;
   }).join('\n');
   const glow = lit ? lights.map(([x, y]) =>
     `<circle cx="${x}" cy="${y}" r="1.1" fill="url(#glow)"/><circle cx="${x}" cy="${y}" r="0.13" fill="#fffef4"/>`).join('') +
