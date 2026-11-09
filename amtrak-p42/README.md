@@ -1,6 +1,7 @@
-# Amtrak P42 (GE Genesis) – 16" × 23" stacked MDF sign with working lights
+# Amtrak P42 (GE Genesis) in Phase VI – 16" × 23" stacked MDF sign with working lights
 
-A head-on relief of a GE Genesis P42DC, cut from nine layers of 1/8" MDF and stacked.
+A head-on relief of GE Genesis P42DC #108 in Amtrak's Phase VI colours (blue body,
+black window mask with a red band around it, white logo), cut from nine layers of 1/8" MDF and stacked.
 It's built the same way as the IAIS 510 sign: every layer is cut, painted, then glued
 from 1 (back) to 9 (front). The two headlights and two ditch lights are 5 mm LEDs that
 run on a battery holder hidden in a pocket in the back.
@@ -28,19 +29,19 @@ every layer lines up. They contain cut lines only (red hairline, no fill). The s
 | 3 | `layer3_core.svg` | black | 1 | same as layer 2 |
 | 4 | `layer4_core_wiring.svg` | black | 1 | core: wire channels |
 | 5 | `layer5_glass_wiring.svg` | dark glass (top), black edges | 1 | wire channels; its top shows through the windshield |
-| 6 | `layer6_body.svg` | silver body; black plow + steps | 4 | carbody with windshield cut out, plow backing, corner steps |
-| 7 | `layer7_nose_skirt.svg` | silver nose, blue skirt, black | 5 | nose, blue skirt, windshield gaskets with wipers, ribbed plow face |
-| 8 | `layer8_details.svg` | black, red, gray | 16 | headlight bezel, ditch light housings, red pinstripe, anticlimber, coupler, hoses, grab irons |
-| 9 | `layer9_lens_rings.svg` | chrome/silver | 4 | lens rings around the four LEDs |
+| 6 | `layer6_body.svg` | blue body; dark grey plow + steps; grey horns + antenna | 6 | carbody with windshield cut out, plow backing, corner steps, roof horns, antenna |
+| 7 | `layer7_nose_mask.svg` | blue, red, black, dark grey | 4 | nose + skirt, red band, black window mask with wipers, ribbed plow face |
+| 8 | `layer8_details.svg` | black, white, grey | 35 | headlight bezel, ditch light housings, logo, road number, anticlimber, coupler, MU + HEP receptacles, air hoses, lever brackets, grab irons |
+| 9 | `layer9_front_gear.svg` | black, grey, chrome | 18 | lens rings, MU jumper cable, HEP jumper cables, receptacle lids, glad hands, uncoupling lever |
 | – | `back_cover.svg` | black | 1 | battery pocket cover (screws to the back, with a slot to reach the switch) |
 
 The stack is 1-1/8" thick. Each piece in a layer is cut separately, so pieces with different
-paints (for example the silver body and the black plow on layer 6) come apart.
+paints (for example the blue body and the grey plow on layer 6) come apart.
 
 Other files:
 * `preview_flat.svg` – full-colour flat preview.
 * `placement_template.svg` – every layer's outline in its own colour. Print it at 1:1
-  (actual size, tiled) to position the small layer 8 parts during glue-up.
+  (actual size, tiled) to position the small layer 8 and 9 parts (logo letters, hoses, cables) during glue-up.
 
 ## Lights and battery
 
@@ -65,15 +66,42 @@ Other files:
   layer 5 dark glass grey: it shows through the windshield.
 * Glue order: 1 → 5 (all the same outline), check the wire channels are clear, then 6,
   7, 8 and 9. Use the placement template for the small layer 8 parts.
-* The wipers are part of the black gasket piece and joined at both ends, so they don't snap.
+* The wipers are part of the black window mask and joined at both ends, so they don't snap.
+
+## Front-end detail
+Everything between the anticlimber and the plow, as on the real locomotive:
+* **Coupler**: draft gear and an E-type head with the knuckle gap and lock-lift hole.
+* **MU receptacles** (two each side of the coupler) with a **MU jumper cable** draped
+  across the coupler between the inner pair, plug heads on the receptacles.
+* **HEP (head-end power) receptacles** further out, each with its jumper stowed in a loop
+  to the dummy socket beside it.
+* **Air hoses** (brake pipe and main reservoir, two each side) hanging from the
+  anticlimber, ending in **glad hands**.
+* **Uncoupling lever** across the top of the plow on the left, on two brackets.
+* Receptacle lids, grab irons beside the steps and on the nose, and a ribbed plow.
+
+Layer 9 parts sit on layer 8 parts: the cables end on the receptacles and the lever rests
+on its brackets and on the air hoses where it crosses them. Glue the receptacles and hoses
+first, then lay the cables and lever on top using the placement template.
+
+## Phase VI livery and logo
+* Body, nose and skirt: Amtrak blue. Window surround: black. A red band wraps around the
+  bottom and lower sides of the black surround. Plow, steps and undercarriage: dark grey.
+* Sources describe P42 #108's Phase VI front as "a mostly blue body with red and black
+  around the windshield". They don't give the exact shapes, so the red band and mask are
+  my interpretation. Check a photo of #108 and adjust `window_mask()` and `red_band()`
+  in `generate.py` if needed.
+* The logo is cut from MDF and painted white: three sweeping stripes for the Travel Mark,
+  then the AMTRAK wordmark (set in Liberation Sans Bold), centred on the nose above the
+  headlight. The Travel Mark is an **approximation** drawn to be cuttable (no stripe narrower
+  than 0.1"). If you have the official artwork, swap it in `travel_mark()`.
+  The Amtrak logo is a trademark: fine for a personal sign, but get permission before
+  selling these (the IAIS sign was made with the railroad's permission).
+* The road number (`ROAD_NUMBER`, default 108) is cut in white below the headlight.
+  Change it to any number and rerun.
+* Change `COLORS` to preview other schemes. The cut files stay the same.
 * Kerf is not compensated. Pieces come out a few thousandths undersize, which is fine for
   stacked art. If your LEDs fit loosely, a dab of hot glue holds them.
-* **Lettering**: the nose is left plain. Add the road number and logo with paint,
-  vinyl or decals. Amtrak's logo is a trademark, so that's up to you (the IAIS
-  sign was made with the railroad's permission).
-* **Livery**: the previews use a Phase V style (platinum body, dark blue skirt, red
-  pinstripe). Edit `COLORS` in `generate.py` to preview other schemes. The cut files
-  stay the same.
 * The shape was drawn from general P42 references, not from factory drawings: the
   "home plate" headlight on the nose, ditch lights low on the front, a plow,
   corner steps, and cab sides that lean inward. Compare it with a photo of the unit
@@ -81,7 +109,7 @@ Other files:
 
 ## Regenerating
 ```
-pip install shapely numpy
+pip install shapely numpy fonttools
 python3 generate.py        # writes svg/
 node render.js             # writes renders/ (needs Playwright + Chromium)
 ```
