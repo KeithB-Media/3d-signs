@@ -33,7 +33,8 @@ OUT = os.path.join(HERE, "svg")
 T = 0.125                     # MDF thickness
 HALF_W = 8.0                  # sign is 16" wide ...
 TOP = 23.0                    # ... and 23" tall incl. roof horns (about 1:7.5 scale)
-ROOF = 22.4                   # top of the carbody
+ROOF = 22.4                   # roof height where the horns and antenna sit
+ROOF_CROWN = 22.55            # top of the domed roof, on the centre line
 MARGIN = 0.25                 # border around the drawing in the SVG files
 SILL = 6.3                    # bottom of the silver carbody (the plow tips reach up to it)
 Y0 = 1.9                      # bottom edge of the plow = bottom of the sign
@@ -191,9 +192,12 @@ def travelmark(cx, cy, cap=0.5):
 def body():
     """Carbody from the sill (y=SILL) to the roof: straight lower sides, upper
     sides leaning in (Genesis 'tumblehome'), rounded roof corners."""
-    half = [(0, SILL), (8.0, SILL), (8.0, 14.4), (6.9, 21.2), (6.6, 21.95),
-            (6.1, 22.32), (5.45, ROOF), (0, ROOF)]
-    return rounded(mirror(half), 0.05)
+    # domed roof: a superellipse from the shoulder (6.92, 21.1) up to the crown
+    dome = [(x, 21.1 + (ROOF_CROWN - 21.1) * (1 - (x / 6.92) ** 2.2) ** (1 / 2.2))
+            for x in [6.92 * (1 - i / 40) for i in range(40)]]
+    half = [(0, SILL), (8.0, SILL), (8.0, 14.4)] + dome
+    outline = Polygon(half[1:] + [(0, ROOF_CROWN)] + [(-x, y) for x, y in reversed(half[1:])]).buffer(0)
+    return rounded(outline, 0.05).simplify(0.001)
 
 
 def wave():
@@ -209,12 +213,12 @@ def wave():
 
 def roof_gear():
     """Horn cluster and radio antenna, seen over the roof line."""
-    horn = unary_union([box(2.3, ROOF - 0.05, 4.3, ROOF + 0.12),
+    horn = unary_union([box(2.3, ROOF - 0.4, 4.3, ROOF + 0.12),       # base runs down into the dome
                         box(3.2, ROOF + 0.05, 3.4, ROOF + 0.32),
                         rounded(box(2.35, ROOF + 0.28, 4.25, ROOF + 0.52), 0.08)] +
                        [Polygon([(x - 0.12, ROOF + 0.5), (x + 0.12, ROOF + 0.5),
                                  (x + 0.22, TOP), (x - 0.22, TOP)]) for x in (2.65, 3.3, 3.95)])
-    antenna = unary_union([box(-3.9, ROOF - 0.05, -3.1, ROOF + 0.14),
+    antenna = unary_union([box(-3.9, ROOF - 0.4, -3.1, ROOF + 0.14),
                            Polygon([(-3.62, ROOF + 0.1), (-3.38, ROOF + 0.1), (-3.44, ROOF + 0.55),
                                     (-3.56, ROOF + 0.55)])])
     return horn.difference(body()), antenna.difference(body())
@@ -261,7 +265,7 @@ def grab_irons_nose():
 
 def sill_stripe():
     """Amtrak Red sill stripe, seen at the front corners either side of the plow."""
-    return both(box(7.08, SILL + 0.05, 8.0, SILL + 0.32))
+    return both(box(7.58, SILL + 0.05, 8.0, SILL + 0.32))
 
 
 # ------------------------------------------------------------------ lights
@@ -335,7 +339,7 @@ def conn_caps():
 B = Y0                                            # bottom of the plow (= bottom of the sign)
 PILOT_OPENING = box(-3.0, SILL, 3.0, 6.95)        # cut-out in the bottom of the silver body over the coupler
 NOTCH = box(-1.7, B + 1.7, 1.7, SILL)             # opening in the plow top the coupler sits in
-UNDERFRAME = box(-7.0, B + 3.0, 7.0, SILL)        # dark underframe seen above the plow
+UNDERFRAME = box(-7.5, B + 3.0, 7.5, SILL)        # dark underframe seen above the plow
 SKIRT = mirror([(0, B + 1.2), (7.6, B + 1.2), (8.0, B + 1.6), (8.0, SILL), (0, SILL)])  # behind the plow, out to the edges
 
 
@@ -399,23 +403,23 @@ def plugs_mu():
 def _plow_top(x):
     """Height of the plow's top edge: low beside the notch, rising to the outer
     tips, which reach up to the bottom of the carbody."""
-    x = min(max(abs(x), 1.7), 6.55)
-    return B + 3.2 + 1.45 * (x - 1.7) / (6.55 - 1.7)
+    x = min(max(abs(x), 1.7), 7.05)
+    return B + 3.2 + 1.45 * (x - 1.7) / (7.05 - 1.7)
 
 
 def plow():
     """Plow outline (front plate, layer 7): wide bottom, angled lower corners,
     tall outer tips up at the carbody, top edge sloping down to the coupler notch."""
-    half = [(0, B), (4.6, B), (6.5, B + 0.95), (7.0, B + 1.6), (7.0, B + 4.6), (6.55, B + 4.65),
+    half = [(0, B), (5.0, B), (7.0, B + 0.95), (7.5, B + 1.6), (7.5, B + 4.6), (7.05, B + 4.65),
             (1.7, B + 3.2), (1.7, B + 1.7), (0, B + 1.7)]
     return rounded(mirror(half), 0.06)
 
 
 def plow_doors():
     """Closed door on each wing (layer 8), inset from the plow edges."""
-    xs = [2.15 + i * (6.65 - 2.15) / 40 for i in range(41)]
+    xs = [2.15 + i * (7.15 - 2.15) / 40 for i in range(41)]
     top = [(x, _plow_top(x) - 0.3) for x in xs]
-    door = Polygon([(2.15, B + 0.8), (6.25, B + 0.8), (6.65, B + 1.35)] + top[::-1])
+    door = Polygon([(2.15, B + 0.8), (6.75, B + 0.8), (7.15, B + 1.35)] + top[::-1])
     return both(rounded(door.intersection(plow().buffer(-0.25, join_style=2)), 0.06))
 
 
@@ -427,17 +431,17 @@ def plow_bar():
 def plow_handles():
     """White grab handles (layer 9): they come forward from the engine over the
     top of each wing, a rail along the wing with its ends turned down."""
-    xs = [2.6 + i * (6.2 - 2.6) / 30 for i in range(31)]
+    xs = [2.6 + i * (6.7 - 2.6) / 30 for i in range(31)]
     rail = [(x, _plow_top(x) - 0.32) for x in xs]
-    pts = [(2.6, rail[0][1] - 0.4)] + rail + [(6.2, rail[-1][1] - 0.4)]
+    pts = [(2.6, rail[0][1] - 0.4)] + rail + [(6.7, rail[-1][1] - 0.4)]
     return both(stroke(pts, 0.14))
 
 
 def door_hardware():
     """Latch at the inner edge and two hinges at the outer edge of each door (layer 9)."""
     parts = [rounded(box(2.35, B + 1.4, 2.55, B + 2.1), 0.05),
-             rounded(box(6.15, B + 1.35, 6.4, B + 1.6), 0.04),
-             rounded(box(6.15, B + 3.15, 6.4, B + 3.4), 0.04)]
+             rounded(box(6.65, B + 1.35, 6.9, B + 1.6), 0.04),
+             rounded(box(6.65, B + 3.25, 6.9, B + 3.5), 0.04)]
     return both(unary_union(parts))
 
 
