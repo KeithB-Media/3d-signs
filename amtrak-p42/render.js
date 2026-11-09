@@ -1,13 +1,13 @@
 // Renders the stacked sign from svg/layers.json (written by generate.py).
-// Usage: node render.js [phase5|phase6] -> renders/render_front.png, render_lit.png, render_angle.png,
+// Usage: node render.js -> renders/render_front.png, render_lit.png, render_angle.png,
 //                          render_exploded.png, layer_sheet.png
 const { chromium } = require('playwright');
 const fs = require('fs');
 const path = require('path');
 
-const base = path.join(__dirname, process.argv[2] || 'phase5');
+const base = __dirname;
 const meta = JSON.parse(fs.readFileSync(path.join(base, 'svg', 'layers.json')));
-const { w: W, h: H, layers, lights } = meta;
+const { w: W, h: H, layers, lights, red_lights: reds = [] } = meta;
 const PX = 32;                                   // px per inch in the 3D views
 const outDir = path.join(base, 'renders');
 fs.mkdirSync(outDir, { recursive: true });
@@ -29,12 +29,14 @@ function frontHTML(lit, dark) {
       `<g filter="url(#sh${i})">${paths(L, dark ? c => shade(c, 0.35) : null)}</g>`;
   }).join('\n');
   const glow = lit ? lights.map(([x, y]) =>
-    `<circle cx="${x}" cy="${y}" r="1.1" fill="url(#glow)"/><circle cx="${x}" cy="${y}" r="0.13" fill="#fffef4"/>`).join('') : '';
+    `<circle cx="${x}" cy="${y}" r="1.1" fill="url(#glow)"/><circle cx="${x}" cy="${y}" r="0.13" fill="#fffef4"/>`).join('') +
+    reds.map(([x, y]) => `<circle cx="${x}" cy="${y}" r="0.7" fill="url(#rglow)"/><circle cx="${x}" cy="${y}" r="0.12" fill="#ff5a4a"/>`).join('') : '';
   const bg = dark ? '#1b1a19' : '#d9d4cb';
   return `<html><body style="margin:0;background:${bg}">
   <svg width="760" height="1060" viewBox="-0.6 -0.4 ${W + 1.2} ${H + 0.8}">
    <defs><radialGradient id="glow"><stop offset="0" stop-color="#fffbe6" stop-opacity="0.95"/>
      <stop offset="0.25" stop-color="#fff2b8" stop-opacity="0.45"/><stop offset="1" stop-color="#ffe9a0" stop-opacity="0"/></radialGradient>
+     <radialGradient id="rglow"><stop offset="0" stop-color="#ff6a55" stop-opacity="0.9"/><stop offset="1" stop-color="#ff2a1a" stop-opacity="0"/></radialGradient>
      <linearGradient id="light" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity="0.18"/>
      <stop offset="0.6" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity="0.12"/></linearGradient></defs>
    ${groups}

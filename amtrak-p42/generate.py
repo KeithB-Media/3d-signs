@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Generate laser-cut SVG layers for a stacked 1/8" MDF sign of the front of a
-GE Genesis P42DC locomotive in Amtrak Phase VI colours, with working LED
-headlights and ditch lights.
+GE Genesis P42DC locomotive in Amtrak Phase V, with working LED headlights,
+ditch lights and red rear (marker) lights.
 
 Units are inches. Design origin is the bottom centre of the sign (top of rail),
 +x to the right, +y up; the SVG output flips y. Run:
@@ -9,11 +9,17 @@ Units are inches. Design origin is the bottom centre of the sign (top of rail),
 
 Every layer is cut from 1/8" MDF. Layers 1-5 are the hidden "core": they give
 the sign its thickness and hold the battery pocket, the wire channels and the
-hanging keyholes. Layers 6-9 are the visible relief.
+hanging keyholes. Layers 6-10 are the visible relief.
+
+The front layout follows a head-on photo of a Phase V P42: number board above
+the windshield, dark plate and Travelmark under it, twin round headlights with a
+red light either side, blue/silver split just under the headlights, ditch lights
+and dark lamp boxes on the silver, anticlimber, pilot with jumpers and hoses,
+and a big stepped plow.
 """
 import json
-import math
 import os
+import sys
 
 from fontTools.pens.basePen import BasePen
 from fontTools.ttLib import TTFont
@@ -22,6 +28,7 @@ from shapely.geometry import Polygon, Point, LineString, box
 from shapely.ops import unary_union
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+OUT = os.path.join(HERE, "svg")
 
 T = 0.125                     # MDF thickness
 HALF_W = 8.0                  # sign is 16" wide ...
@@ -29,40 +36,39 @@ TOP = 23.0                    # ... and 23" tall incl. roof horns (about 1:7.5 s
 ROOF = 22.4                   # top of the carbody
 MARGIN = 0.25                 # border around the drawing in the SVG files
 
+ROAD_NUMBER = "82"            # cut in white for the number board ("" for a blank board)
 WORDMARK = "AMTRAK"
 FONT = "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf"
 
-# ---- liveries. Each one is written to its own folder (phase5/, phase6/).
-# Colours only change the previews and the paint list; ROAD_NUMBER is cut.
-_COMMON = {
+# ---- Phase V colours (Amtrak livery guide): edit to repaint the previews.
+COLORS = {
     "core": "#1d1d1f",        # hidden layers: paint the edges black
     "glass": "#26313b",       # top of layer 5, seen through the windshield
+    "blue": "#1f4e79",        # Amtrak Blue: roof and nose "wave"
+    "silver": "#cdd1d4",      # Platinum Mist
+    "plow": "#b3b8bc",        # plow: Platinum Mist a shade darker so the steps read
+    "under": "#4a4f52",       # Anthracite Gray: pilot face, steps, underbody
+    "red": "#d9442f",         # Amtrak Red
     "black": "#161616",
     "white": "#f4f4f2",
-    "under": "#3b4046",       # undercarriage grey: plow, steps
-    "gray": "#7d838a",        # coupler, horns, glad hands, receptacle lids
+    "gray": "#7d838a",        # coupler, horns, glad hands
+    "plug": "#d8d5c8",        # jumper plug heads (light grey)
+    "lens": "#5d7690",        # lens of the lower lamp boxes
     "chrome": "#e6e8ea",
 }
-LIVERIES = {
-    # Phase V (1999 on): Platinum Mist body, Amtrak Blue nose and roof "wave",
-    # Anthracite Gray underbody, Amtrak Red sill stripe, Travelmark logo.
-    "phase5": {"number": "82",
-               "colors": {**_COMMON, "silver": "#cdd1d4", "blue": "#1f4e79", "red": "#d9442f",
-                          "under": "#4a4f52"}},
-    # Phase VI (P42 #108, 2021): blue body, black and red around the windshield.
-    "phase6": {"number": "108",
-               "colors": {**_COMMON, "blue": "#0b4a7a", "red": "#c8202f"}},
-}
-COLORS = LIVERIES["phase5"]["colors"]
+
+# ---- lights (LED positions)
+HEADLIGHTS = [(-0.55, 12.0), (0.55, 12.0)]
+REDLIGHTS = [(-4.3, 12.0), (4.3, 12.0)]
+DITCHLIGHTS = [(-5.6, 9.55), (5.6, 9.55)]
+LAMP_BOXES = [(-5.6, 7.85), (5.6, 7.85)]     # dark boxes under the ditch lights (not lit)
 
 # ---- electronics
 LED_HOLE = 0.25               # 5 mm LEDs push in from the front (loose fit, dab of glue)
 LED_RING_ID = 0.36            # chrome lens ring: the LED flange sits inside it
 CHANNEL_W = 0.32              # wire channel width (in layers 4 and 5)
 POCKET = (2.50, 1.95)         # battery holder pocket, through layers 1-5 (0.625" deep)
-POCKET_C = (0.0, 8.9)         # pocket centre: behind the nose, under the headlight
-HEADLIGHTS = [(-0.45, 11.85), (0.45, 11.85)]
-DITCHLIGHTS = [(-5.55, 5.15), (5.55, 5.15)]
+POCKET_C = (0.0, 8.9)         # pocket centre: behind the nose
 KEYHOLES = [(-4.6, 19.2), (4.6, 19.2)]
 
 
@@ -81,6 +87,14 @@ def rounded(geom, r):
 
 def stroke(pts, w, cap=1):
     return LineString(pts).buffer(w / 2, cap_style=cap, join_style=1)
+
+
+def circles(pts, r):
+    return unary_union([Point(p).buffer(r) for p in pts])
+
+
+def rings(pts, r_out, r_in):
+    return unary_union([Point(p).buffer(r_out).difference(Point(p).buffer(r_in)) for p in pts])
 
 
 def bezier(p0, p1, p2, p3, n=40):
@@ -144,20 +158,28 @@ def text(s, cap_height, cx, cy, tracking=0.06):
     return affinity.translate(t, cx - (minx + maxx) / 2, cy - cap_height / 2)
 
 
-def travel_mark(cx, cy, w=1.55, h=0.82):
-    """Three sweeping stripes in the spirit of Amtrak's Travel Mark: they rise
-    from the left and fan out toward the right. Each stripe is a separate piece
-    at least 0.1" wide so it survives cutting. Approximate - swap in the
-    official artwork if you have it."""
+def travelmark(cx, cy, cap=0.5):
+    """Phase V Travelmark: the AMTRAK wordmark over three sweeping stripes that
+    fan out to the right. Stripes are at least 0.1" wide so they can be cut.
+    Approximate - swap in the official artwork if you have it."""
+    word = text(WORDMARK, cap, 0.0, 0.0, tracking=0.06)
+    minx, _, maxx, _ = word.bounds
+    w = maxx - minx
     bands = []
     for k in range(3):
-        y0 = -h / 2 + 0.06 + k * 0.2
-        rise = 0.18 + 0.16 * k
-        pts = bezier((-w / 2, y0), (-w / 6, y0 - 0.02), (w / 6, y0 + rise * 0.55), (w / 2, y0 + rise), 40)
-        upper = [(x, y + 0.055 + 0.02 * i / 40) for i, (x, y) in enumerate(pts)]
-        lower = [(x, y - 0.055 - 0.02 * i / 40) for i, (x, y) in enumerate(pts)]
+        x0 = minx + 0.12 * w + 0.07 * w * k                      # left tips step in
+        y_top = -cap / 2 - 0.3 - 0.2 * k
+        pts = bezier((x0, y_top - 0.28), (x0 + 0.3 * w, y_top - 0.09),
+                     (maxx - 0.35 * w, y_top + 0.02), (maxx + 0.08 * w, y_top + 0.1), 50)
+        n = len(pts) - 1
+        half = [0.05 + 0.04 * (i / n) for i in range(n + 1)]    # widen to the right
+        upper = [(x, y + h) for (x, y), h in zip(pts, half)]
+        lower = [(x, y - h) for (x, y), h in zip(pts, half)]
         bands.append(Polygon(upper + lower[::-1]))
-    return affinity.translate(unary_union(bands), cx, cy)
+    mark = unary_union(bands)
+    bx0, by0, bx1, by1 = unary_union([word, mark]).bounds
+    dx, dy = cx - (bx0 + bx1) / 2, cy - (by0 + by1) / 2
+    return affinity.translate(mark, dx, dy), affinity.translate(word, dx, dy)
 
 
 # ------------------------------------------------------------------ carbody
@@ -169,30 +191,99 @@ def body():
     return rounded(mirror(half), 0.05)
 
 
+def wave():
+    """Everything above this line is Amtrak Blue. It runs straight across the
+    front just under the headlights and sweeps up at the cab corners."""
+    pts = []
+    for i in range(-90, 91):
+        x = i / 10
+        y = 11.05 + 0.25 * (x / 7) ** 2 + 2.2 * max(0.0, abs(x) - 6.7)
+        pts.append((x, y))
+    return Polygon(pts + [(9, TOP + 1), (-9, TOP + 1)])
+
+
 def roof_gear():
     """Horn cluster and radio antenna, seen over the roof line."""
-    horn = unary_union([box(2.3, ROOF - 0.05, 4.3, ROOF + 0.12),          # mounting bar
-                        box(3.2, ROOF + 0.05, 3.4, ROOF + 0.32),          # post
-                        rounded(box(2.35, ROOF + 0.28, 4.25, ROOF + 0.52), 0.08)] +  # manifold
+    horn = unary_union([box(2.3, ROOF - 0.05, 4.3, ROOF + 0.12),
+                        box(3.2, ROOF + 0.05, 3.4, ROOF + 0.32),
+                        rounded(box(2.35, ROOF + 0.28, 4.25, ROOF + 0.52), 0.08)] +
                        [Polygon([(x - 0.12, ROOF + 0.5), (x + 0.12, ROOF + 0.5),
                                  (x + 0.22, TOP), (x - 0.22, TOP)]) for x in (2.65, 3.3, 3.95)])
     antenna = unary_union([box(-3.9, ROOF - 0.05, -3.1, ROOF + 0.14),
                            Polygon([(-3.62, ROOF + 0.1), (-3.38, ROOF + 0.1), (-3.44, ROOF + 0.55),
                                     (-3.56, ROOF + 0.55)])])
-    return horn, antenna
+    return horn.difference(body()), antenna.difference(body())
 
 
+def windows():
+    """Windshield openings (each pane leans in with the cab side)."""
+    pane = Polygon([(0.38, 15.75), (5.95, 15.75), (5.35, 19.65), (0.38, 19.65)])
+    return both(rounded(pane, 0.35))
+
+
+def gaskets():
+    return windows().buffer(0.24, join_style=1).difference(windows())
+
+
+def wipers():
+    """Parked wipers, joined to the gasket at both ends so they're strong."""
+    arm = stroke([(4.9, 15.63), (0.26, 16.9)], 0.18, cap=2)
+    pivot = Point(4.75, 15.6).buffer(0.16)
+    return both(unary_union([arm, pivot]))
+
+
+def number_board():
+    """Number board above the windshield, between the panes."""
+    return rounded(box(-0.95, 20.15, 0.95, 21.05), 0.12)
+
+
+def nose_plate():
+    """Dark plate on the nose just under the windshield."""
+    return rounded(box(-1.0, 14.45, 1.0, 15.15), 0.1)
+
+
+def nose():
+    """Forward-sloping nose under the windshield, raised one layer over the
+    cab 'cheeks'. It stops at the anticlimber."""
+    half = [(0, 7.0), (7.5, 7.0), (6.45, 15.3), (0, 15.3)]
+    return rounded(mirror(half), 0.08)
+
+
+def pilot_face():
+    """Anthracite pilot face behind the coupler, jumpers and hoses."""
+    return box(-6.6, 3.5, 6.6, 7.0)
+
+
+def grab_irons_low():
+    return both(box(7.3, 3.95, 7.5, 6.9))
+
+
+def grab_irons_nose():
+    return both(stroke([(6.05, 12.75), (5.85, 14.1)], 0.18))
+
+
+# ------------------------------------------------------------------ plow (4 steps)
 def plow():
     half = [(0, 0.0), (4.3, 0.0), (6.45, 1.85), (6.45, 3.5), (0, 3.5)]
     return mirror(half)
 
 
 def plow_face():
-    """Raised plow plate with three horizontal ribs cut as grooves."""
-    face = plow().buffer(-0.18, join_style=2).intersection(box(-9, 0, 9, 3.1))
-    for y, half in ((0.9, 4.0), (1.65, 4.7), (2.4, 5.4)):   # grooves stop short of the ends
-        face = face.difference(box(-half, y, half, y + 0.12))
-    return face
+    """Step 2: the plow plate, inset all round."""
+    return plow().buffer(-0.2, join_style=2).intersection(box(-9, 0, 9, 3.2))
+
+
+def plow_deflector():
+    """Step 3: the angled deflector with three ribs cut as grooves."""
+    d = plow().buffer(-0.45, join_style=2).intersection(box(-9, 0, 9, 2.85))
+    for y, half in ((0.75, 3.6), (1.45, 4.3), (2.15, 4.9)):
+        d = d.difference(box(-half, y, half, y + 0.12))
+    return d
+
+
+def plow_nose():
+    """Step 4: the pointed centre reinforcement at the bottom of the plow."""
+    return rounded(Polygon([(-2.3, 0.3), (2.3, 0.3), (1.6, 1.3), (-1.6, 1.3)]), 0.08)
 
 
 def steps():
@@ -203,147 +294,68 @@ def steps():
     return both(ladder)
 
 
-def windows():
-    """Windshield openings (each pane leans in with the cab side)."""
-    pane = Polygon([(0.38, 15.75), (5.95, 15.75), (5.35, 19.65), (0.38, 19.65)])
-    return both(rounded(pane, 0.35))
+# ------------------------------------------------------------------ lights
+def light_housings():
+    return unary_union([circles(HEADLIGHTS, 0.47), circles(REDLIGHTS, 0.4),
+                        circles(DITCHLIGHTS, 0.5)])
 
 
-def window_mask():
-    """Black surround: one piece around both panes, the centre post included."""
-    return windows().convex_hull.buffer(0.42, join_style=1).difference(windows())
+def lens_rings():
+    return unary_union([rings(HEADLIGHTS, 0.36, LED_RING_ID / 2),
+                        rings(DITCHLIGHTS, 0.37, LED_RING_ID / 2)])
 
 
-def red_band():
-    """Red band hugging the black mask: under the windshield and up the sides."""
-    inner = windows().convex_hull.buffer(0.42, join_style=1)
-    outer = windows().convex_hull.buffer(0.95, join_style=1)
-    return outer.difference(inner).intersection(box(-9, 0, 9, 17.7))
+def red_rings():
+    """Red lights: a red ring round the LED (paint it red, or use a red LED with a chrome ring)."""
+    return rings(REDLIGHTS, 0.31, LED_RING_ID / 2)
 
 
-def wipers():
-    """Parked wipers, joined to the mask at both ends so they're strong."""
-    arm = stroke([(4.9, 15.63), (0.26, 16.9)], 0.18, cap=2)
-    pivot = Point(4.75, 15.6).buffer(0.16)
-    return both(unary_union([arm, pivot]))
+def lamp_boxes():
+    return unary_union([rounded(box(x - 0.55, y - 0.42, x + 0.55, y + 0.42), 0.08) for x, y in LAMP_BOXES])
 
 
-def nose_and_skirt():
-    """Forward-sloping nose under the windshield plus the skirt below it, one
-    piece. The triangles left over at each side are the cab 'cheeks', one layer lower."""
-    nose_top = red_band().bounds[1]
-    half = [(0, 3.4), (8.0, 3.4), (8.0, 7.8), (7.45, 7.8), (6.5, nose_top), (0, nose_top)]
-    return rounded(mirror(half), 0.08)
-
-
-def gaskets():
-    """Phase V: separate black rubber gaskets around each pane."""
-    return windows().buffer(0.24, join_style=1).difference(windows())
-
-
-def wave_p5():
-    """Phase V: everything above this curve is Amtrak Blue (the "wave" over the
-    roof and nose); below it is Platinum Mist. It dips toward the centre of the nose."""
-    pts = [(x / 10, 10.35 + 0.9 * (x / 80) ** 2) for x in range(-90, 91)]
-    return Polygon(pts + [(9, TOP + 1), (-9, TOP + 1)])
-
-
-def nose_p5():
-    """Phase V nose + lower front, from the red sill stripe up to just under the gaskets."""
-    half = [(0, 3.75), (8.0, 3.75), (8.0, 7.8), (7.45, 7.8), (6.45, 15.3), (0, 15.3)]
-    return rounded(mirror(half), 0.08)
-
-
-def sill_stripe_p5():
-    """Phase V: Amtrak Red sill stripe across the bottom of the carbody."""
-    return box(-HALF_W, 3.4, HALF_W, 3.75)
-
-
-def travelmark_p5(cx, cy, cap=0.56):
-    """Phase V style Travelmark: the AMTRAK wordmark over three sweeping stripes
-    that fan out to the right. Stripes are at least 0.1" wide so they can be cut.
-    Approximate - swap in the official artwork if you have it."""
-    word = text(WORDMARK, cap, 0.0, 0.0, tracking=0.06)
-    minx, _, maxx, _ = word.bounds
-    w = maxx - minx
-    bands = []
-    for k in range(3):
-        x0 = minx + 0.12 * w + 0.07 * w * k                      # left tips step in
-        y_top = -cap / 2 - 0.32 - 0.22 * k
-        pts = bezier((x0, y_top - 0.32), (x0 + 0.3 * w, y_top - 0.1),
-                     (maxx - 0.35 * w, y_top + 0.02), (maxx + 0.08 * w, y_top + 0.12), 50)
-        n = len(pts) - 1
-        half = [0.05 + 0.045 * (i / n) for i in range(n + 1)]   # widen to the right
-        upper = [(x, y + h) for (x, y), h in zip(pts, half)]
-        lower = [(x, y - h) for (x, y), h in zip(pts, half)]
-        bands.append(Polygon(upper + lower[::-1]))
-    mark = unary_union(bands)
-    both_ = unary_union([word, mark])
-    bx0, by0, bx1, by1 = both_.bounds
-    dx, dy = cx - (bx0 + bx1) / 2, cy - (by0 + by1) / 2
-    return affinity.translate(mark, dx, dy), affinity.translate(word, dx, dy)
-
-
-def grab_irons():
-    pcs = [box(7.3, 3.95, 7.5, 7.15),                         # beside the steps
-           stroke([(6.05, 12.6), (5.82, 14.1)], 0.18)]       # on the nose
-    return both(unary_union(pcs))
+def lamp_box_lenses():
+    return unary_union([rounded(box(x - 0.36, y - 0.26, x + 0.36, y + 0.26), 0.06) for x, y in LAMP_BOXES])
 
 
 # ------------------------------------------------------------------ front end
 def anticlimber():
-    return box(-6.1, 5.85, 6.1, 6.45)
+    a = box(-6.4, 6.35, 6.4, 6.95)
+    return a.difference(box(-0.5, 6.35, 0.5, 6.42))      # notch over the coupler shank
 
 
-def headlight_bezel():
-    """'Home plate' headlight housing, point down."""
-    cx, cy = 0.0, 11.65
-    pts = [(-1.15, 0.75), (1.15, 0.75), (1.15, -0.25), (0, -0.95), (-1.15, -0.25)]
-    return rounded(Polygon([(cx + x, cy + y) for x, y in pts]), 0.12)
+def coupler_shank():
+    return box(-0.42, 3.55, 0.42, 6.32)
 
 
-def ditch_housings():
-    return unary_union([rounded(box(x - 0.48, y - 0.42, x + 0.48, y + 0.42), 0.12)
-                        for x, y in DITCHLIGHTS])
+def coupler_head():
+    """E-type coupler head with the knuckle gap and lock-lift hole (layer 9)."""
+    head = rounded(Polygon([(-1.0, 2.3), (0.55, 2.3), (1.0, 2.6), (1.0, 3.6), (-1.0, 3.6)]), 0.12)
+    return head.difference(box(0.05, 2.3, 0.22, 3.0)).difference(Point(-0.55, 3.05).buffer(0.1))
 
 
-def lens_rings():
-    return unary_union([Point(x, y).buffer(0.32).difference(Point(x, y).buffer(LED_RING_ID / 2))
-                        for x, y in HEADLIGHTS + DITCHLIGHTS])
-
-
-def coupler():
-    """Draft gear/shank plus the E-type coupler head with its knuckle gap."""
-    shank = box(-0.42, 3.4, 0.42, 5.82)
-    head = rounded(Polygon([(-1.0, 2.3), (0.55, 2.3), (1.0, 2.6), (1.0, 3.55), (-1.0, 3.55)]), 0.12)
-    knuckle_gap = box(0.05, 2.3, 0.22, 3.0)
-    pin = Point(-0.55, 3.0).buffer(0.1)                      # lock-lift hole
-    return unary_union([shank, head]).difference(knuckle_gap).difference(pin)
-
-
-MU_X = (1.95, 2.5)            # MU receptacles each side of the coupler
-HEP_X = (3.45, 4.45)          # HEP receptacle and its dummy (stowage) socket
+MU_X = (1.95, 2.55)           # MU receptacles each side of the coupler
+HEP_X = (3.5, 4.5)            # HEP receptacle and its dummy (stowage) socket
 HOSE_X = (1.2, 1.5)           # air hoses: brake pipe and main reservoir
+REC_Y = 4.75                  # receptacle centre height
 
 
 def receptacles():
-    mu = [rounded(box(x - 0.24, 4.3, x + 0.24, 4.85), 0.06) for x in MU_X]
-    hep = [rounded(box(x - 0.3, 4.15, x + 0.3, 4.85), 0.08) for x in HEP_X]
+    """Receptacle boxes on the pilot face (layer 8)."""
+    mu = [rounded(box(x - 0.27, REC_Y - 0.33, x + 0.27, REC_Y + 0.33), 0.06) for x in MU_X]
+    hep = [rounded(box(x - 0.36, REC_Y - 0.4, x + 0.36, REC_Y + 0.4), 0.08) for x in HEP_X]
     return both(unary_union(mu + hep))
 
 
-def receptacle_lids():
-    """Hinged spring lids on top of each receptacle (layer 9)."""
-    mu = [rounded(box(x - 0.2, 4.68, x + 0.2, 4.95), 0.05) for x in MU_X]
-    hep = [rounded(box(x - 0.26, 4.68, x + 0.26, 4.98), 0.06) for x in HEP_X]
-    return both(unary_union(mu + hep))
+def socket_faces():
+    """Round socket face with a centre hole on the outer (empty) MU receptacles."""
+    return both(rings([(MU_X[1], REC_Y)], 0.2, 0.07))
 
 
 def air_hoses():
-    """Hoses hang from the anticlimber, curve out and end in glad hands."""
-    hoses = [stroke(bezier((x, 5.85), (x, 4.4), (x + 0.25, 3.2), (x + 0.2, 1.95), 30), 0.17)
-             for x in HOSE_X]
-    return both(unary_union(hoses))
+    """Hoses hang from the anticlimber, curve out and end at glad hands."""
+    return both(unary_union([stroke(bezier((x, 6.35), (x, 4.6), (x + 0.25, 3.3), (x + 0.2, 1.95), 30), 0.17)
+                             for x in HOSE_X]))
 
 
 def glad_hands():
@@ -355,36 +367,41 @@ def glad_hands():
     return both(unary_union(hands))
 
 
+def mu_jumper():
+    """MU jumper cable draped under the coupler shank, plug heads on the inner receptacles."""
+    x = MU_X[0]
+    cable = stroke(bezier((-x, REC_Y - 0.2), (-x + 0.3, 3.65), (x - 0.3, 3.65), (x, REC_Y - 0.2), 60), 0.22)
+    return cable.difference(plugs_mu())
+
+
+def plugs_mu():
+    x = MU_X[0]
+    return unary_union([rounded(box(s * x - 0.23, REC_Y - 0.28, s * x + 0.23, REC_Y + 0.22), 0.07)
+                        for s in (-1, 1)])
+
+
+def hep_jumpers():
+    """HEP jumpers stowed in a loop between receptacle and dummy socket."""
+    a, b = HEP_X
+    loop = stroke(bezier((a, REC_Y - 0.25), (a + 0.05, 3.75), (b - 0.05, 3.75), (b, REC_Y - 0.25), 40), 0.24)
+    return both(loop).difference(plugs_hep())
+
+
+def plugs_hep():
+    return both(unary_union([rounded(box(x - 0.28, REC_Y - 0.33, x + 0.28, REC_Y + 0.25), 0.08)
+                             for x in HEP_X]))
+
+
 def cut_lever():
-    """Uncoupling lever across the top of the plow: handle at the left end,
-    bracket half-way, crank at the coupler."""
-    bar = stroke([(-5.1, 3.18), (-1.05, 3.18)], 0.16)
-    handle = stroke([(-5.1, 3.18), (-5.25, 2.75), (-4.85, 2.65)], 0.15)
-    crank = stroke([(-1.05, 3.18), (-1.05, 3.48)], 0.15)
-    return unary_union([bar, handle, crank])
+    """Uncoupling lever across the top of the plow, handle at the left."""
+    bar = stroke([(-5.1, 3.3), (-1.08, 3.3)], 0.16)
+    handle = stroke([(-5.1, 3.3), (-5.25, 2.85), (-4.85, 2.75)], 0.15)
+    return unary_union([bar, handle])
 
 
 def cut_lever_brackets():
-    """Brackets the lever rests on (layer 8)."""
-    return unary_union([rounded(box(-4.7, 2.95, -4.3, 3.4), 0.05),
-                        rounded(box(-2.9, 2.95, -2.5, 3.4), 0.05)])
-
-
-def mu_cable():
-    """MU jumper cable draped across the coupler between the inner receptacles,
-    with a plug head at each end."""
-    x = MU_X[0]
-    cable = stroke(bezier((-x, 4.4), (-x + 0.2, 3.2), (x - 0.2, 3.2), (x, 4.4), 60), 0.2)
-    plugs = unary_union([rounded(box(s * x - 0.2, 4.3, s * x + 0.2, 4.68), 0.06) for s in (-1, 1)])
-    return unary_union([cable, plugs])
-
-
-def hep_cables():
-    """HEP jumper stowed in a loop between its receptacle and dummy socket."""
-    a, b = HEP_X
-    loop = stroke(bezier((a, 4.25), (a + 0.05, 3.55), (b - 0.05, 3.55), (b, 4.25), 40), 0.22)
-    plugs = unary_union([rounded(box(x - 0.24, 4.15, x + 0.24, 4.6), 0.06) for x in HEP_X])
-    return both(unary_union([loop, plugs]))
+    return unary_union([rounded(box(-4.7, 3.05, -4.3, 3.5), 0.05),
+                        rounded(box(-3.0, 3.05, -2.6, 3.5), 0.05)])
 
 
 def silhouette():
@@ -393,8 +410,12 @@ def silhouette():
 
 
 # ------------------------------------------------------------------ electronics
+def all_leds():
+    return HEADLIGHTS + REDLIGHTS + DITCHLIGHTS
+
+
 def led_holes():
-    return unary_union([Point(p).buffer(LED_HOLE / 2) for p in HEADLIGHTS + DITCHLIGHTS])
+    return circles(all_leds(), LED_HOLE / 2)
 
 
 def pocket():
@@ -404,14 +425,16 @@ def pocket():
 
 
 def channels():
+    """Pocket -> straight up to the light bar (headlights + red lights), and
+    pocket -> sideways to each ditch light."""
     cx, cy = POCKET_C
-    runs = [LineString([(cx, cy), (0, HEADLIGHTS[0][1])]), LineString(HEADLIGHTS)]
+    y_bar = HEADLIGHTS[0][1]
+    runs = [LineString([(cx, cy), (cx, y_bar)]),
+            LineString([REDLIGHTS[0], REDLIGHTS[1]])]
     for x, y in DITCHLIGHTS:
-        s = 1 if x > 0 else -1
-        runs.append(LineString([(cx, cy), (s * 1.6, 6.9), (x, y)]))
+        runs.append(LineString([(cx, y), (x, y)]))
     lines = unary_union([r.buffer(CHANNEL_W / 2, cap_style=1, join_style=1) for r in runs])
-    led_seats = unary_union([Point(p).buffer(0.2) for p in HEADLIGHTS + DITCHLIGHTS])
-    return unary_union([lines, led_seats])
+    return unary_union([lines, circles(all_leds(), 0.2)])
 
 
 def keyholes():
@@ -422,7 +445,6 @@ def keyholes():
 
 
 def keyhole_reliefs():
-    """Room behind the keyhole for the screw head (layers 2 and 3)."""
     return unary_union([rounded(box(x - 0.26, y - 0.26, x + 0.26, y + 0.78), 0.2) for x, y in KEYHOLES])
 
 
@@ -438,85 +460,63 @@ def back_cover():
 
 
 # ------------------------------------------------------------------ layers
-def logo(cap=0.62, cy=13.45):
-    """Travel Mark + wordmark, centred on the nose between headlight and windshield."""
-    k = cap / 0.62
-    word = text(WORDMARK, cap, 0.0, 0.0, tracking=0.07 * k)
-    ww = word.bounds[2] - word.bounds[0]
-    mark = travel_mark(0, 0, w=1.55 * max(k, 0.9), h=0.82)
-    mw = mark.bounds[2] - mark.bounds[0]
-    gap = 0.22 * k
-    total = mw + gap + ww
-    mark = affinity.translate(mark, -total / 2 + mw / 2, cy + 0.04)
-    word = affinity.translate(word, -total / 2 + mw + gap + ww / 2, cy)
-    return mark, word
-
-
-def build(livery):
-    number_text = LIVERIES[livery]["number"]
-    sil = silhouette()
-    core = sil.difference(pocket())
+def build():
+    core = silhouette().difference(pocket())
     leds = led_holes()
     horn, antenna = roof_gear()
-    plow_back = plow().difference(body())
-    if livery == "phase5":
-        mark, word = travelmark_p5(0.0, 8.85)
-        logo_paint = "blue"
-        wave = wave_p5()
-        cab = body().difference(windows()).difference(leds)
-        nose = nose_p5().difference(leds)
-        number = text(number_text, 0.75, 0.0, 21.05, tracking=0.08) if number_text else None
-        layer6 = [("silver", cab.difference(wave)), ("blue", cab.intersection(wave))]
-        layer7 = [("silver", nose.difference(wave)), ("blue", nose.intersection(wave)),
-                  ("red", sill_stripe_p5()),
-                  ("black", gaskets().union(wipers())),
-                  ("under", plow_face())]
-        layer7 += [("white", number)] if number else []
-        note7 = "nose (blue wave + silver), red sill stripe, gaskets with wipers, plow face, road number"
-        numbers = []
-    else:
-        mark, word = logo()
-        logo_paint = "white"
-        layer6 = [("blue", body().difference(windows()).difference(leds))]
-        layer7 = [("blue", nose_and_skirt().difference(leds)),
-                  ("red", red_band()),
-                  ("black", window_mask().union(wipers())),
-                  ("under", plow_face())]
-        note7 = "nose + skirt, red band, black window mask with wipers, plow face"
-        number = text(number_text, 0.7, 0.0, 9.55, tracking=0.08) if number_text else None
-        numbers = [(logo_paint, number)] if number else []
+    blue = wave()
+    cab = body().difference(windows()).difference(leds)
+    nose_ = nose().difference(leds)
+    mark, word = travelmark(0.0, 13.55, cap=0.56)
+    digits = text(ROAD_NUMBER, 0.55, 0.0, 20.6, tracking=0.06) if ROAD_NUMBER else None
 
     layers = [
         # (stem, [(paint, geometry)], note)
-        ("layer1_backer", [("core", core.difference(keyholes()))],
+        ("layer01_backer", [("core", core.difference(keyholes()))],
          "backer: battery pocket + 2 keyhole hangers"),
-        ("layer2_core", [("core", core.difference(keyhole_reliefs()))], "core: room for the screw heads"),
-        ("layer3_core", [("core", core.difference(keyhole_reliefs()))], "core: room for the screw heads"),
-        ("layer4_core_wiring", [("core", core.difference(channels()))], "core: wire channels"),
-        ("layer5_glass_wiring", [("glass", core.difference(channels()))],
+        ("layer02_core", [("core", core.difference(keyhole_reliefs()))], "core: room for the screw heads"),
+        ("layer03_core", [("core", core.difference(keyhole_reliefs()))], "core: room for the screw heads"),
+        ("layer04_core_wiring", [("core", core.difference(channels()))], "core: wire channels"),
+        ("layer05_glass_wiring", [("glass", core.difference(channels()))],
          "core: wire channels; top shows through the windshield"),
-        ("layer6_body", layer6 + [("under", plow_back.difference(leds)),
-                         ("under", steps()),
-                         ("gray", horn.difference(body())), ("gray", antenna.difference(body()))],
-         "carbody (windshield cut out), plow backing, steps, horns, antenna"),
-        ("layer7_nose", layer7, note7),
-        ("layer8_details", [("black", headlight_bezel().difference(leds)),
-                            ("black", ditch_housings().difference(leds)),
-                            (logo_paint, mark), (logo_paint, word)] + numbers + [
-                            ("black", anticlimber().difference(coupler().buffer(0.03))),
-                            ("gray", coupler()),
-                            ("black", receptacles()),
-                            ("black", air_hoses().difference(anticlimber())),
-                            ("black", cut_lever_brackets()),
-                            ("black", grab_irons())],
-         "headlight + ditch housings, logo, number, anticlimber, coupler, receptacles, hoses, grab irons"),
-        ("layer9_front_gear", [("chrome", lens_rings()),
-                               ("black", mu_cable()),
-                               ("black", hep_cables()),
-                               ("gray", receptacle_lids().difference(mu_cable()).difference(hep_cables())),
-                               ("gray", glad_hands()),
-                               ("black", cut_lever().difference(mu_cable().buffer(0.04)))],
-         "lens rings, MU jumper, HEP jumpers, receptacle lids, glad hands, cut lever"),
+        ("layer06_body", [("silver", cab.difference(blue)), ("blue", cab.intersection(blue)),
+                          ("plow", plow().difference(body())),
+                          ("under", steps()), ("gray", horn), ("gray", antenna)],
+         "carbody (blue wave + silver, windshield cut out), plow base, steps, horns, antenna"),
+        ("layer07_nose", [("silver", nose_.difference(blue)), ("blue", nose_.intersection(blue)),
+                          ("under", pilot_face()),
+                          ("black", gaskets().union(wipers())),
+                          ("black", number_board()),
+                          ("under", grab_irons_low()),
+                          ("plow", plow_face())],
+         "raised nose (blue + silver), pilot face, gaskets with wipers, number board, plow plate"),
+        ("layer08_lights_logo", [("black", light_housings().difference(leds)),
+                                 ("black", nose_plate()),
+                                 ("white", mark), ("white", word)] +
+                                ([("white", digits)] if digits else []) +
+                                [("black", lamp_boxes()),
+                                 ("black", anticlimber()),
+                                 ("gray", coupler_shank()),
+                                 ("black", receptacles()),
+                                 ("black", air_hoses().difference(anticlimber())),
+                                 ("black", cut_lever_brackets()),
+                                 ("black", grab_irons_nose()),
+                                 ("plow", plow_deflector().difference(air_hoses().buffer(0.06)))],
+         "light housings, nose plate, Travelmark, number, lamp boxes, anticlimber, coupler shank, "
+         "receptacles, air hoses, lever brackets, grab irons, plow deflector"),
+        ("layer09_front_gear", [("chrome", lens_rings()),
+                                ("red", red_rings()),
+                                ("lens", lamp_box_lenses()),
+                                ("gray", coupler_head()),
+                                ("gray", socket_faces()),
+                                ("black", mu_jumper()),
+                                ("plug", plugs_mu()),
+                                ("black", hep_jumpers().union(plugs_hep())),  # one piece: glues to the receptacles
+                                ("gray", glad_hands()),
+                                ("black", cut_lever().difference(mu_jumper().buffer(0.04))),
+                                ("plow", plow_nose())],
+         "lens rings, red light rings, lamp box lenses, coupler head, socket faces, MU + HEP jumpers "
+         "with plug heads, glad hands, uncoupling lever, plow nose"),
     ]
     return layers
 
@@ -549,46 +549,48 @@ def count(geom):
     return len(geom.geoms) if hasattr(geom, "geoms") else 1
 
 
-def check(stem, pieces):
-    """Warn about overlapping pieces in a layer, and slivers that won't survive the laser."""
+def check(stem, pieces, below):
+    """Warn about overlapping pieces, pieces with nothing under them, and slivers."""
     for i in range(len(pieces)):
         for j in range(i + 1, len(pieces)):
             a = pieces[i][1].intersection(pieces[j][1]).area
             if a > 1e-4:
                 print(f"  WARNING: {stem}: pieces {i} and {j} overlap ({a:.4f} sq in)")
-    for c, g in pieces:
+    for k, (c, g) in enumerate(pieces):
+        if below is not None:
+            parts = g.geoms if hasattr(g, "geoms") else [g]
+            for p in parts:
+                if p.intersection(below).area < 0.25 * p.area:
+                    print(f"  WARNING: {stem}: piece {k} ({c}) has under 25% glue area below it")
+                    break
         thin = g.difference(g.buffer(-0.045).buffer(0.045))
         if thin.area > 0.01:
             print(f"  note: {stem} ({c}) has {thin.area:.3f} sq in narrower than 0.09\"")
 
 
-def write(livery):
-    global COLORS
-    COLORS = LIVERIES[livery]["colors"]
-    OUT = os.path.join(HERE, livery, "svg")
-    print(f"== {livery} -> {os.path.relpath(OUT, HERE)}")
+def main():
     os.makedirs(OUT, exist_ok=True)
     for f in os.listdir(OUT):                       # clear out files from older versions
         if f.endswith(".svg") or f.endswith(".json"):
             os.remove(os.path.join(OUT, f))
-    layers = build(livery)
-    data, rows, z = [], [], 0.0
+    layers = build()
+    data, rows, z, below = [], [], 0.0, None
     for i, (stem, pieces, note) in enumerate(layers, 1):
-        check(stem, pieces)
-        # each piece is cut on its own, so edges between paints are cut too
+        check(stem, pieces, below)
+        below = unary_union([g for _, g in pieces])
         cut = "\n".join(f'<path d="{path_d(g)}" fill="none" stroke="#FF0000" stroke-width="0.01"/>'
                         for _, g in pieces)
         with open(os.path.join(OUT, stem + ".svg"), "w") as f:
             f.write(svg_doc(cut, f"Layer {i} - {note}"))
         paints = sorted({c for c, _ in pieces}, key=list(COLORS).index)
-        rows.append(f"| {i} | `svg/{stem}.svg` | {', '.join(paints)} | {sum(count(g) for _, g in pieces)} | {note} |")
+        rows.append(f"| {i} | `svg/{stem}.svg` | {', '.join(paints)} | "
+                    f"{sum(count(g) for _, g in pieces)} | {note} |")
         data.append({"stem": stem, "z": z, "t": T,
                      "pieces": [{"color": COLORS[c], "d": path_d(g)} for c, g in pieces]})
         z += T
 
-    cover = back_cover()
     with open(os.path.join(OUT, "back_cover.svg"), "w") as f:
-        f.write(svg_doc(f'<path d="{path_d(cover)}" fill="none" stroke="#FF0000" stroke-width="0.01"/>',
+        f.write(svg_doc(f'<path d="{path_d(back_cover())}" fill="none" stroke="#FF0000" stroke-width="0.01"/>',
                         "Battery pocket cover - screws to the back"))
 
     body_ = "\n".join(f'<path d="{p["d"]}" fill="{p["color"]}" fill-rule="evenodd"/>'
@@ -596,25 +598,20 @@ def write(livery):
     with open(os.path.join(OUT, "preview_flat.svg"), "w") as f:
         f.write(svg_doc(body_, "Flat colour preview"))
 
-    tcols = ["#000", "#888", "#888", "#0a0", "#0a0", "#00c", "#c90", "#c00", "#808"]
+    tcols = ["#000", "#888", "#888", "#0a0", "#0a0", "#00c", "#c90", "#c00", "#808", "#088"]
     body_ = "\n".join(f'<path d="{" ".join(p["d"] for p in L["pieces"])}" fill="none" '
                       f'stroke="{tcols[k]}" stroke-width="0.015"/>' for k, L in enumerate(data))
     with open(os.path.join(OUT, "placement_template.svg"), "w") as f:
         f.write(svg_doc(body_, "Glue-up placement template (print 1:1)"))
 
-    meta = {"w": W_SVG, "h": H_SVG, "top": TOP, "margin": MARGIN,
-            "lights": [[x + HALF_W + MARGIN, TOP + MARGIN - y] for x, y in HEADLIGHTS + DITCHLIGHTS],
+    to_svg = lambda pts: [[x + HALF_W + MARGIN, TOP + MARGIN - y] for x, y in pts]
+    meta = {"w": W_SVG, "h": H_SVG,
+            "lights": to_svg(HEADLIGHTS + DITCHLIGHTS), "red_lights": to_svg(REDLIGHTS),
             "layers": data}
     with open(os.path.join(OUT, "layers.json"), "w") as f:
         json.dump(meta, f)
     print("\n".join(rows))
     print(f"total stack height: {z:.3f}\"  |  sheet size {W_SVG:.2f}\" x {H_SVG:.2f}\"")
-
-
-def main():
-    import sys
-    for livery in sys.argv[1:] or LIVERIES:
-        write(livery)
 
 
 if __name__ == "__main__":
