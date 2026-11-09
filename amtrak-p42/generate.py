@@ -336,6 +336,7 @@ B = Y0                                            # bottom of the plow (= bottom
 PILOT_OPENING = box(-3.0, SILL, 3.0, 6.95)        # cut-out in the bottom of the silver body over the coupler
 NOTCH = box(-1.7, B + 1.7, 1.7, SILL)             # opening in the plow top the coupler sits in
 UNDERFRAME = box(-6.4, B + 3.0, 6.4, SILL)        # dark underframe seen above the plow
+SKIRT = mirror([(0, B + 1.2), (7.6, B + 1.2), (8.0, B + 1.6), (8.0, SILL), (0, SILL)])  # behind the plow, out to the edges
 
 
 def coupler_head():
@@ -447,7 +448,7 @@ def cut_lever():
 
 def silhouette():
     horn, antenna = roof_gear()
-    return unary_union([body(), plow(), NOTCH, UNDERFRAME, horn, antenna])
+    return unary_union([body(), plow(), NOTCH, UNDERFRAME, SKIRT, horn, antenna])
 
 
 # ------------------------------------------------------------------ electronics
@@ -527,8 +528,10 @@ def build():
                           ("blue", cab.intersection(blue).difference(headlight_recess())),
                           ("black", cab.intersection(headlight_recess())),      # headlight recess floor
                           ("plow", plow().difference(body())),
+                          ("under", SKIRT.difference(body()).difference(plow()).difference(NOTCH).difference(UNDERFRAME)),
                           ("gray", horn), ("gray", antenna)],
-         "carbody (blue wave + silver, windshield cut out, pilot opening), recess floors, underframe, plow base, horns, antenna"),
+         "carbody (blue wave + silver, windshield cut out, pilot opening), recess floors, underframe, plow base, "
+         "skirt behind the plow, horns, antenna"),
         ("layer07_nose", [("silver", nose_.difference(blue).difference(conn_recesses())),
                           ("conn_blue", conn_plates()[0]), ("black", conn_plates()[1]),
                           ("blue", nose_.intersection(blue).difference(headlight_recess())),

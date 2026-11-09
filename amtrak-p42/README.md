@@ -43,6 +43,8 @@ The layout follows a head-on photo of a Phase V P42, top to bottom:
   * **Air hoses** (two each side) hang from the top of the opening **behind the plow**: they
     show only in the opening and the notch, pass behind the coupler head, and end in
     **glad hands**.
+* **Skirt** (anthracite, layer 6) behind the plow, running out to both edges of the
+  body with chamfered bottom corners.
 * **Plow**, near-black, in front of everything, 4.65" tall:
   1. base (layer 6)
   2. the plow plate (layer 7): wide bottom, angled lower corners, **tall outer tips that
@@ -67,7 +69,7 @@ scale), 1-1/8" thick. It fits a 24" × 18" laser bed if you rotate it.
 | 3 | `layer03_core.svg` | same as layer 2 |
 | 4 | `layer04_core_wiring.svg` | core: wire channels |
 | 5 | `layer05_glass_wiring.svg` | wire channels; its top shows through the windshield |
-| 6 | `layer06_body.svg` | carbody (blue + silver, windshield and pilot opening cut out), headlight + connector recess floors, pilot opening + underframe floor, plow base, horns, antenna |
+| 6 | `layer06_body.svg` | carbody (blue + silver, windshield and pilot opening cut out), headlight + connector recess floors, pilot opening + underframe floor, plow base, skirt, horns, antenna |
 | 7 | `layer07_nose.svg` | raised nose (blue + silver) with headlight and connector recesses, headlight rings, connector plates, gaskets with wipers, coupler shank + head, MU receptacles, air hoses, corner cables + yellow plugs, sill stripe, plow plate |
 | 8 | `layer08_lights_logo.svg` | red light + ditch light housings, number board, Travelmark, connector caps, MU jumper, socket faces, glad hands, uncoupling lever, nose grab irons, plow doors + centre plate |
 | 9 | `layer09_front_gear.svg` | ditch light rings, red light rings, number digits, white plow handles, door latches + hinges |
@@ -89,6 +91,7 @@ Other files:
 | Amtrak Blue | `#1f4e79` | top of the carbody and nose (above the wave line) |
 | Platinum Mist | `#cdd1d4` | lower carbody and nose |
 | Near-black | `#26292d` | the four plow layers (darker than the real one so the plow stands out) |
+| Anthracite Gray | `#4a4f52` | skirt behind the plow |
 | Amtrak Red | `#d9442f` | red light rings, sill stripe at the corners |
 | Black | | gaskets, wipers, number board, headlight and connector recess floors, pilot opening + underframe, light housings, inner connector covers, corner cables, receptacles, hoses, jumper, nose grab irons |
 | White | | Travelmark, number digits, plow grab handles |
