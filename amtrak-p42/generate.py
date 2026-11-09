@@ -18,6 +18,7 @@ and connector boxes (blue + black covers) on the silver, a cut-out in the bottom
 the body over the coupler, and a tall plow with doors whose tips reach the body.
 """
 import json
+import math
 import os
 import sys
 
@@ -236,12 +237,49 @@ def gaskets():
     return windows().buffer(0.24, join_style=1).difference(windows())
 
 
+# ---- parked pantograph wipers (right side; mirrored for the left)
+_WB = WIN_BOTTOM
+WIPER_HUB = (4.72, _WB - 0.14)                  # pivot at the bottom outer corner
+BLADE = ((0.26, _WB + 1.0), (4.4, _WB + 0.02))  # inner tip on the centre post -> outer end on the gasket
+
+
+def _along(t):
+    (x0, y0), (x1, y1) = BLADE
+    return (x0 + (x1 - x0) * t, y0 + (y1 - y0) * t)
+
+
 def wipers():
-    """Parked wipers, joined to the gasket at both ends so they're strong."""
-    b = WIN_BOTTOM
-    arm = stroke([(4.8, b - 0.12), (0.26, b + 1.0)], 0.18, cap=2)
-    pivot = Point(4.65, b - 0.15).buffer(0.16)
-    return both(unary_union([arm, pivot]))
+    """Wiper blades (layer 7, part of the gasket piece): joined to the gasket at
+    both ends so they're strong. A thin rib down the middle reads as the rubber edge."""
+    blade = stroke(list(BLADE), 0.16, cap=2)
+    return both(blade)
+
+
+def wiper_arms():
+    """Wiper arm, pantograph link, pivot hub and blade clip (layer 8)."""
+    hx, hy = WIPER_HUB
+    cx, cy = _along(0.42)                        # where the arm grabs the blade
+    # arm: tapers from 0.2" at the hub to 0.12" at the clip, riding just above the blade
+    dx, dy = cx - hx, cy + 0.1 - hy
+    n = (dx * dx + dy * dy) ** 0.5
+    ux, uy = -dy / n, dx / n                      # unit normal
+    arm = Polygon([(hx + ux * 0.1, hy + uy * 0.1), (cx + ux * 0.06, cy + 0.1 + uy * 0.06),
+                   (cx - ux * 0.06, cy + 0.1 - uy * 0.06), (hx - ux * 0.1, hy - uy * 0.1)])
+    # pantograph link: a thinner rod parallel to the arm, from its own pivot to the clip
+    link = stroke([(hx - 0.35, hy + 0.28), (cx + 0.12, cy + 0.2)], 0.11)
+    hub = Point(hx, hy).buffer(0.2)
+    link_pivot = Point(hx - 0.35, hy + 0.28).buffer(0.1)
+    # blade clip where the arm meets the blade, plus an end cap at the blade's inner tip
+    ang = math.degrees(math.atan2(BLADE[1][1] - BLADE[0][1], BLADE[1][0] - BLADE[0][0]))
+    clip = affinity.rotate(rounded(box(cx - 0.26, cy - 0.14, cx + 0.26, cy + 0.2), 0.05), ang, origin=(cx, cy))
+    tx, ty = _along(0.06)
+    cap = affinity.rotate(rounded(box(tx - 0.13, ty - 0.11, tx + 0.13, ty + 0.11), 0.04), ang, origin=(tx, ty))
+    return both(unary_union([arm, link, hub, link_pivot, clip, cap]))
+
+
+def wiper_nuts():
+    """Nut on each wiper pivot hub (layer 9)."""
+    return both(Point(WIPER_HUB).buffer(0.09))
 
 
 NUMBER_Y = 16.05
@@ -578,6 +616,7 @@ def build():
                                            .difference(lift_rod().buffer(0.04))
                                            .difference(coupler_knuckle_pin().buffer(0.04))),
                                  ("black", grab_irons_nose()),
+                                 ("black", wiper_arms()),
                                  ("gray", lift_rod()),
                                  ("coupler", coupler_knuckle_pin()),
                                  ("plow", plow_doors()), ("plow", plow_bar())],
@@ -587,6 +626,7 @@ def build():
                                 ("red", red_rings())] +
                                ([("white", digits)] if digits else []) +
                                [("gray", door_hardware()),
+                                ("gray", wiper_nuts()),
                                 ("black", mu_jumper())],                   # rests on its plugs and the lever
          "ditch light rings, red light rings, number digits, white plow handles, door latches + hinges"),
     ]
