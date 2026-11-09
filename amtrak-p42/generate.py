@@ -389,15 +389,6 @@ def air_hoses():
                              for x in HOSE_X]))
 
 
-def glad_hands():
-    hands = []
-    for x in HOSE_X:
-        cx, cy = x - 0.2, B + 2.05
-        hands.append(unary_union([rounded(box(cx - 0.12, cy - 0.26, cx + 0.12, cy + 0.12), 0.05),
-                                  box(cx - 0.3, cy - 0.26, cx + 0.12, cy - 0.12)]))
-    return both(unary_union(hands))
-
-
 def mu_jumper():
     """MU jumper cable draped across the coupler between the inner receptacles."""
     x = MU_X[0]
@@ -591,7 +582,7 @@ def build():
                                  ("coupler", coupler_knuckle_pin()),
                                  ("plow", plow_doors()), ("plow", plow_bar())],
          "red + ditch light housings, number board, Travelmark, connector caps, MU jumper, socket faces, "
-         "glad hands, uncoupling lever, plow doors + centre plate"),
+         "knuckle pin, lift rod, plow doors + centre plate"),
         ("layer09_front_gear", [("chrome", rings(DITCHLIGHTS, 0.5, LED_RING_ID / 2)),
                                 ("red", red_rings())] +
                                ([("white", digits)] if digits else []) +
