@@ -27,7 +27,8 @@ The layout follows a head-on photo of a Phase V P42, top to bottom:
 * **Light bar**: twin round **headlights** set into a recess in the nose (the recess is cut
   out of layer 7, so the lamps sit one layer in, with a black floor). A **red light**
   either side.
-* **Blue/silver line** just under the light bar, sweeping up at the cab corners.
+* **Blue/silver line**: a shallow V across the nose, lowest just under the headlights,
+  sweeping up at the cab corners.
 * **Ditch lights** on the silver, with the **dark lamp boxes** below them.
 * **Anticlimber** across the full width.
 * **Pilot** (anthracite):
@@ -48,7 +49,9 @@ The layout follows a head-on photo of a Phase V P42, top to bottom:
      middle is cut away for the coupler pocket (layer 7)
   3. a lower centre plate and a raised plate on each wing (layer 8)
   4. bolted brackets on the wings and a rib on the centre plate (layer 9)
-* **Corner steps** at both ends of the plow.
+* **Corner steps** tucked into the pilot corners, either side of the plow: a black well
+  (layer 6) with two stringers and three treads in grey (layer 7). The **red sill stripe**
+  runs across the top of each well.
 
 ## Cut files (`svg/`)
 All files are 16.5" × 23.5" (the sign plus a 1/4" margin) and share the same origin, so
@@ -84,11 +87,11 @@ Other files:
 | Amtrak Blue | `#1f4e79` | top of the carbody and nose (above the wave line) |
 | Platinum Mist | `#cdd1d4` | lower carbody and nose |
 | Near-black | `#26292d` | the four plow steps (darker than prototype so the plow stands out) |
-| Anthracite Gray | `#4a4f52` | pilot face, steps, low grab irons |
-| Amtrak Red | `#d9442f` | red light rings |
-| Black | | gaskets, wipers, number board, nose plate, headlight recess floor, coupler pocket floor, light housings, lamp boxes, anticlimber, receptacles, hoses, jumpers, nose grab irons |
+| Anthracite Gray | `#4a4f52` | pilot face, low grab irons |
+| Amtrak Red | `#d9442f` | red light rings, sill stripe at the corners |
+| Black | | step wells, gaskets, wipers, number board, nose plate, headlight recess floor, coupler pocket floor, light housings, lamp boxes, anticlimber, receptacles, hoses, jumpers, nose grab irons |
 | White | | Travelmark, number digits |
-| Grey | | coupler, uncoupling lever, horns, antenna, socket faces |
+| Grey | | coupler, uncoupling lever, step treads, horns, antenna, socket faces |
 | Light grey | | MU plug heads, glad hands |
 | Chrome/silver | | headlight and ditch light rings |
 | Steel blue | `#5d7690` | lamp box lenses |

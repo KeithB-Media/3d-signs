@@ -194,12 +194,12 @@ def body():
 
 
 def wave():
-    """Everything above this line is Amtrak Blue. It runs straight across the
-    front just under the headlights and sweeps up at the cab corners."""
+    """Everything above this line is Amtrak Blue. It forms a shallow V across the
+    front, lowest just under the headlights, and sweeps up at the cab corners."""
     pts = []
     for i in range(-90, 91):
         x = i / 10
-        y = 11.95 + 0.25 * (x / 7) ** 2 + 2.2 * max(0.0, abs(x) - 6.7)
+        y = 11.8 + 0.75 * abs(x) / 7 + 2.2 * max(0.0, abs(x) - 6.7)
         pts.append((x, y))
     return Polygon(pts + [(9, TOP + 1), (-9, TOP + 1)])
 
@@ -299,12 +299,26 @@ def plow_brackets():
     return unary_union([both(unary_union(brk)), rib])
 
 
-def steps():
-    """Corner step ladders (treads cut out)."""
-    ladder = box(6.72, 0.85, 7.88, 3.4)
-    for y0 in (1.15, 2.15):
-        ladder = ladder.difference(box(6.88, y0, 7.72, y0 + 0.62))
-    return both(ladder)
+STEP_WELL = box(6.62, 0.9, 7.9, 3.4)          # corner step well, under the sill
+
+
+def step_wells():
+    """Back of each corner step well (layer 6): painted black, it reads as the
+    dark recess the steps are tucked into."""
+    return both(STEP_WELL)
+
+
+def step_treads():
+    """Steps inside the well (layer 7): two side stringers and three treads, one piece a side."""
+    x0, y0, x1, y1 = STEP_WELL.bounds
+    parts = [box(x0, y0, x0 + 0.16, y1), box(x1 - 0.16, y0, x1, y1)]
+    parts += [box(x0, y, x1, y + 0.2) for y in (y0, 1.85, 2.75)]
+    return both(unary_union(parts))
+
+
+def sill_stripe():
+    """Amtrak Red sill stripe, seen at the front corners either side of the pilot."""
+    return both(box(6.62, 3.45, 8.0, 3.72))
 
 
 # ------------------------------------------------------------------ lights
@@ -325,11 +339,11 @@ def red_rings():
 
 
 def lamp_boxes():
-    return unary_union([rounded(box(x - 0.55, y - 0.42, x + 0.55, y + 0.42), 0.08) for x, y in LAMP_BOXES])
+    return unary_union([rounded(box(x - 0.6, y - 0.5, x + 0.6, y + 0.5), 0.08) for x, y in LAMP_BOXES])
 
 
 def lamp_box_lenses():
-    return unary_union([rounded(box(x - 0.36, y - 0.26, x + 0.36, y + 0.26), 0.06) for x, y in LAMP_BOXES])
+    return unary_union([rounded(box(x - 0.42, y - 0.32, x + 0.42, y + 0.32), 0.06) for x, y in LAMP_BOXES])
 
 
 # ------------------------------------------------------------------ front end
@@ -422,7 +436,7 @@ def cut_lever_brackets():
 
 def silhouette():
     horn, antenna = roof_gear()
-    return unary_union([body(), plow(), both(box(6.72, 0.85, 7.88, 3.6)), horn, antenna])
+    return unary_union([body(), plow(), both(STEP_WELL), horn, antenna])
 
 
 # ------------------------------------------------------------------ electronics
@@ -500,7 +514,7 @@ def build():
                           ("black", cab.intersection(headlight_recess())),     # recess floor
                           ("plow", plow().difference(body()).difference(COUPLER_POCKET)),
                           ("black", COUPLER_POCKET.intersection(silhouette())),     # pocket floor
-                          ("under", steps()), ("gray", horn), ("gray", antenna)],
+                          ("black", step_wells()), ("gray", horn), ("gray", antenna)],
          "carbody (blue wave + silver, windshield cut out), plow base, steps, horns, antenna"),
         ("layer07_nose", [("silver", nose_.difference(blue)),
                           ("blue", nose_.intersection(blue).difference(headlight_recess())),
@@ -510,6 +524,8 @@ def build():
                           ("black", gaskets().union(wipers())),
                           ("black", number_board()),
                           ("under", grab_irons_low()),
+                          ("gray", step_treads()),
+                          ("red", sill_stripe()),
                           ("plow", plow_wings())],
          "raised nose (blue + silver) with headlight recess, headlight rings, coupler head, "
          "pilot face, gaskets with wipers, number board, plow wings"),
