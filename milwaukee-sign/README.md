@@ -22,9 +22,24 @@ The logo is traced directly from `source/logo.png`, so the letters and bolt matc
 
 Both versions use the same 22"-wide red logo.
 
+### Bambu R1 versions (600 × 300 mm bed, no material feeder)
+
+These are sized so every layer fits the R1's 600 × 300 mm bed with clearance. Each SVG is a
+600 × 300 mm sheet with the part centred, so it drops straight onto the bed. You'll need
+600 × 300 mm stock (or a little smaller than the bed) for the backer and white layers.
+
+| Version | Folder | Backer size | Logo width |
+|---|---|---|---|
+| **Contour** | `svg_r1/` | 590 × 284 mm | 557 mm |
+| Panel | `svg_r1_panel/` | 569 × 290 mm | 508 mm |
+
+Previews: [`renders_r1/`](renders_r1/render_front.png), [`renders_r1_panel/`](renders_r1_panel/render_front.png).
+To fit a different bed, change `R1_MAX_MM` in `generate.py` and run `python3 generate.py r1`
+(or `r1 panel`).
+
 ## Cut files
 
-Each SVG is drawn at actual size, and every layer in a folder shares the same origin, so they line
+Each SVG is drawn at actual size (units in mm), and every layer in a folder shares the same origin, so they line
 up. They contain cut lines only (red hairline, no fill).
 
 | # | File | Paint | Stock | Pieces | What it is |
@@ -62,8 +77,10 @@ pip install shapely opencv-python-headless
 python3 trace_logo.py source/logo.png   # only if you swap in a different logo image
 python3 generate.py            # contour version -> svg/
 python3 generate.py panel      # panel version   -> svg_panel/
+python3 generate.py r1         # Bambu R1 contour -> svg_r1/
+python3 generate.py r1 panel   # Bambu R1 panel   -> svg_r1_panel/
 node render.js                 # -> renders/        (needs Playwright + Chromium)
-node render.js svg_panel       # -> renders_panel/
+node render.js svg_panel       # -> renders_panel/  (likewise svg_r1, svg_r1_panel)
 ```
 `trace_logo.py` reads the logo's coverage from the image (the alpha channel of a transparent
 PNG, or red-ness on a white background). It then simplifies each edge to a straight-sided polygon.

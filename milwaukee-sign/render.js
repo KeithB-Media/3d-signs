@@ -1,5 +1,5 @@
 // Renders the stacked sign from svg/layers.json (written by generate.py).
-// Usage: node render.js [svg|svg_panel] -> renders/ (or renders_panel/)
+// Usage: node render.js [svg|svg_panel|svg_r1|svg_r1_panel] -> renders/, renders_panel/, ...
 const { chromium } = require('playwright');
 const fs = require('fs');
 const path = require('path');
@@ -7,7 +7,7 @@ const path = require('path');
 const src = process.argv[2] || 'svg';
 const { w: W, h: H, layers } = JSON.parse(fs.readFileSync(path.join(__dirname, src, 'layers.json')));
 const PX = 50;
-const outDir = path.join(__dirname, src === 'svg' ? 'renders' : 'renders_panel');
+const outDir = path.join(__dirname, 'renders' + src.slice(3));   // svg_r1 -> renders_r1
 fs.mkdirSync(outDir, { recursive: true });
 
 function shade(hex, f) {
@@ -73,6 +73,6 @@ function stackHTML(tiltDeg, rotDeg, gap, w, h, px) {
     <path d="${L.d}" fill="${L.color}" stroke="#555" stroke-width="0.03" fill-rule="evenodd"/></svg>
     <div>Layer ${i + 1}</div><div style="font-weight:400;font-size:13px">${L.stem.replace(/^layer\d_/, '').replace(/_/g, ' ')}</div></div>`).join('');
   await shoot(`<html><body style="margin:0;background:#eeeae2;padding:20px;display:grid;grid-template-columns:repeat(3,420px);gap:18px">${cards}</body></html>`,
-    'layer_sheet.png', 1340, 520);
+    'layer_sheet.png', 1340, Math.round(400 * (H + 0.6) / (W + 0.6) + 110));
   await browser.close();
 })();

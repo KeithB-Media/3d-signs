@@ -21,18 +21,21 @@ RIM = 0.30                # black rim outside the white
 CLOSE = 2.2               # contour style: dips narrower than ~2x this are filled in
 PANEL_PAD = (0.9, 0.9)    # panel style: white space left/right and top/bottom of the logo
 PANEL_CORNER = 0.6
+# Bambu R1 laser without the material feeder: 600 x 300 mm. Each layer must fit the bed with a
+# little clearance, so the backer is kept within these sizes ("r1" versions).
+R1_MAX_MM = (590.0, 290.0)
 MIN_HALF = 0.04           # red pieces: features thinner than 0.08" (bolt tips) are blunted
 
 COLORS = {"black": "#141414", "red": "#c8282a", "white": "#f7f7f5"}
 
 
 # ------------------------------------------------------------------ logo
-def logo():
+def logo(logo_w=None):
     data = json.load(open(os.path.join(HERE, "logo_trace.json")))
     pieces = [Polygon(p[0], p[1:]).buffer(0) for p in data["pieces"]]
     u = unary_union(pieces)
     minx, miny, maxx, maxy = u.bounds
-    k = LOGO_W / (maxx - minx)
+    k = (logo_w or LOGO_W) / (maxx - minx)
     cx, cy = (minx + maxx) / 2, (miny + maxy) / 2
     out = []
     for p in pieces:          # image y points down -> flip; centre on the origin
@@ -52,8 +55,8 @@ def rrect(w, h, r):
     return box(-w / 2 + r, -h / 2 + r, w / 2 - r, h / 2 - r).buffer(r, quad_segs=24)
 
 
-def build(style):
-    red = logo()
+def build(style, logo_w=None):
+    red = logo(logo_w)
     minx, miny, maxx, maxy = red.bounds
     if style == "contour":
         white = smooth_hull(red, WHITE, CLOSE)
@@ -75,11 +78,26 @@ def build(style):
 
 
 # ------------------------------------------------------------------ SVG out
-def main(style=STYLE):
-    out = os.path.join(HERE, "svg" if style == "contour" else "svg_panel")
+def fit_logo_w(style, max_w, max_h):
+    """Largest logo width whose backer fits within max_w x max_h inches."""
+    lo, hi = 5.0, 40.0
+    for _ in range(30):
+        mid = (lo + hi) / 2
+        (bw, bh), _ = build(style, mid)
+        lo, hi = (mid, hi) if bw <= max_w and bh <= max_h else (lo, mid)
+    return lo
+
+
+def main(style=STYLE, r1=False):
+    name = "svg" + ("_r1" if r1 else "") + ("" if style == "contour" else "_panel")
+    out = os.path.join(HERE, name)
     os.makedirs(out, exist_ok=True)
-    (W, H), layers = build(style)
-    W, H = round(W + 0.2, 2), round(H + 0.2, 2)          # 0.1" margin around the backer
+    logo_w = fit_logo_w(style, R1_MAX_MM[0] / 25.4, R1_MAX_MM[1] / 25.4) if r1 else None
+    (W, H), layers = build(style, logo_w)
+    if r1:                               # bed-sized sheet so it drops onto the bed origin as-is
+        W, H = 600 / 25.4, 300 / 25.4
+    else:
+        W, H = round(W + 0.2, 2), round(H + 0.2, 2)      # 0.1" margin around the backer
 
     def path_d(geom):
         polys = geom.geoms if isinstance(geom, MultiPolygon) else [geom]
@@ -92,7 +110,7 @@ def main(style=STYLE):
 
     def svg_doc(body, title):
         return (f'<?xml version="1.0" encoding="UTF-8"?>\n'
-                f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}in" height="{H}in" '
+                f'<svg xmlns="http://www.w3.org/2000/svg" width="{W * 25.4:.2f}mm" height="{H * 25.4:.2f}mm" '
                 f'viewBox="0 0 {W} {H}">\n<title>{title}</title>\n{body}\n</svg>\n')
 
     preview, z, rows = [], 0.0, []
@@ -116,9 +134,14 @@ def main(style=STYLE):
     with open(os.path.join(out, "layers.json"), "w") as f:
         json.dump({"w": W, "h": H, "layers": [{"stem": s, "color": COLORS[c], "d": d, "z": z, "t": t}
                                               for s, c, d, z, t in preview]}, f)
-    print(f"{style}: sheet {W}\" x {H}\" (backer {W - 0.2:.2f}\" x {H - 0.2:.2f}\"), stack {z:.3f}\"")
+    bx = layers[0][2].bounds
+    bw, bh = bx[2] - bx[0], bx[3] - bx[1]
+    lb = layers[2][2].bounds
+    print(f"{name}: sheet {W * 25.4:.0f} x {H * 25.4:.0f} mm, backer {bw * 25.4:.1f} x {bh * 25.4:.1f} mm "
+          f"({bw:.2f}\" x {bh:.2f}\"), logo {(lb[2] - lb[0]) * 25.4:.0f} mm wide, stack {z:.3f}\"")
     print("\n".join(rows))
 
 
 if __name__ == "__main__":
-    main(sys.argv[1] if len(sys.argv) > 1 else STYLE)
+    args = sys.argv[1:]
+    main(next((a for a in args if a in ("contour", "panel")), STYLE), r1="r1" in args)
