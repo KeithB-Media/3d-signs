@@ -31,21 +31,23 @@ The layout follows a head-on photo of a Phase V P42, top to bottom:
 * **Ditch lights** on the silver. Below each one is a **connector box**: a recess cut
   out of the nose (black floor on layer 6) holding two covered connectors. Each connector
   is a square plate (layer 7) with a round cap (layer 8): **blue on the outside, black on
-  the inside**. Under the box, a small opening lets out a **black cable** that hangs over
-  the anticlimber to a **yellow plug**.
-* **Anticlimber** across the full width, close above the sill.
+  the inside**. Under the box, a small slot holds a **yellow plug** with a **black cable**
+  that runs down and disappears behind the plow tip.
 * **Pilot opening**: a cut-out in the bottom middle of the silver body (black floor on
-  layer 6) over the coupler. Inside it:
+  layer 6) over the coupler, with the dark underframe showing above the plow.
   * **Coupler** shank, with an E-type head (knuckle gap, lock-lift hole) sitting down in the
-    plow notch.
-  * **MU receptacles**, two each side. A **MU jumper** droops across the shank between the
-    inner pair, with light-grey plug heads. The outer pair have round socket faces.
-  * **Air hoses** (two each side) hang from the anticlimber **behind the plow**: they show
-    only in the opening and the notch, pass behind the coupler head, and end in **glad hands**.
-* **Plow**, near-black, in front of everything:
-  1. base (layer 6), with dark underframe showing between the plow and the sill
-  2. the plow plate (layer 7): wide bottom, angled lower corners, **outer tips up at
-     coupler height**, top edge sloping down to a notch in the middle for the coupler
+    plow notch, its top about level with the plow tips.
+  * **MU receptacles**, two each side, in the dark gap between the plow wings. A **MU
+    jumper** droops across the coupler between the inner pair, with light-grey plug heads.
+    The outer pair have round socket faces.
+  * **Air hoses** (two each side) hang from the top of the opening **behind the plow**: they
+    show only in the opening and the notch, pass behind the coupler head, and end in
+    **glad hands**.
+* **Plow**, near-black, in front of everything, 4.65" tall:
+  1. base (layer 6)
+  2. the plow plate (layer 7): wide bottom, angled lower corners, **tall outer tips that
+     reach up to the bottom of the body**, top edge sloping down to a notch in the middle
+     for the coupler
   3. a **closed door on each wing** and a reinforcing plate under the notch (layer 8),
      plus the **uncoupling lever** from the coupler head onto the left door
   4. **white grab handles** that come forward over the top of each wing, and a latch and
@@ -66,8 +68,8 @@ scale), 1-1/8" thick. It fits a 24" × 18" laser bed if you rotate it.
 | 4 | `layer04_core_wiring.svg` | core: wire channels |
 | 5 | `layer05_glass_wiring.svg` | wire channels; its top shows through the windshield |
 | 6 | `layer06_body.svg` | carbody (blue + silver, windshield and pilot opening cut out), headlight + connector recess floors, pilot opening + underframe floor, plow base, horns, antenna |
-| 7 | `layer07_nose.svg` | raised nose (blue + silver) with headlight and connector recesses, headlight rings, connector plates, gaskets with wipers, anticlimber, coupler shank + head, MU receptacles, air hoses, cable sockets, low grab irons, sill stripe, plow plate |
-| 8 | `layer08_lights_logo.svg` | red light + ditch light housings, number board, Travelmark, connector caps, hanging cables + yellow plugs, MU jumper, socket faces, glad hands, uncoupling lever, nose grab irons, plow doors + centre plate |
+| 7 | `layer07_nose.svg` | raised nose (blue + silver) with headlight and connector recesses, headlight rings, connector plates, gaskets with wipers, coupler shank + head, MU receptacles, air hoses, corner cables + yellow plugs, sill stripe, plow plate |
+| 8 | `layer08_lights_logo.svg` | red light + ditch light housings, number board, Travelmark, connector caps, MU jumper, socket faces, glad hands, uncoupling lever, nose grab irons, plow doors + centre plate |
 | 9 | `layer09_front_gear.svg` | ditch light rings, red light rings, number digits, white plow handles, door latches + hinges |
 | – | `back_cover.svg` | battery pocket cover (screws to the back, slot for the switch) |
 
@@ -87,15 +89,14 @@ Other files:
 | Amtrak Blue | `#1f4e79` | top of the carbody and nose (above the wave line) |
 | Platinum Mist | `#cdd1d4` | lower carbody and nose |
 | Near-black | `#26292d` | the four plow layers (darker than the real one so the plow stands out) |
-| Anthracite Gray | `#4a4f52` | low grab irons |
 | Amtrak Red | `#d9442f` | red light rings, sill stripe at the corners |
-| Black | | gaskets, wipers, number board, headlight and connector recess floors, pilot opening + underframe, light housings, inner connector covers, hanging cables, anticlimber, cable sockets, receptacles, hoses, jumper, nose grab irons |
+| Black | | gaskets, wipers, number board, headlight and connector recess floors, pilot opening + underframe, light housings, inner connector covers, corner cables, receptacles, hoses, jumper, nose grab irons |
 | White | | Travelmark, number digits, plow grab handles |
 | Grey | | coupler, uncoupling lever, door latches + hinges, horns, antenna, socket faces |
 | Light grey | | MU plug heads, glad hands |
 | Chrome/silver | | headlight and ditch light rings |
 | Bright blue | `#2f7fd0` | outer connector covers |
-| Yellow | `#e3b53c` | plugs on the hanging cables |
+| Yellow | `#e3b53c` | plugs on the corner cables |
 
 ## Lights and battery
 * **Six 5 mm LEDs**: two warm-white headlights, two warm-white ditch lights and two red
