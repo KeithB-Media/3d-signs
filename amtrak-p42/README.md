@@ -20,11 +20,12 @@ The layout follows a head-on photo of a Phase V P42, top to bottom:
 
 * **Roof**: domed, curving from the cab sides up to the crown, with the horn cluster
   and radio antenna on top.
-* **Windshield**: two wide, short panes with black gaskets and parked pantograph wipers.
-  Each wiper has a blade (layer 7, joined to the gasket at both ends), and on layer 8 a
-  pivot hub at the bottom outer corner, a tapered arm, a thinner pantograph link with its
-  own pivot, a clip where the arm grabs the blade and a cap on the blade tip. A grey nut
-  sits on each hub (layer 9).
+* **Windshield**: two wide, short panes with black gaskets and pantograph wipers parked
+  **standing up along the outer edge** of each pane, leaning in with the cab side. Each
+  wiper has a blade (layer 7, joined to the gasket at the bottom and the top), and on
+  layer 8 a pivot hub at the bottom outer corner, a tapered arm, a thinner pantograph link
+  with its own pivot, a clip where the arm grabs the blade and a cap on the blade tip. A
+  grey nut sits on each hub (layer 9). Close-up: `renders/detail_wipers.png`.
 * **Number board** on the nose just under the windshield: black board (layer 8) with
   white digits on it (layer 9). `ROAD_NUMBER`, default 82, or `""` for a blank board.
 * **Travelmark**: AMTRAK wordmark over three sweeping stripes, in white on the blue.

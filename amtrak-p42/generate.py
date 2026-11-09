@@ -237,10 +237,12 @@ def gaskets():
     return windows().buffer(0.24, join_style=1).difference(windows())
 
 
-# ---- parked pantograph wipers (right side; mirrored for the left)
-_WB = WIN_BOTTOM
-WIPER_HUB = (4.72, _WB - 0.14)                  # pivot at the bottom outer corner
-BLADE = ((0.26, _WB + 1.0), (4.4, _WB + 0.02))  # inner tip on the centre post -> outer end on the gasket
+# ---- parked pantograph wipers (right side; mirrored for the left). They park
+# standing up along the outer edge of each pane, leaning in with the cab side.
+_WB, _WT = WIN_BOTTOM, WIN_TOP
+_LEAN = 0.157 * (_WT - _WB)
+BLADE = ((5.4, _WB - 0.03), (5.4 - _LEAN, _WT + 0.03))   # bottom gasket -> top gasket
+WIPER_HUB = (5.5, _WB - 0.16)                           # pivot at the bottom outer corner
 
 
 def _along(t):
@@ -248,31 +250,40 @@ def _along(t):
     return (x0 + (x1 - x0) * t, y0 + (y1 - y0) * t)
 
 
+def _normal():
+    """Unit normal to the blade, pointing outward (towards the cab side)."""
+    (x0, y0), (x1, y1) = BLADE
+    dx, dy = x1 - x0, y1 - y0
+    n = (dx * dx + dy * dy) ** 0.5
+    return dy / n, -dx / n
+
+
 def wipers():
-    """Wiper blades (layer 7, part of the gasket piece): joined to the gasket at
-    both ends so they're strong. A thin rib down the middle reads as the rubber edge."""
-    blade = stroke(list(BLADE), 0.16, cap=2)
-    return both(blade)
+    """Wiper blades (layer 7, part of the gasket piece), joined to the gasket at
+    the bottom and the top so they're strong."""
+    return both(stroke(list(BLADE), 0.16, cap=2))
 
 
 def wiper_arms():
-    """Wiper arm, pantograph link, pivot hub and blade clip (layer 8)."""
+    """Wiper arm, pantograph link, pivot hub, blade clip and tip cap (layer 8)."""
     hx, hy = WIPER_HUB
-    cx, cy = _along(0.42)                        # where the arm grabs the blade
-    # arm: tapers from 0.2" at the hub to 0.12" at the clip, riding just above the blade
-    dx, dy = cx - hx, cy + 0.1 - hy
+    nx, ny = _normal()
+    cx, cy = _along(0.58)                           # where the arm grabs the blade
+    ax, ay = cx + nx * 0.1, cy + ny * 0.1           # the arm rides just outside the blade
+    # arm: tapers from 0.2" at the hub to 0.12" at the clip
+    dx, dy = ax - hx, ay - hy
     n = (dx * dx + dy * dy) ** 0.5
-    ux, uy = -dy / n, dx / n                      # unit normal
-    arm = Polygon([(hx + ux * 0.1, hy + uy * 0.1), (cx + ux * 0.06, cy + 0.1 + uy * 0.06),
-                   (cx - ux * 0.06, cy + 0.1 - uy * 0.06), (hx - ux * 0.1, hy - uy * 0.1)])
-    # pantograph link: a thinner rod parallel to the arm, from its own pivot to the clip
-    link = stroke([(hx - 0.35, hy + 0.28), (cx + 0.12, cy + 0.2)], 0.11)
+    ux, uy = -dy / n, dx / n
+    arm = Polygon([(hx + ux * 0.1, hy + uy * 0.1), (ax + ux * 0.06, ay + uy * 0.06),
+                   (ax - ux * 0.06, ay - uy * 0.06), (hx - ux * 0.1, hy - uy * 0.1)])
+    # pantograph link: thinner rod on the inner side of the blade, from its own pivot to the clip
+    lp = (hx - 0.36, hy + 0.12)
+    link = stroke([lp, (cx - nx * 0.14, cy - ny * 0.14 + 0.15)], 0.11)
     hub = Point(hx, hy).buffer(0.2)
-    link_pivot = Point(hx - 0.35, hy + 0.28).buffer(0.1)
-    # blade clip where the arm meets the blade, plus an end cap at the blade's inner tip
+    link_pivot = Point(lp).buffer(0.1)
     ang = math.degrees(math.atan2(BLADE[1][1] - BLADE[0][1], BLADE[1][0] - BLADE[0][0]))
-    clip = affinity.rotate(rounded(box(cx - 0.26, cy - 0.14, cx + 0.26, cy + 0.2), 0.05), ang, origin=(cx, cy))
-    tx, ty = _along(0.06)
+    clip = affinity.rotate(rounded(box(cx - 0.27, cy - 0.17, cx + 0.27, cy + 0.17), 0.05), ang, origin=(cx, cy))
+    tx, ty = _along(0.93)
     cap = affinity.rotate(rounded(box(tx - 0.13, ty - 0.11, tx + 0.13, ty + 0.11), 0.04), ang, origin=(tx, ty))
     return both(unary_union([arm, link, hub, link_pivot, clip, cap]))
 
