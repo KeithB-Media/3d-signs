@@ -37,6 +37,33 @@ Previews: [`renders_r1/`](renders_r1/render_front.png), [`renders_r1_panel/`](re
 To fit a different bed, change `R1_MAX_MM` in `generate.py` and run `python3 generate.py r1`
 (or `r1 panel`).
 
+### Raised-frame panel versions
+
+These are the panel version with a black frame that rises to the same height as the red logo, so
+the logo sits inside a tray. The frame is 0.4" (10 mm) wide.
+
+![raised](renders_panel_raised/render_angle.png)
+
+| Version | Folder | Backer size | Logo width |
+|---|---|---|---|
+| Panel, raised frame | `svg_panel_raised/` | 620 × 315 mm (24.4" × 12.4") | 554 mm |
+| **Bambu R1** panel, raised frame | `svg_r1_panel_raised/` | 563 × 290 mm | 497 mm |
+
+These versions have two extra layers, both painted black:
+
+| # | File | Stock | What it is |
+|---|------|-------|------------|
+| 4 | `layer4_black_frame_lower.svg` | 1/8" (same as the white) | frame ring; sits on the backer around the white field |
+| 5 | `layer5_black_frame_upper.svg` | 1/4" (same as the red) | frame ring on top of layer 4; its top is level with the red |
+
+* The frame's inner edge is the white field's outline, so the white drops into the lower ring
+  and the ring locates it. Glue the backer, then the lower ring, then the white, then the upper
+  ring, then the red.
+* Each ring is a single long, narrow piece. Handle it carefully until it's glued down, and use
+  hold-downs when cutting.
+* If you change the stock thicknesses, keep the frame rings the same thickness as the white and
+  red layers, so the frame stays level with the logo.
+
 ## Cut files
 
 Each SVG is drawn at actual size (units in mm), and every layer in a folder shares the same origin, so they line
@@ -79,8 +106,10 @@ python3 generate.py            # contour version -> svg/
 python3 generate.py panel      # panel version   -> svg_panel/
 python3 generate.py r1         # Bambu R1 contour -> svg_r1/
 python3 generate.py r1 panel   # Bambu R1 panel   -> svg_r1_panel/
+python3 generate.py panel raised      # raised frame -> svg_panel_raised/
+python3 generate.py r1 panel raised   # raised frame, R1 bed -> svg_r1_panel_raised/
 node render.js                 # -> renders/        (needs Playwright + Chromium)
-node render.js svg_panel       # -> renders_panel/  (likewise svg_r1, svg_r1_panel)
+node render.js svg_panel       # -> renders_panel/  (likewise for the other svg_* folders)
 ```
 `trace_logo.py` reads the logo's coverage from the image (the alpha channel of a transparent
 PNG, or red-ness on a white background). It then simplifies each edge to a straight-sided polygon.

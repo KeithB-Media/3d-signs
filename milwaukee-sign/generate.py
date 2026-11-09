@@ -21,6 +21,7 @@ RIM = 0.30                # black rim outside the white
 CLOSE = 2.2               # contour style: dips narrower than ~2x this are filled in
 PANEL_PAD = (0.9, 0.9)    # panel style: white space left/right and top/bottom of the logo
 PANEL_CORNER = 0.6
+RAISED_RIM = 0.4          # "raised" panel: width of the black frame that rises to the logo's height
 # Bambu R1 laser without the material feeder: 600 x 300 mm. Each layer must fit the bed with a
 # little clearance, so the backer is kept within these sizes ("r1" versions).
 R1_MAX_MM = (590.0, 290.0)
@@ -55,7 +56,7 @@ def rrect(w, h, r):
     return box(-w / 2 + r, -h / 2 + r, w / 2 - r, h / 2 - r).buffer(r, quad_segs=24)
 
 
-def build(style, logo_w=None):
+def build(style, logo_w=None, raised=False):
     red = logo(logo_w)
     minx, miny, maxx, maxy = red.bounds
     if style == "contour":
@@ -64,36 +65,48 @@ def build(style, logo_w=None):
         what = "cut to the logo's shape"
     else:
         pw, ph = (maxx - minx) + 2 * PANEL_PAD[0], (maxy - miny) + 2 * PANEL_PAD[1]
+        rim = RAISED_RIM if raised else RIM
         white = rrect(pw, ph, PANEL_CORNER)
-        base = rrect(pw + 2 * RIM, ph + 2 * RIM, PANEL_CORNER + RIM)
+        base = rrect(pw + 2 * rim, ph + 2 * rim, PANEL_CORNER + rim)
         what = "rounded rectangle"
     bx = base.bounds
     size = (bx[2] - bx[0], bx[3] - bx[1])
     n = len(red.geoms) if isinstance(red, MultiPolygon) else 1
-    return size, [
-        ("layer1_base_black", "black", base, 0.25, f"backer, {what}; shows as a {RIM}\" black rim"),
-        ("layer2_white_field", "white", white, 0.125, "white field"),
-        ("layer3_red_logo", "red", red, 0.25, f"red logo ({n} pieces)"),
+    # (file stem, colour, geometry, thickness, height it sits at, note)
+    layers = [
+        ("layer1_base_black", "black", base, 0.25, 0.0, f"backer, {what}"),
+        ("layer2_white_field", "white", white, 0.125, 0.25, "white field"),
+        ("layer3_red_logo", "red", red, 0.25, 0.375, f"red logo ({n} pieces)"),
     ]
+    if raised:   # black frame around the white, built up level with the top of the red logo
+        frame = base.difference(white)
+        layers += [
+            ("layer4_black_frame_lower", "black", frame, 0.125, 0.25,
+             "lower frame ring, same stock as the white; sits on the backer around the white"),
+            ("layer5_black_frame_upper", "black", frame, 0.25, 0.375,
+             "upper frame ring, same stock as the red; top is level with the logo"),
+        ]
+    return size, layers
 
 
 # ------------------------------------------------------------------ SVG out
-def fit_logo_w(style, max_w, max_h):
+def fit_logo_w(style, max_w, max_h, raised=False):
     """Largest logo width whose backer fits within max_w x max_h inches."""
     lo, hi = 5.0, 40.0
     for _ in range(30):
         mid = (lo + hi) / 2
-        (bw, bh), _ = build(style, mid)
+        (bw, bh), _ = build(style, mid, raised)
         lo, hi = (mid, hi) if bw <= max_w and bh <= max_h else (lo, mid)
     return lo
 
 
-def main(style=STYLE, r1=False):
-    name = "svg" + ("_r1" if r1 else "") + ("" if style == "contour" else "_panel")
+def main(style=STYLE, r1=False, raised=False):
+    raised = raised and style == "panel"
+    name = "svg" + ("_r1" if r1 else "") + ("" if style == "contour" else "_panel") + ("_raised" if raised else "")
     out = os.path.join(HERE, name)
     os.makedirs(out, exist_ok=True)
-    logo_w = fit_logo_w(style, R1_MAX_MM[0] / 25.4, R1_MAX_MM[1] / 25.4) if r1 else None
-    (W, H), layers = build(style, logo_w)
+    logo_w = fit_logo_w(style, R1_MAX_MM[0] / 25.4, R1_MAX_MM[1] / 25.4, raised) if r1 else None
+    (W, H), layers = build(style, logo_w, raised)
     if r1:                               # bed-sized sheet so it drops onto the bed origin as-is
         W, H = 600 / 25.4, 300 / 25.4
     else:
@@ -113,20 +126,19 @@ def main(style=STYLE, r1=False):
                 f'<svg xmlns="http://www.w3.org/2000/svg" width="{W * 25.4:.2f}mm" height="{H * 25.4:.2f}mm" '
                 f'viewBox="0 0 {W} {H}">\n<title>{title}</title>\n{body}\n</svg>\n')
 
-    preview, z, rows = [], 0.0, []
-    for i, (stem, color, geom, thick, note) in enumerate(layers, 1):
+    preview, rows = [], []
+    for i, (stem, color, geom, thick, z, note) in enumerate(layers, 1):
         d = path_d(geom)
         cut = f'<path d="{d}" fill="none" stroke="#FF0000" stroke-width="0.01" fill-rule="evenodd"/>'
         with open(os.path.join(out, stem + ".svg"), "w") as f:
             f.write(svg_doc(cut, f"Layer {i} - {note} - paint {color}"))
         preview.append((stem, color, d, z, thick))
         rows.append(f"| {i} | `{os.path.basename(out)}/{stem}.svg` | {color} | {thick}\" | {note} |")
-        z += thick
 
     body = "\n".join(f'<path d="{d}" fill="{COLORS[c]}" fill-rule="evenodd"/>' for _, c, d, _, _ in preview)
     with open(os.path.join(out, "preview_flat.svg"), "w") as f:
         f.write(svg_doc(body, "Flat colour preview"))
-    tcols = ["#000", "#08c", "#c00"]
+    tcols = ["#000", "#08c", "#c00", "#0a0", "#f80"]
     body = "\n".join(f'<path d="{d}" fill="none" stroke="{tcols[k]}" stroke-width="0.015" fill-rule="evenodd"/>'
                      for k, (_, _, d, _, _) in enumerate(preview))
     with open(os.path.join(out, "placement_template.svg"), "w") as f:
@@ -138,10 +150,11 @@ def main(style=STYLE, r1=False):
     bw, bh = bx[2] - bx[0], bx[3] - bx[1]
     lb = layers[2][2].bounds
     print(f"{name}: sheet {W * 25.4:.0f} x {H * 25.4:.0f} mm, backer {bw * 25.4:.1f} x {bh * 25.4:.1f} mm "
-          f"({bw:.2f}\" x {bh:.2f}\"), logo {(lb[2] - lb[0]) * 25.4:.0f} mm wide, stack {z:.3f}\"")
+          f"({bw:.2f}\" x {bh:.2f}\"), logo {(lb[2] - lb[0]) * 25.4:.0f} mm wide, "
+          f"stack {max(p[3] + p[4] for p in preview):.3f}\"")
     print("\n".join(rows))
 
 
 if __name__ == "__main__":
     args = sys.argv[1:]
-    main(next((a for a in args if a in ("contour", "panel")), STYLE), r1="r1" in args)
+    main(next((a for a in args if a in ("contour", "panel")), STYLE), r1="r1" in args, raised="raised" in args)
