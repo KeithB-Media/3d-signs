@@ -261,7 +261,7 @@ def grab_irons_nose():
 
 def sill_stripe():
     """Amtrak Red sill stripe, seen at the front corners either side of the plow."""
-    return both(box(6.62, SILL + 0.05, 8.0, SILL + 0.32))
+    return both(box(7.08, SILL + 0.05, 8.0, SILL + 0.32))
 
 
 # ------------------------------------------------------------------ lights
@@ -335,7 +335,7 @@ def conn_caps():
 B = Y0                                            # bottom of the plow (= bottom of the sign)
 PILOT_OPENING = box(-3.0, SILL, 3.0, 6.95)        # cut-out in the bottom of the silver body over the coupler
 NOTCH = box(-1.7, B + 1.7, 1.7, SILL)             # opening in the plow top the coupler sits in
-UNDERFRAME = box(-6.4, B + 3.0, 6.4, SILL)        # dark underframe seen above the plow
+UNDERFRAME = box(-7.0, B + 3.0, 7.0, SILL)        # dark underframe seen above the plow
 SKIRT = mirror([(0, B + 1.2), (7.6, B + 1.2), (8.0, B + 1.6), (8.0, SILL), (0, SILL)])  # behind the plow, out to the edges
 
 
@@ -399,23 +399,23 @@ def plugs_mu():
 def _plow_top(x):
     """Height of the plow's top edge: low beside the notch, rising to the outer
     tips, which reach up to the bottom of the carbody."""
-    x = min(max(abs(x), 1.7), 5.95)
-    return B + 3.2 + 1.45 * (x - 1.7) / (5.95 - 1.7)
+    x = min(max(abs(x), 1.7), 6.55)
+    return B + 3.2 + 1.45 * (x - 1.7) / (6.55 - 1.7)
 
 
 def plow():
     """Plow outline (front plate, layer 7): wide bottom, angled lower corners,
     tall outer tips up at the carbody, top edge sloping down to the coupler notch."""
-    half = [(0, B), (4.1, B), (5.9, B + 0.95), (6.4, B + 1.6), (6.4, B + 4.6), (5.95, B + 4.65),
+    half = [(0, B), (4.6, B), (6.5, B + 0.95), (7.0, B + 1.6), (7.0, B + 4.6), (6.55, B + 4.65),
             (1.7, B + 3.2), (1.7, B + 1.7), (0, B + 1.7)]
     return rounded(mirror(half), 0.06)
 
 
 def plow_doors():
     """Closed door on each wing (layer 8), inset from the plow edges."""
-    xs = [2.15 + i * (6.05 - 2.15) / 40 for i in range(41)]
+    xs = [2.15 + i * (6.65 - 2.15) / 40 for i in range(41)]
     top = [(x, _plow_top(x) - 0.3) for x in xs]
-    door = Polygon([(2.15, B + 0.8), (5.7, B + 0.8), (6.05, B + 1.35)] + top[::-1])
+    door = Polygon([(2.15, B + 0.8), (6.25, B + 0.8), (6.65, B + 1.35)] + top[::-1])
     return both(rounded(door.intersection(plow().buffer(-0.25, join_style=2)), 0.06))
 
 
@@ -427,17 +427,17 @@ def plow_bar():
 def plow_handles():
     """White grab handles (layer 9): they come forward from the engine over the
     top of each wing, a rail along the wing with its ends turned down."""
-    xs = [2.6 + i * (5.6 - 2.6) / 30 for i in range(31)]
+    xs = [2.6 + i * (6.2 - 2.6) / 30 for i in range(31)]
     rail = [(x, _plow_top(x) - 0.32) for x in xs]
-    pts = [(2.6, rail[0][1] - 0.4)] + rail + [(5.6, rail[-1][1] - 0.4)]
+    pts = [(2.6, rail[0][1] - 0.4)] + rail + [(6.2, rail[-1][1] - 0.4)]
     return both(stroke(pts, 0.14))
 
 
 def door_hardware():
     """Latch at the inner edge and two hinges at the outer edge of each door (layer 9)."""
     parts = [rounded(box(2.35, B + 1.4, 2.55, B + 2.1), 0.05),
-             rounded(box(5.55, B + 1.3, 5.8, B + 1.55), 0.04),
-             rounded(box(5.55, B + 3.0, 5.8, B + 3.25), 0.04)]
+             rounded(box(6.15, B + 1.35, 6.4, B + 1.6), 0.04),
+             rounded(box(6.15, B + 3.15, 6.4, B + 3.4), 0.04)]
     return both(unary_union(parts))
 
 

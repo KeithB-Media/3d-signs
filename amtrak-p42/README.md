@@ -45,7 +45,8 @@ The layout follows a head-on photo of a Phase V P42, top to bottom:
     **glad hands**.
 * **Skirt** (anthracite, layer 6) behind the plow, running out to both edges of the
   body with chamfered bottom corners.
-* **Plow**, near-black, in front of everything, 4.65" tall:
+* **Plow**, near-black, in front of everything: 14" wide across the tips, 9.2" across the
+  bottom, 4.65" tall:
   1. base (layer 6)
   2. the plow plate (layer 7): wide bottom, angled lower corners, **tall outer tips that
      reach up to the bottom of the body**, top edge sloping down to a notch in the middle
