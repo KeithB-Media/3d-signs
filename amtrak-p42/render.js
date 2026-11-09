@@ -8,8 +8,8 @@ const path = require('path');
 const base = __dirname;
 const meta = JSON.parse(fs.readFileSync(path.join(base, 'svg', 'layers.json')));
 const { w: W, h: H, layers, lights, red_lights: reds = [] } = meta;
-const PX = 32;
-const FH = Math.round(760 * (H + 0.8) / (W + 1.2));          // front view height for 760 px wide                                   // px per inch in the 3D views
+const PX = 32;                                   // px per inch in the 3D views
+const FH = Math.round(760 * (H + 0.8) / (W + 1.2));   // front view height for 760 px wide
 const outDir = path.join(base, 'renders');
 fs.mkdirSync(outDir, { recursive: true });
 
