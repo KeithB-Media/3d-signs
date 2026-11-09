@@ -80,11 +80,19 @@ function stackHTML(tiltDeg, gap, w, h, scale = PX) {
   await shoot(frontHTML(true, true), 'render_lit.png', 760, FH);
   await shoot(stackHTML(40, 0, 900, 900, 34), 'render_angle.png', 900, 900);
   await shoot(stackHTML(64, 1.6, 900, 1400, 26), 'render_exploded.png', 900, 1400);
-  const cards = layers.map((L, i) => `<div style="text-align:center;font:600 14px system-ui;color:#333">
-    <svg width="190" height="265" viewBox="0 0 ${W} ${H}">
-    ${L.pieces.map(p => `<path d="${p.d}" fill="${p.color}" stroke="#555" stroke-width="0.04" fill-rule="evenodd"/>`).join('')}</svg>
-    <div>Layer ${i + 1}</div><div style="font-weight:400;font-size:12px">${L.stem.replace(/^layer\d_/, '').replace(/_/g, ' ')}</div></div>`).join('');
-  await shoot(`<html><body style="margin:0;background:#eeeae2;padding:16px;display:grid;grid-template-columns:repeat(5,200px);gap:14px">${cards}</body></html>`,
-    'layer_sheet.png', 1090, 680);
+  // layer sheet: each layer on a grey card (so white and black parts both show),
+  // with the sign outline dashed for reference
+  const outline = layers[0].pieces[0].d.split(' Z')[0] + ' Z';   // outer edge only
+  const CW = 330, CH = Math.round(CW * H / W);
+  const cards = layers.map((L, i) => `<div style="background:#fbfaf7;border-radius:10px;padding:12px 12px 10px;box-shadow:0 1px 3px rgba(0,0,0,.15)">
+    <svg width="${CW}" height="${CH}" viewBox="-0.2 -0.2 ${W + 0.4} ${H + 0.4}" style="background:#9a9fa5;border-radius:6px">
+    <path d="${outline}" fill="none" stroke="#e8e8e8" stroke-width="0.05" stroke-dasharray="0.25 0.18"/>
+    ${L.pieces.map(p => `<path d="${p.d}" fill="${p.color}" stroke="#222" stroke-width="0.03" fill-rule="evenodd"/>`).join('')}</svg>
+    <div style="font:700 17px system-ui;color:#222;margin-top:8px">Layer ${i + 1}</div>
+    <div style="font:400 13px system-ui;color:#555">${L.stem.replace(/^layer\d+_/, '').replace(/_/g, ' ')}</div></div>`).join('');
+  const SW = 3 * (CW + 24) + 2 * 16 + 40;
+  const SH = 3 * (CH + 70) + 2 * 16 + 40;
+  await shoot(`<html><body style="margin:0;background:#e6e2da;padding:20px;display:grid;grid-template-columns:repeat(3,${CW + 24}px);gap:16px">${cards}</body></html>`,
+    'layer_sheet.png', SW, SH);
   await browser.close();
 })();
