@@ -1,14 +1,15 @@
 // Renders the stacked sign from svg/layers.json (written by generate.py).
-// Usage: node render.js -> renders/render_front.png, render_lit.png, render_angle.png,
+// Usage: node render.js [phase5|phase6] -> renders/render_front.png, render_lit.png, render_angle.png,
 //                          render_exploded.png, layer_sheet.png
 const { chromium } = require('playwright');
 const fs = require('fs');
 const path = require('path');
 
-const meta = JSON.parse(fs.readFileSync(path.join(__dirname, 'svg', 'layers.json')));
+const base = path.join(__dirname, process.argv[2] || 'phase5');
+const meta = JSON.parse(fs.readFileSync(path.join(base, 'svg', 'layers.json')));
 const { w: W, h: H, layers, lights } = meta;
 const PX = 32;                                   // px per inch in the 3D views
-const outDir = path.join(__dirname, 'renders');
+const outDir = path.join(base, 'renders');
 fs.mkdirSync(outDir, { recursive: true });
 
 function shade(hex, f) {

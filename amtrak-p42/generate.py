@@ -22,7 +22,6 @@ from shapely.geometry import Polygon, Point, LineString, box
 from shapely.ops import unary_union
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-OUT = os.path.join(HERE, "svg")
 
 T = 0.125                     # MDF thickness
 HALF_W = 8.0                  # sign is 16" wide ...
@@ -30,22 +29,31 @@ TOP = 23.0                    # ... and 23" tall incl. roof horns (about 1:7.5 s
 ROOF = 22.4                   # top of the carbody
 MARGIN = 0.25                 # border around the drawing in the SVG files
 
-ROAD_NUMBER = "108"           # P42 #108 was painted in Phase VI for Amtrak's 50th
 WORDMARK = "AMTRAK"
 FONT = "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf"
 
-# ---- Phase VI colours. Edit to repaint the previews; cut files don't change.
-COLORS = {
+# ---- liveries. Each one is written to its own folder (phase5/, phase6/).
+# Colours only change the previews and the paint list; ROAD_NUMBER is cut.
+_COMMON = {
     "core": "#1d1d1f",        # hidden layers: paint the edges black
     "glass": "#26313b",       # top of layer 5, seen through the windshield
-    "blue": "#0b4a7a",        # Amtrak blue (body, nose, skirt)
-    "red": "#c8202f",         # red band around the windshield
     "black": "#161616",
     "white": "#f4f4f2",
     "under": "#3b4046",       # undercarriage grey: plow, steps
     "gray": "#7d838a",        # coupler, horns, glad hands, receptacle lids
     "chrome": "#e6e8ea",
 }
+LIVERIES = {
+    # Phase V (1999 on): Platinum Mist body, Amtrak Blue nose and roof "wave",
+    # Anthracite Gray underbody, Amtrak Red sill stripe, Travelmark logo.
+    "phase5": {"number": "82",
+               "colors": {**_COMMON, "silver": "#cdd1d4", "blue": "#1f4e79", "red": "#d9442f",
+                          "under": "#4a4f52"}},
+    # Phase VI (P42 #108, 2021): blue body, black and red around the windshield.
+    "phase6": {"number": "108",
+               "colors": {**_COMMON, "blue": "#0b4a7a", "red": "#c8202f"}},
+}
+COLORS = LIVERIES["phase5"]["colors"]
 
 # ---- electronics
 LED_HOLE = 0.25               # 5 mm LEDs push in from the front (loose fit, dab of glue)
@@ -228,6 +236,54 @@ def nose_and_skirt():
     return rounded(mirror(half), 0.08)
 
 
+def gaskets():
+    """Phase V: separate black rubber gaskets around each pane."""
+    return windows().buffer(0.24, join_style=1).difference(windows())
+
+
+def wave_p5():
+    """Phase V: everything above this curve is Amtrak Blue (the "wave" over the
+    roof and nose); below it is Platinum Mist. It dips toward the centre of the nose."""
+    pts = [(x / 10, 10.35 + 0.9 * (x / 80) ** 2) for x in range(-90, 91)]
+    return Polygon(pts + [(9, TOP + 1), (-9, TOP + 1)])
+
+
+def nose_p5():
+    """Phase V nose + lower front, from the red sill stripe up to just under the gaskets."""
+    half = [(0, 3.75), (8.0, 3.75), (8.0, 7.8), (7.45, 7.8), (6.45, 15.3), (0, 15.3)]
+    return rounded(mirror(half), 0.08)
+
+
+def sill_stripe_p5():
+    """Phase V: Amtrak Red sill stripe across the bottom of the carbody."""
+    return box(-HALF_W, 3.4, HALF_W, 3.75)
+
+
+def travelmark_p5(cx, cy, cap=0.56):
+    """Phase V style Travelmark: the AMTRAK wordmark over three sweeping stripes
+    that fan out to the right. Stripes are at least 0.1" wide so they can be cut.
+    Approximate - swap in the official artwork if you have it."""
+    word = text(WORDMARK, cap, 0.0, 0.0, tracking=0.06)
+    minx, _, maxx, _ = word.bounds
+    w = maxx - minx
+    bands = []
+    for k in range(3):
+        x0 = minx + 0.12 * w + 0.07 * w * k                      # left tips step in
+        y_top = -cap / 2 - 0.32 - 0.22 * k
+        pts = bezier((x0, y_top - 0.32), (x0 + 0.3 * w, y_top - 0.1),
+                     (maxx - 0.35 * w, y_top + 0.02), (maxx + 0.08 * w, y_top + 0.12), 50)
+        n = len(pts) - 1
+        half = [0.05 + 0.045 * (i / n) for i in range(n + 1)]   # widen to the right
+        upper = [(x, y + h) for (x, y), h in zip(pts, half)]
+        lower = [(x, y - h) for (x, y), h in zip(pts, half)]
+        bands.append(Polygon(upper + lower[::-1]))
+    mark = unary_union(bands)
+    both_ = unary_union([word, mark])
+    bx0, by0, bx1, by1 = both_.bounds
+    dx, dy = cx - (bx0 + bx1) / 2, cy - (by0 + by1) / 2
+    return affinity.translate(mark, dx, dy), affinity.translate(word, dx, dy)
+
+
 def grab_irons():
     pcs = [box(7.3, 3.95, 7.5, 7.15),                         # beside the steps
            stroke([(6.05, 12.6), (5.82, 14.1)], 0.18)]       # on the nose
@@ -382,28 +438,53 @@ def back_cover():
 
 
 # ------------------------------------------------------------------ layers
-def logo():
+def logo(cap=0.62, cy=13.45):
     """Travel Mark + wordmark, centred on the nose between headlight and windshield."""
-    word = text(WORDMARK, 0.62, 0.0, 0.0, tracking=0.07)
+    k = cap / 0.62
+    word = text(WORDMARK, cap, 0.0, 0.0, tracking=0.07 * k)
     ww = word.bounds[2] - word.bounds[0]
-    mark = travel_mark(0, 0)
+    mark = travel_mark(0, 0, w=1.55 * max(k, 0.9), h=0.82)
     mw = mark.bounds[2] - mark.bounds[0]
-    gap = 0.22
+    gap = 0.22 * k
     total = mw + gap + ww
-    cy = 13.45
     mark = affinity.translate(mark, -total / 2 + mw / 2, cy + 0.04)
     word = affinity.translate(word, -total / 2 + mw + gap + ww / 2, cy)
     return mark, word
 
 
-def build():
+def build(livery):
+    number_text = LIVERIES[livery]["number"]
     sil = silhouette()
     core = sil.difference(pocket())
     leds = led_holes()
     horn, antenna = roof_gear()
-    mark, word = logo()
-    number = text(ROAD_NUMBER, 0.7, 0.0, 9.55, tracking=0.08)
     plow_back = plow().difference(body())
+    if livery == "phase5":
+        mark, word = travelmark_p5(0.0, 8.85)
+        logo_paint = "blue"
+        wave = wave_p5()
+        cab = body().difference(windows()).difference(leds)
+        nose = nose_p5().difference(leds)
+        number = text(number_text, 0.75, 0.0, 21.05, tracking=0.08) if number_text else None
+        layer6 = [("silver", cab.difference(wave)), ("blue", cab.intersection(wave))]
+        layer7 = [("silver", nose.difference(wave)), ("blue", nose.intersection(wave)),
+                  ("red", sill_stripe_p5()),
+                  ("black", gaskets().union(wipers())),
+                  ("under", plow_face())]
+        layer7 += [("white", number)] if number else []
+        note7 = "nose (blue wave + silver), red sill stripe, gaskets with wipers, plow face, road number"
+        numbers = []
+    else:
+        mark, word = logo()
+        logo_paint = "white"
+        layer6 = [("blue", body().difference(windows()).difference(leds))]
+        layer7 = [("blue", nose_and_skirt().difference(leds)),
+                  ("red", red_band()),
+                  ("black", window_mask().union(wipers())),
+                  ("under", plow_face())]
+        note7 = "nose + skirt, red band, black window mask with wipers, plow face"
+        number = text(number_text, 0.7, 0.0, 9.55, tracking=0.08) if number_text else None
+        numbers = [(logo_paint, number)] if number else []
 
     layers = [
         # (stem, [(paint, geometry)], note)
@@ -414,19 +495,14 @@ def build():
         ("layer4_core_wiring", [("core", core.difference(channels()))], "core: wire channels"),
         ("layer5_glass_wiring", [("glass", core.difference(channels()))],
          "core: wire channels; top shows through the windshield"),
-        ("layer6_body", [("blue", body().difference(windows()).difference(leds)),
-                         ("under", plow_back.difference(leds)),
+        ("layer6_body", layer6 + [("under", plow_back.difference(leds)),
                          ("under", steps()),
                          ("gray", horn.difference(body())), ("gray", antenna.difference(body()))],
          "carbody (windshield cut out), plow backing, steps, horns, antenna"),
-        ("layer7_nose_mask", [("blue", nose_and_skirt().difference(leds)),
-                              ("red", red_band()),
-                              ("black", window_mask().union(wipers())),
-                              ("under", plow_face())],
-         "nose + skirt, red band, black window mask with wipers, plow face"),
+        ("layer7_nose", layer7, note7),
         ("layer8_details", [("black", headlight_bezel().difference(leds)),
                             ("black", ditch_housings().difference(leds)),
-                            ("white", mark), ("white", word), ("white", number),
+                            (logo_paint, mark), (logo_paint, word)] + numbers + [
                             ("black", anticlimber().difference(coupler().buffer(0.03))),
                             ("gray", coupler()),
                             ("black", receptacles()),
@@ -486,12 +562,16 @@ def check(stem, pieces):
             print(f"  note: {stem} ({c}) has {thin.area:.3f} sq in narrower than 0.09\"")
 
 
-def main():
+def write(livery):
+    global COLORS
+    COLORS = LIVERIES[livery]["colors"]
+    OUT = os.path.join(HERE, livery, "svg")
+    print(f"== {livery} -> {os.path.relpath(OUT, HERE)}")
     os.makedirs(OUT, exist_ok=True)
     for f in os.listdir(OUT):                       # clear out files from older versions
         if f.endswith(".svg") or f.endswith(".json"):
             os.remove(os.path.join(OUT, f))
-    layers = build()
+    layers = build(livery)
     data, rows, z = [], [], 0.0
     for i, (stem, pieces, note) in enumerate(layers, 1):
         check(stem, pieces)
@@ -529,6 +609,12 @@ def main():
         json.dump(meta, f)
     print("\n".join(rows))
     print(f"total stack height: {z:.3f}\"  |  sheet size {W_SVG:.2f}\" x {H_SVG:.2f}\"")
+
+
+def main():
+    import sys
+    for livery in sys.argv[1:] or LIVERIES:
+        write(livery)
 
 
 if __name__ == "__main__":
