@@ -34,30 +34,28 @@ The layout follows a head-on photo of a Phase V P42, top to bottom:
   the inside**. Under the box, a small opening lets out a **black cable** that hangs over
   the anticlimber to a **yellow plug**.
 * **Anticlimber** across the full width.
-* **Pilot** (anthracite):
-  * **Coupler**: draft gear and an E-type head with the knuckle gap and lock-lift hole.
-    The head sits down in a black pocket cut into the plow.
-  * **MU receptacles**, two each side of the coupler. A **MU jumper** droops under the
-    coupler between the inner pair, with light-grey plug heads. The outer pair have
-    round socket faces.
-  * **HEP (head-end power) receptacles** further out. Each HEP jumper is stowed in a loop
-    to the dummy socket beside it.
-  * **Air hoses** (brake pipe and main reservoir, two each side) hang from the
-    anticlimber and end in **glad hands**.
-  * **Uncoupling lever** across the left plow wing to the coupler, handle at the left.
-  * **Grab irons** at the lower corners and on the nose.
-* **Plow**, near-black, in four layers:
-  1. base (layer 6)
-  2. one plate with two wings: the top slopes down to the outer corners, and the
-     middle is cut away for the coupler pocket (layer 7)
-  3. a lower centre plate and a raised plate on each wing (layer 8)
-  4. bolted brackets on the wings and a rib on the centre plate (layer 9)
-* **Red sill stripe** at the front corners, either side of the pilot.
+* **Pilot opening**: a cut-out in the bottom middle of the silver body (black floor on
+  layer 6) over the coupler. Inside it:
+  * **Coupler** shank, with an E-type head (knuckle gap, lock-lift hole) sitting down in the
+    plow notch.
+  * **MU receptacles**, two each side. A **MU jumper** droops across the shank between the
+    inner pair, with light-grey plug heads. The outer pair have round socket faces.
+  * **Air hoses** (two each side) hang from the anticlimber **behind the plow**: they show
+    only in the opening and the notch, pass behind the coupler head, and end in **glad hands**.
+* **Plow**, near-black, in front of everything:
+  1. base (layer 6), with dark underframe showing between the plow and the sill
+  2. the plow plate (layer 7): wide bottom, angled lower corners, **outer tips up at
+     coupler height**, top edge sloping down to a notch in the middle for the coupler
+  3. a **closed door on each wing** and a reinforcing plate under the notch (layer 8),
+     plus the **uncoupling lever** from the coupler head onto the left door
+  4. **white grab handles** that come forward over the top of each wing, and a latch and
+     two hinges on each door (layer 9)
+* **Red sill stripe** at the front corners, either side of the plow.
 
 ## Cut files (`svg/`)
 All files are 16.5" × 23.5" (the sign plus a 1/4" margin) and share the same origin, so
 every layer lines up. They contain cut lines only (red hairline, no fill). The sign is
-16" wide × 23" tall (about 1:7.5 scale). It fits a 24" × 18" laser bed if you rotate it.
+16" wide × 23" tall (about 1:7.5 scale), 1-1/8" thick. It fits a 24" × 18" laser bed if you rotate it.
 
 | # | File | What it is |
 |---|------|------------|
@@ -66,10 +64,10 @@ every layer lines up. They contain cut lines only (red hairline, no fill). The s
 | 3 | `layer03_core.svg` | same as layer 2 |
 | 4 | `layer04_core_wiring.svg` | core: wire channels |
 | 5 | `layer05_glass_wiring.svg` | wire channels; its top shows through the windshield |
-| 6 | `layer06_body.svg` | carbody (blue + silver, windshield cut out), headlight recess floor, plow base, coupler pocket floor, horns, antenna |
-| 7 | `layer07_nose.svg` | raised nose (blue + silver) with headlight and connector recesses, connector plates, headlight rings, coupler head, pilot face, gaskets with wipers, low grab irons, sill stripe, plow wings |
-| 8 | `layer08_lights_logo.svg` | red light + ditch light housings, number board, Travelmark, connector caps, yellow plugs, anticlimber, coupler shank, receptacles, air hoses, nose grab irons, plow plates |
-| 9 | `layer09_front_gear.svg` | ditch light rings, red light rings, number digits, hanging cables, socket faces, MU + HEP jumpers with plugs, glad hands, uncoupling lever, plow brackets |
+| 6 | `layer06_body.svg` | carbody (blue + silver, windshield and pilot opening cut out), headlight + connector recess floors, pilot opening + underframe floor, plow base, horns, antenna |
+| 7 | `layer07_nose.svg` | raised nose (blue + silver) with headlight and connector recesses, headlight rings, connector plates, gaskets with wipers, anticlimber, coupler shank + head, MU receptacles, air hoses, cable sockets, low grab irons, sill stripe, plow plate |
+| 8 | `layer08_lights_logo.svg` | red light + ditch light housings, number board, Travelmark, connector caps, hanging cables + yellow plugs, MU jumper, socket faces, glad hands, uncoupling lever, nose grab irons, plow doors + centre plate |
+| 9 | `layer09_front_gear.svg` | ditch light rings, red light rings, number digits, white plow handles, door latches + hinges |
 | – | `back_cover.svg` | battery pocket cover (screws to the back, slot for the switch) |
 
 The stack is 1-1/8" thick. Each piece is cut on its own, so where two paint colours meet
@@ -80,7 +78,7 @@ quarter of its area glued to the layer below.
 Other files:
 * `preview_flat.svg` – full-colour flat preview.
 * `placement_template.svg` – every layer's outline in its own colour. Print it at 1:1
-  (actual size, tiled) to place the small parts (logo, digits, hoses, jumpers) during glue-up.
+  (actual size, tiled) to place the small parts (logo, digits, hoses, jumpers, handles) during glue-up.
 
 ## Paint (Phase V, from Amtrak's livery guide)
 | Colour | Preview hex | Pieces |
@@ -88,11 +86,11 @@ Other files:
 | Amtrak Blue | `#1f4e79` | top of the carbody and nose (above the wave line) |
 | Platinum Mist | `#cdd1d4` | lower carbody and nose |
 | Near-black | `#26292d` | the four plow layers (darker than the real one so the plow stands out) |
-| Anthracite Gray | `#4a4f52` | pilot face, low grab irons |
+| Anthracite Gray | `#4a4f52` | low grab irons |
 | Amtrak Red | `#d9442f` | red light rings, sill stripe at the corners |
-| Black | | gaskets, wipers, number board, headlight and connector recess floors, coupler pocket floor, light housings, inner connector covers, hanging cables, anticlimber, receptacles, hoses, jumpers, nose grab irons |
-| White | | Travelmark, number digits |
-| Grey | | coupler, uncoupling lever, horns, antenna, socket faces |
+| Black | | gaskets, wipers, number board, headlight and connector recess floors, pilot opening + underframe, light housings, inner connector covers, hanging cables, anticlimber, cable sockets, receptacles, hoses, jumper, nose grab irons |
+| White | | Travelmark, number digits, plow grab handles |
+| Grey | | coupler, uncoupling lever, door latches + hinges, horns, antenna, socket faces |
 | Light grey | | MU plug heads, glad hands |
 | Chrome/silver | | headlight and ditch light rings |
 | Bright blue | `#2f7fd0` | outer connector covers |
@@ -100,8 +98,9 @@ Other files:
 
 ## Lights and battery
 * **Six 5 mm LEDs**: two warm-white headlights, two warm-white ditch lights and two red
-  rear lights. The holes in layers 6–8 are 0.25", so each LED goes in from the front after
-  glue-up. Its rim sits inside the ring on layer 9.
+  rear lights. The holes are 0.25", so each LED goes in from the front after glue-up.
+  Headlight and ditch light rings are 1" across; the headlight rings sit in the recess on
+  layer 7, the ditch light rings on layer 9.
 * **Battery pocket**: 2.50" × 1.95", cut through layers 1–5 (0.625" deep), behind the nose.
   It's sized for a 3×AAA holder with an on/off switch. **Measure your holder** and change
   `POCKET` in `generate.py` if it differs.
@@ -122,10 +121,10 @@ Other files:
   from an angle. Layers 1–5 only show their edges, so paint those black. Paint the top of
   layer 5 dark glass grey: it shows through the windshield.
 * Glue order: 1 → 5 (all the same outline), check the wire channels are clear, then 6, 7,
-  8 and 9. On layer 8, glue the receptacles, air hoses and plow plates before the
-  jumpers and lever from layer 9, which rest on them.
-* Paint the headlight recess floor (on layer 6) and the coupler pocket floor black before
-  gluing layer 7 over them: they're cut as separate pieces so you can paint them on their own.
+  8 and 9. On layer 7, glue the hoses, receptacles and coupler before the plow plate; the
+  MU jumper and glad hands (layer 8) rest on them.
+* The headlight and connector recess floors and the pilot opening floor (layer 6) are cut
+  as separate pieces: paint them black before gluing layer 7 over them.
 * The wipers are joined to the gaskets at both ends, so they don't snap.
 * The smallest parts are the Travelmark stripes and letters (about 0.1" strokes). Cut them
   from good MDF, or from 1/8" hardboard or birch ply, for clean edges.
