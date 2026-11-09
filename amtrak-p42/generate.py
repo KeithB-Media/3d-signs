@@ -35,6 +35,9 @@ HALF_W = 8.0                  # sign is 16" wide ...
 TOP = 23.0                    # ... and 23" tall incl. roof horns (about 1:7.5 scale)
 ROOF = 22.4                   # top of the carbody
 MARGIN = 0.25                 # border around the drawing in the SVG files
+SILL = 5.2                    # bottom of the silver carbody
+LIFT = 1.8                    # how far the plow/coupler group sits above the old design origin
+Y0 = 1.9                      # bottom edge of the plow = bottom of the sign
 
 ROAD_NUMBER = "82"            # cut in white for the number board ("" for a blank board)
 WORDMARK = "AMTRAK"
@@ -187,9 +190,9 @@ def travelmark(cx, cy, cap=0.5):
 
 # ------------------------------------------------------------------ carbody
 def body():
-    """Carbody from the sill (y=3.4) to the roof: straight lower sides, upper
+    """Carbody from the sill (y=SILL) to the roof: straight lower sides, upper
     sides leaning in (Genesis 'tumblehome'), rounded roof corners."""
-    half = [(0, 3.4), (8.0, 3.4), (8.0, 14.4), (6.9, 21.2), (6.6, 21.95),
+    half = [(0, SILL), (8.0, SILL), (8.0, 14.4), (6.9, 21.2), (6.6, 21.95),
             (6.1, 22.32), (5.45, ROOF), (0, ROOF)]
     return rounded(mirror(half), 0.05)
 
@@ -254,7 +257,7 @@ def nose():
 
 
 def grab_irons_low():
-    return both(box(7.3, 3.95, 7.5, 6.9))
+    return both(box(7.3, SILL + 0.45, 7.5, 6.9))
 
 
 def grab_irons_nose():
@@ -263,7 +266,7 @@ def grab_irons_nose():
 
 def sill_stripe():
     """Amtrak Red sill stripe, seen at the front corners either side of the plow."""
-    return both(box(6.62, 3.45, 8.0, 3.72))
+    return both(box(6.62, SILL + 0.05, 8.0, SILL + 0.32))
 
 
 # ------------------------------------------------------------------ lights
@@ -301,11 +304,11 @@ def hanging_cables():
     cables, plugs, sockets = [], [], []
     for cx, cy in cable_tops():
         s = 1 if cx > 0 else -1
-        pts = bezier((cx, cy), (cx, 6.6), (cx + s * 0.25, 6.2), (cx + s * 0.2, 5.75), 30)
+        pts = bezier((cx, cy), (cx, 6.9), (cx + s * 0.25, 6.5), (cx + s * 0.2, 6.15), 30)
         cables.append(stroke(pts, 0.18))
         px = cx + s * 0.2
-        plugs.append(rounded(box(px - 0.15, 5.2, px + 0.15, 5.72), 0.06))
-        sockets.append(rounded(box(px - 0.24, 4.95, px + 0.24, 5.85), 0.06))
+        plugs.append(rounded(box(px - 0.15, 5.65, px + 0.15, 6.12), 0.06))
+        sockets.append(rounded(box(px - 0.24, 5.52, px + 0.24, 6.27), 0.06))
     plugs = unary_union(plugs)
     return unary_union(cables).difference(plugs), plugs, unary_union(sockets)
 
@@ -335,9 +338,9 @@ def conn_caps():
 
 
 # ------------------------------------------------------------------ pilot opening + coupler
-PILOT_OPENING = box(-3.4, 3.4, 3.4, 6.35)        # cut-out in the silver body over the coupler
-NOTCH = box(-1.7, 1.35, 1.7, 3.4)                # opening in the plow top the coupler sits in
-UNDERFRAME = box(-6.4, 2.4, 6.4, 3.4)            # dark underframe seen between the plow and the sill
+PILOT_OPENING = box(-3.4, SILL, 3.4, 6.35)        # cut-out in the silver body over the coupler
+NOTCH = box(-1.7, 1.35 + LIFT, 1.7, SILL)                # opening in the plow top the coupler sits in
+UNDERFRAME = box(-6.4, 2.4 + LIFT, 6.4, SILL)            # dark underframe seen between the plow and the sill
 
 
 def anticlimber():
@@ -345,18 +348,19 @@ def anticlimber():
 
 
 def coupler_shank():
-    return box(-0.42, 3.6, 0.42, 6.35)
+    return box(-0.42, 3.6 + LIFT, 0.42, 6.35)
 
 
 def coupler_head():
     """E-type coupler head with the knuckle gap and lock-lift hole. It sits down
     in the plow notch (layer 7); the hoses pass behind it."""
     head = rounded(Polygon([(-1.0, 2.3), (0.55, 2.3), (1.0, 2.6), (1.0, 3.55), (-1.0, 3.55)]), 0.12)
-    return head.difference(box(0.05, 2.3, 0.22, 3.0)).difference(Point(-0.55, 3.05).buffer(0.1))
+    head = head.difference(box(0.05, 2.3, 0.22, 3.0)).difference(Point(-0.55, 3.05).buffer(0.1))
+    return affinity.translate(head, 0, LIFT)
 
 
 MU_X = (1.85, 2.65)           # MU receptacles in the pilot opening
-REC_Y = 5.1                   # receptacle centre height
+REC_Y = 5.75                  # receptacle centre height
 HOSE_X = (1.0, 1.3)           # air hoses: brake pipe and main reservoir
 
 
@@ -373,14 +377,14 @@ def socket_faces():
 def air_hoses():
     """Hoses hang from the anticlimber behind the plow; they show in the pilot
     opening and the plow notch, passing behind the coupler head (layer 7)."""
-    return both(unary_union([stroke(bezier((x, 6.35), (x, 4.6), (x - 0.15, 3.0), (x - 0.2, 1.75), 30), 0.17)
+    return both(unary_union([stroke(bezier((x, 6.35), (x, 5.4), (x - 0.15, 4.6), (x - 0.2, 1.75 + LIFT), 30), 0.17)
                              for x in HOSE_X]))
 
 
 def glad_hands():
     hands = []
     for x in HOSE_X:
-        cx, cy = x - 0.2, 1.75
+        cx, cy = x - 0.2, 1.75 + LIFT
         hands.append(unary_union([rounded(box(cx - 0.12, cy - 0.26, cx + 0.12, cy + 0.12), 0.05),
                                   box(cx - 0.3, cy - 0.26, cx + 0.12, cy - 0.12)]))
     return both(unary_union(hands))
@@ -389,7 +393,7 @@ def glad_hands():
 def mu_jumper():
     """MU jumper cable draped across the coupler shank between the inner receptacles."""
     x = MU_X[0]
-    cable = stroke(bezier((-x, REC_Y - 0.2), (-x + 0.3, 4.0), (x - 0.3, 4.0), (x, REC_Y - 0.2), 60), 0.22)
+    cable = stroke(bezier((-x, REC_Y - 0.2), (-x + 0.3, 5.1), (x - 0.3, 5.1), (x, REC_Y - 0.2), 60), 0.22)
     return cable.difference(plugs_mu())
 
 
@@ -404,7 +408,7 @@ def _plow_top(x):
     """Height of the plow's top edge: low beside the notch, rising to coupler
     height at the outer tips."""
     x = min(max(abs(x), 1.7), 5.95)
-    return 2.6 + (3.72 - 2.6) * (x - 1.7) / (5.95 - 1.7)
+    return LIFT + 2.6 + (3.72 - 2.6) * (x - 1.7) / (5.95 - 1.7)
 
 
 def plow():
@@ -412,20 +416,20 @@ def plow():
     outer tips up at coupler height, top edge sloping down to the coupler notch."""
     half = [(0, 0.1), (4.1, 0.1), (5.9, 0.85), (6.4, 1.4), (6.4, 3.7), (5.95, 3.72),
             (1.7, 2.6), (1.7, 1.35), (0, 1.35)]
-    return rounded(mirror(half), 0.06)
+    return affinity.translate(rounded(mirror(half), 0.06), 0, LIFT)
 
 
 def plow_doors():
     """Closed door on each wing (layer 8), inset from the plow edges."""
     xs = [2.15 + i * (6.05 - 2.15) / 40 for i in range(41)]
     top = [(x, _plow_top(x) - 0.3) for x in xs]
-    door = Polygon([(2.15, 0.75), (5.75, 0.75), (6.05, 1.15)] + top[::-1])
+    door = Polygon([(2.15, 0.75 + LIFT), (5.75, 0.75 + LIFT), (6.05, 1.15 + LIFT)] + top[::-1])
     return both(rounded(door.intersection(plow().buffer(-0.25, join_style=2)), 0.06))
 
 
 def plow_bar():
     """Reinforcing plate across the bottom centre, under the notch (layer 8)."""
-    return rounded(box(-1.95, 0.35, 1.95, 1.05), 0.06)
+    return rounded(box(-1.95, 0.35 + LIFT, 1.95, 1.05 + LIFT), 0.06)
 
 
 def plow_handles():
@@ -442,12 +446,12 @@ def door_hardware():
     parts = [rounded(box(2.35, 1.3, 2.55, 1.85), 0.05),
              rounded(box(5.55, 1.2, 5.8, 1.45), 0.04),
              rounded(box(5.55, 2.35, 5.8, 2.6), 0.04)]
-    return both(unary_union(parts))
+    return affinity.translate(both(unary_union(parts)), 0, LIFT)
 
 
 def cut_lever():
     """Uncoupling lever from the coupler head out onto the left plow door (layer 8)."""
-    return stroke([(-1.0, 2.45), (-1.9, 2.45), (-2.3, 2.1)], 0.15)
+    return stroke([(-1.0, 2.45 + LIFT), (-1.9, 2.45 + LIFT), (-2.3, 2.1 + LIFT)], 0.15)
 
 
 def silhouette():
@@ -576,7 +580,7 @@ def build():
 
 # ------------------------------------------------------------------ SVG out
 W_SVG = 2 * HALF_W + 2 * MARGIN
-H_SVG = TOP + 2 * MARGIN
+H_SVG = TOP - Y0 + 2 * MARGIN          # the sign runs from the plow bottom (Y0) to TOP
 
 
 def path_d(geom):

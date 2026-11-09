@@ -8,7 +8,8 @@ const path = require('path');
 const base = __dirname;
 const meta = JSON.parse(fs.readFileSync(path.join(base, 'svg', 'layers.json')));
 const { w: W, h: H, layers, lights, red_lights: reds = [] } = meta;
-const PX = 32;                                   // px per inch in the 3D views
+const PX = 32;
+const FH = Math.round(760 * (H + 0.8) / (W + 1.2));          // front view height for 760 px wide                                   // px per inch in the 3D views
 const outDir = path.join(base, 'renders');
 fs.mkdirSync(outDir, { recursive: true });
 
@@ -34,7 +35,7 @@ function frontHTML(lit, dark) {
     reds.map(([x, y]) => `<circle cx="${x}" cy="${y}" r="0.7" fill="url(#rglow)"/><circle cx="${x}" cy="${y}" r="0.12" fill="#ff5a4a"/>`).join('') : '';
   const bg = dark ? '#1b1a19' : '#d9d4cb';
   return `<html><body style="margin:0;background:${bg}">
-  <svg width="760" height="1060" viewBox="-0.6 -0.4 ${W + 1.2} ${H + 0.8}">
+  <svg width="760" height="${FH}" viewBox="-0.6 -0.4 ${W + 1.2} ${H + 0.8}">
    <defs><radialGradient id="glow"><stop offset="0" stop-color="#fffbe6" stop-opacity="0.95"/>
      <stop offset="0.25" stop-color="#fff2b8" stop-opacity="0.45"/><stop offset="1" stop-color="#ffe9a0" stop-opacity="0"/></radialGradient>
      <radialGradient id="rglow"><stop offset="0" stop-color="#ff6a55" stop-opacity="0.9"/><stop offset="1" stop-color="#ff2a1a" stop-opacity="0"/></radialGradient>
@@ -75,8 +76,8 @@ function stackHTML(tiltDeg, gap, w, h, scale = PX) {
     await page.screenshot({ path: path.join(outDir, file) });
     await page.close();
   };
-  await shoot(frontHTML(false, false), 'render_front.png', 760, 1060);
-  await shoot(frontHTML(true, true), 'render_lit.png', 760, 1060);
+  await shoot(frontHTML(false, false), 'render_front.png', 760, FH);
+  await shoot(frontHTML(true, true), 'render_lit.png', 760, FH);
   await shoot(stackHTML(40, 0, 900, 900, 34), 'render_angle.png', 900, 900);
   await shoot(stackHTML(64, 1.6, 900, 1400, 26), 'render_exploded.png', 900, 1400);
   const cards = layers.map((L, i) => `<div style="text-align:center;font:600 14px system-ui;color:#333">

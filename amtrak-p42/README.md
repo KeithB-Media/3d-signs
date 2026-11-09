@@ -1,4 +1,4 @@
-# Amtrak P42 (GE Genesis) in Phase V – 16" × 23" stacked MDF sign with working lights
+# Amtrak P42 (GE Genesis) in Phase V – 16" × 21" stacked MDF sign with working lights
 
 A head-on relief of GE Genesis P42DC #82 in Amtrak Phase V, cut from nine layers of 1/8"
 MDF and stacked. It's built the same way as the IAIS 510 sign: every layer is cut,
@@ -33,7 +33,7 @@ The layout follows a head-on photo of a Phase V P42, top to bottom:
   is a square plate (layer 7) with a round cap (layer 8): **blue on the outside, black on
   the inside**. Under the box, a small opening lets out a **black cable** that hangs over
   the anticlimber to a **yellow plug**.
-* **Anticlimber** across the full width.
+* **Anticlimber** across the full width, close above the sill.
 * **Pilot opening**: a cut-out in the bottom middle of the silver body (black floor on
   layer 6) over the coupler. Inside it:
   * **Coupler** shank, with an E-type head (knuckle gap, lock-lift hole) sitting down in the
@@ -53,9 +53,10 @@ The layout follows a head-on photo of a Phase V P42, top to bottom:
 * **Red sill stripe** at the front corners, either side of the plow.
 
 ## Cut files (`svg/`)
-All files are 16.5" × 23.5" (the sign plus a 1/4" margin) and share the same origin, so
+All files are 16.5" × 21.6" (the sign plus a 1/4" margin) and share the same origin, so
 every layer lines up. They contain cut lines only (red hairline, no fill). The sign is
-16" wide × 23" tall (about 1:7.5 scale), 1-1/8" thick. It fits a 24" × 18" laser bed if you rotate it.
+16" wide × 21.1" tall from the bottom of the plow to the top of the horns (about 1:7.5
+scale), 1-1/8" thick. It fits a 24" × 18" laser bed if you rotate it.
 
 | # | File | What it is |
 |---|------|------------|
