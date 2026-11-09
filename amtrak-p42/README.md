@@ -28,7 +28,11 @@ The layout follows a head-on photo of a Phase V P42, top to bottom:
   either side.
 * **Blue/silver line**: a shallow V across the nose, lowest just under the headlights,
   sweeping up at the cab corners.
-* **Ditch lights** on the silver, with the **dark lamp boxes** below them.
+* **Ditch lights** on the silver. Below each one is a **connector box**: a recess cut
+  out of the nose (black floor on layer 6) holding two covered connectors. Each connector
+  is a square plate (layer 7) with a round cap (layer 8): **blue on the outside, black on
+  the inside**. Under the box, a small opening lets out a **black cable** that hangs over
+  the anticlimber to a **yellow plug**.
 * **Anticlimber** across the full width.
 * **Pilot** (anthracite):
   * **Coupler**: draft gear and an E-type head with the knuckle gap and lock-lift hole.
@@ -63,9 +67,9 @@ every layer lines up. They contain cut lines only (red hairline, no fill). The s
 | 4 | `layer04_core_wiring.svg` | core: wire channels |
 | 5 | `layer05_glass_wiring.svg` | wire channels; its top shows through the windshield |
 | 6 | `layer06_body.svg` | carbody (blue + silver, windshield cut out), headlight recess floor, plow base, coupler pocket floor, horns, antenna |
-| 7 | `layer07_nose.svg` | raised nose (blue + silver) with headlight recess, headlight rings, coupler head, pilot face, gaskets with wipers, low grab irons, sill stripe, plow wings |
-| 8 | `layer08_lights_logo.svg` | red light + ditch light housings, number board, Travelmark, lamp boxes, anticlimber, coupler shank, receptacles, air hoses, nose grab irons, plow plates |
-| 9 | `layer09_front_gear.svg` | ditch light rings, red light rings, number digits, lamp box lenses, socket faces, MU + HEP jumpers with plugs, glad hands, uncoupling lever, plow brackets |
+| 7 | `layer07_nose.svg` | raised nose (blue + silver) with headlight and connector recesses, connector plates, headlight rings, coupler head, pilot face, gaskets with wipers, low grab irons, sill stripe, plow wings |
+| 8 | `layer08_lights_logo.svg` | red light + ditch light housings, number board, Travelmark, connector caps, yellow plugs, anticlimber, coupler shank, receptacles, air hoses, nose grab irons, plow plates |
+| 9 | `layer09_front_gear.svg` | ditch light rings, red light rings, number digits, hanging cables, socket faces, MU + HEP jumpers with plugs, glad hands, uncoupling lever, plow brackets |
 | – | `back_cover.svg` | battery pocket cover (screws to the back, slot for the switch) |
 
 The stack is 1-1/8" thick. Each piece is cut on its own, so where two paint colours meet
@@ -86,12 +90,13 @@ Other files:
 | Near-black | `#26292d` | the four plow layers (darker than the real one so the plow stands out) |
 | Anthracite Gray | `#4a4f52` | pilot face, low grab irons |
 | Amtrak Red | `#d9442f` | red light rings, sill stripe at the corners |
-| Black | | gaskets, wipers, number board, headlight recess floor, coupler pocket floor, light housings, lamp boxes, anticlimber, receptacles, hoses, jumpers, nose grab irons |
+| Black | | gaskets, wipers, number board, headlight and connector recess floors, coupler pocket floor, light housings, inner connector covers, hanging cables, anticlimber, receptacles, hoses, jumpers, nose grab irons |
 | White | | Travelmark, number digits |
 | Grey | | coupler, uncoupling lever, horns, antenna, socket faces |
 | Light grey | | MU plug heads, glad hands |
 | Chrome/silver | | headlight and ditch light rings |
-| Steel blue | `#5d7690` | lamp box lenses |
+| Bright blue | `#2f7fd0` | outer connector covers |
+| Yellow | `#e3b53c` | plugs on the hanging cables |
 
 ## Lights and battery
 * **Six 5 mm LEDs**: two warm-white headlights, two warm-white ditch lights and two red

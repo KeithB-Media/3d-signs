@@ -14,7 +14,7 @@ hanging keyholes. Layers 6-10 are the visible relief.
 The front layout follows a head-on photo of a Phase V P42: number board above
 the windshield, dark plate and Travelmark under it, twin round headlights with a
 red light either side, blue/silver split just under the headlights, ditch lights
-and dark lamp boxes on the silver, anticlimber, pilot with jumpers and hoses,
+and connector boxes (blue + black covers) on the silver, anticlimber, pilot with jumpers and hoses,
 and a big stepped plow.
 """
 import json
@@ -53,7 +53,8 @@ COLORS = {
     "white": "#f4f4f2",
     "gray": "#7d838a",        # coupler, horns, glad hands
     "plug": "#d8d5c8",        # jumper plug heads (light grey)
-    "lens": "#5d7690",        # lens of the lower lamp boxes
+    "conn_blue": "#2f7fd0",   # outer connector cover in the boxes under the ditch lights
+    "yellow": "#e3b53c",      # plug on the cable hanging from under each connector box
     "chrome": "#e6e8ea",
 }
 
@@ -61,7 +62,7 @@ COLORS = {
 HEADLIGHTS = [(-0.55, 12.9), (0.55, 12.9)]
 REDLIGHTS = [(-4.3, 12.9), (4.3, 12.9)]
 DITCHLIGHTS = [(-5.6, 10.1), (5.6, 10.1)]
-LAMP_BOXES = [(-5.6, 8.4), (5.6, 8.4)]       # dark boxes under the ditch lights (not lit)
+CONN_BOXES = [(-5.6, 8.4), (5.6, 8.4)]       # connector recesses under the ditch lights
 
 WIN_BOTTOM, WIN_TOP = 17.0, 19.65             # windshield: wide and short, as on the P42
 
@@ -320,12 +321,54 @@ def red_rings():
     return rings(REDLIGHTS, 0.31, LED_RING_ID / 2)
 
 
-def lamp_boxes():
-    return unary_union([rounded(box(x - 0.6, y - 0.5, x + 0.6, y + 0.5), 0.08) for x, y in LAMP_BOXES])
+def conn_recesses():
+    """Recesses cut out of the nose (layer 7) with a black floor (layer 6): the
+    connector box under each ditch light, and a small cable opening below it."""
+    boxes = [rounded(box(x - 0.62, y - 0.45, x + 0.62, y + 0.45), 0.08) for x, y in CONN_BOXES]
+    holes = [rounded(box(cx - 0.24, 7.2, cx + 0.24, 7.72), 0.06) for cx, _ in cable_tops()]
+    return unary_union(boxes + holes)
 
 
-def lamp_box_lenses():
-    return unary_union([rounded(box(x - 0.42, y - 0.32, x + 0.42, y + 0.32), 0.06) for x, y in LAMP_BOXES])
+def cable_tops():
+    return [(x * 0.93, 7.46) for x, _ in CONN_BOXES]
+
+
+def hanging_cables():
+    """Black cable (layer 9) from each small opening, down over the anticlimber,
+    ending in a yellow plug (layer 8). Returns (cables, plugs)."""
+    cables, plugs = [], []
+    for cx, cy in cable_tops():
+        s = 1 if cx > 0 else -1
+        pts = bezier((cx, cy), (cx, 6.6), (cx + s * 0.25, 6.2), (cx + s * 0.2, 5.75), 30)
+        cables.append(stroke(pts, 0.18))
+        px = cx + s * 0.2
+        plugs.append(rounded(box(px - 0.15, 5.2, px + 0.15, 5.72), 0.06))
+    plugs = unary_union(plugs)
+    return unary_union(cables).difference(plugs), plugs
+
+
+def _conn_centres():
+    """(outer, inner) connector centres: blue on the outside, black on the inside."""
+    outer, inner = [], []
+    for x, y in CONN_BOXES:
+        s = 1 if x > 0 else -1
+        outer.append((x + s * 0.29, y))
+        inner.append((x - s * 0.29, y))
+    return outer, inner
+
+
+def conn_plates():
+    """Square base plate of each covered connector (layer 7, flush with the nose).
+    Returns (outer - blue, inner - black)."""
+    sq = lambda pts: unary_union([rounded(box(x - 0.24, y - 0.24, x + 0.24, y + 0.24), 0.05) for x, y in pts])
+    outer, inner = _conn_centres()
+    return sq(outer), sq(inner)
+
+
+def conn_caps():
+    """Round cap on each plate (layer 8). Returns (outer - blue, inner - black)."""
+    outer, inner = _conn_centres()
+    return circles(outer, 0.17), circles(inner, 0.17)
 
 
 # ------------------------------------------------------------------ front end
@@ -491,14 +534,16 @@ def build():
         ("layer04_core_wiring", [("core", core.difference(channels()))], "core: wire channels"),
         ("layer05_glass_wiring", [("glass", core.difference(channels()))],
          "core: wire channels; top shows through the windshield"),
-        ("layer06_body", [("silver", cab.difference(blue).difference(COUPLER_POCKET)),
+        ("layer06_body", [("silver", cab.difference(blue).difference(COUPLER_POCKET).difference(conn_recesses())),
+                          ("black", cab.intersection(conn_recesses())),         # connector recess floors
                           ("blue", cab.intersection(blue).difference(headlight_recess())),
                           ("black", cab.intersection(headlight_recess())),     # recess floor
                           ("plow", plow().difference(body()).difference(COUPLER_POCKET)),
                           ("black", COUPLER_POCKET.intersection(silhouette())),     # pocket floor
                           ("gray", horn), ("gray", antenna)],
          "carbody (blue wave + silver, windshield cut out), plow base, horns, antenna"),
-        ("layer07_nose", [("silver", nose_.difference(blue)),
+        ("layer07_nose", [("silver", nose_.difference(blue).difference(conn_recesses())),
+                          ("conn_blue", conn_plates()[0]), ("black", conn_plates()[1]),
                           ("blue", nose_.intersection(blue).difference(headlight_recess())),
                           ("chrome", rings(HEADLIGHTS, 0.38, LED_RING_ID / 2)),  # lamps in the recess
                           ("gray", coupler_head()),
@@ -512,28 +557,29 @@ def build():
         ("layer08_lights_logo", [("black", light_housings().difference(leds)),
                                  ("black", number_board()),
                                  ("white", mark), ("white", word),
-                                 ("black", lamp_boxes()),
+                                 ("conn_blue", conn_caps()[0]), ("black", conn_caps()[1]),
+                                 ("yellow", hanging_cables()[1]),     # plugs sit on the pilot face
                                  ("black", anticlimber()),
                                  ("gray", coupler_shank()),
                                  ("black", receptacles()),
                                  ("black", air_hoses().difference(anticlimber())),
                                  ("black", grab_irons_nose()),
                                  ("plow", plow_plates())],
-         "light housings, number board, Travelmark, lamp boxes, anticlimber, coupler shank, "
+         "light housings, number board, Travelmark, connector caps, anticlimber, coupler shank, "
          "receptacles, air hoses, grab irons, plow plates"),
         ("layer09_front_gear", [("chrome", rings(DITCHLIGHTS, 0.37, LED_RING_ID / 2)),
                                 ("red", red_rings())] +
                                ([("white", digits)] if digits else []) +
                                [
-                                ("lens", lamp_box_lenses()),
                                 ("gray", socket_faces()),
                                 ("black", mu_jumper()),
                                 ("plug", plugs_mu()),
                                 ("black", hep_jumpers().union(plugs_hep())),  # one piece: glues to the receptacles
                                 ("plug", glad_hands()),
+                                ("black", hanging_cables()[0]),
                                 ("gray", cut_lever().difference(mu_jumper().buffer(0.04))),
                                 ("plow", plow_brackets())],
-         "ditch light rings, red light rings, number digits, lamp box lenses, socket faces, MU + HEP jumpers "
+         "ditch light rings, red light rings, number digits, hanging cables + plugs, socket faces, MU + HEP jumpers "
          "with plug heads, glad hands, uncoupling lever, plow brackets"),
     ]
     return layers
