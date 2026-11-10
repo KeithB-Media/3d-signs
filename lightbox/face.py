@@ -176,6 +176,8 @@ def main():
                     help="colours darker than this luminance (0-1) run full thickness and block light")
     ap.add_argument("--merge", action="append", default=[],
                     help='print one colour with another filament, e.g. "#f6cf14=#f5f5f2" (fewer AMS slots)')
+    ap.add_argument("--backing", default=None,
+                    help='backing filament colour, e.g. "#f5f5f2" (default: lightest colour in the art)')
     ap.add_argument("--coupon", type=float, nargs=3, metavar=("X", "Y", "D"),
                     help="test piece: only a D mm circle of the face, centred at X,Y mm (front view)")
     ap.add_argument("--rotate", type=float, default=0.0, help="rotate the art, degrees")
@@ -201,7 +203,7 @@ def main():
         disc = affinity.translate(disc.intersection(cut), -cx, -cy)
     art = unary_union(list(vis.values()))
     margin = disc.difference(art.buffer(0.01))                 # outside the art: black, no light
-    white = max(vis, key=_lum)                                  # lightest colour = backing filament
+    white = a.backing.lower() if a.backing else max(vis, key=_lum)   # backing filament
     dark = [c for c in vis if _lum(c) < a.blackout]
     black = dark[0] if dark else "#141414"
 
@@ -231,7 +233,7 @@ def main():
         m.export(os.path.join(a.outdir, name + ".stl"))
         parts.append((name, m))
         role = "blackout (full thickness)" if c == black else \
-            "skin + white backing" if c == white else "skin"
+            ("skin + backing" if c in vis else "backing (hidden)") if c == white else "skin"
         info.append(dict(file=name + ".stl", colour=c, role=role,
                          visible_area_cm2=round(vis.get(c, margin).area / 100, 1) if c in vis else None))
     write_3mf(os.path.join(a.outdir, "face.3mf"), parts)

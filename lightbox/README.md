@@ -20,8 +20,8 @@ Size: about **9.6" (245 mm) across**. The body is 240 mm, the opening shows 224 
 art, and the wired version is about 2" (50 mm) deep. The P1S bed is 256 mm, so this is
 close to the biggest one-piece size it can print. Smaller sizes are covered further down.
 
-**New to this? Start with the [test prints](test/README.md):** a colour coupon, a full-size
-fit test and a working 4" mini box.
+**New to this? Start with the [test prints](test/README.md):** a yellow-S colour coupon, a
+full-size fit test and a working 4" mini box.
 
 ---
 
@@ -61,7 +61,8 @@ Inkscape or Illustrator works too. The script writes:
 The model is **mirrored on purpose**. It prints face-down, so it looks backwards in the
 slicer and reads correctly on the finished sign.
 
-Options: `--skin 0.6` sets the colour thickness and `--back 1.0` the white thickness.
+Options: `--backing "#f5f5f2"` chooses the backing filament (by default, the lightest
+colour in the art). `--coupon X Y D` makes a small test piece. `--skin 0.6` sets the colour thickness and `--back 1.0` the white thickness.
 `--rotate 15` turns the art. `--merge "#f6cf14=#f5f5f2"` prints one colour with another
 filament (see *More than 4 colours*).
 

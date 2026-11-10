@@ -9,6 +9,7 @@ cavity   = 25;
 stand_extra = 12;
 part = "assembly";   // body | led_plate | bezel | stand | assembly
 demo_face_dir = "test/mini/";
+demo_face_colours = ["141414", "f6cf14", "f5f5f2"];   // yellow S test face
 
 if (part == "body") body(cable_angle = 270, mount_angle = 270);
 else if (part == "led_plate") led_plate();

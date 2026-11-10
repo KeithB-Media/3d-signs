@@ -140,3 +140,8 @@ when lit from behind.
 
 `lightbox_face/face.3mf` is ready for Bambu Studio and uses 5 filaments. It was made with:
 `python3 ../lightbox/face.py svg/preview_flat.svg lightbox_face`
+
+### Yellow S only
+`python3 yellow_s.py` writes `svg/preview_yellow_s.svg`: the black S with its yellow outline
+and the yellow pinstripe ring on black, with no flag. It is used for the light-box test
+prints because it needs only 3 filaments (black, yellow and a white backing).
