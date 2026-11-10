@@ -1,0 +1,329 @@
+[
+ {
+  "file": "spine_1_back_upper.svg",
+  "qty": 1,
+  "layers": [
+   1
+  ],
+  "color": "grey",
+  "material": "1/8in MDF",
+  "w": 1.95,
+  "h": 12.3
+ },
+ {
+  "file": "spine_1_back_cross.svg",
+  "qty": 1,
+  "layers": [
+   1
+  ],
+  "color": "grey",
+  "material": "1/8in MDF",
+  "w": 16.4,
+  "h": 9.3
+ },
+ {
+  "file": "spine_1_back_lower.svg",
+  "qty": 1,
+  "layers": [
+   1
+  ],
+  "color": "grey",
+  "material": "1/8in MDF",
+  "w": 1.75,
+  "h": 7.5
+ },
+ {
+  "file": "spine_2_mid_upper.svg",
+  "qty": 1,
+  "layers": [
+   2
+  ],
+  "color": "grey",
+  "material": "1/8in MDF",
+  "w": 1.95,
+  "h": 13.6
+ },
+ {
+  "file": "spine_2_mid_cross.svg",
+  "qty": 1,
+  "layers": [
+   2
+  ],
+  "color": "grey",
+  "material": "1/8in MDF",
+  "w": 16.4,
+  "h": 9.4
+ },
+ {
+  "file": "spine_2_mid_lower.svg",
+  "qty": 1,
+  "layers": [
+   2
+  ],
+  "color": "grey",
+  "material": "1/8in MDF",
+  "w": 1.75,
+  "h": 6.1
+ },
+ {
+  "file": "spine_3_front_upper.svg",
+  "qty": 1,
+  "layers": [
+   3
+  ],
+  "color": "grey",
+  "material": "1/8in MDF",
+  "w": 1.49,
+  "h": 12.95
+ },
+ {
+  "file": "spine_3_front_cross.svg",
+  "qty": 1,
+  "layers": [
+   3
+  ],
+  "color": "grey",
+  "material": "1/8in MDF",
+  "w": 16.15,
+  "h": 9.35
+ },
+ {
+  "file": "spine_3_front_lower.svg",
+  "qty": 1,
+  "layers": [
+   3
+  ],
+  "color": "grey",
+  "material": "1/8in MDF",
+  "w": 1.35,
+  "h": 6.8
+ },
+ {
+  "file": "blade_railroad.svg",
+  "qty": 1,
+  "layers": [
+   4
+  ],
+  "color": "white",
+  "material": "1/8in MDF",
+  "w": 18.5,
+  "h": 3.9
+ },
+ {
+  "file": "blade_crossing.svg",
+  "qty": 1,
+  "layers": [
+   5
+  ],
+  "color": "white",
+  "material": "1/8in MDF",
+  "w": 18.5,
+  "h": 3.9
+ },
+ {
+  "file": "letters_railroad.svg",
+  "qty": 8,
+  "layers": [
+   5
+  ],
+  "color": "black",
+  "material": "1/8in MDF",
+  "w": 12.51,
+  "h": 2.15
+ },
+ {
+  "file": "letters_crossing.svg",
+  "qty": 8,
+  "layers": [
+   6
+  ],
+  "color": "black",
+  "material": "1/8in MDF",
+  "w": 12.9,
+  "h": 2.2
+ },
+ {
+  "file": "tracks_plate.svg",
+  "qty": 1,
+  "layers": [
+   4
+  ],
+  "color": "white",
+  "material": "1/8in MDF",
+  "w": 9.5,
+  "h": 6.0
+ },
+ {
+  "file": "letters_tracks.svg",
+  "qty": 7,
+  "layers": [
+   5
+  ],
+  "color": "black",
+  "material": "1/8in MDF",
+  "w": 8.65,
+  "h": 1.92
+ },
+ {
+  "file": "plaque.svg",
+  "qty": 1,
+  "layers": [
+   4
+  ],
+  "color": "blue",
+  "material": "1/8in MDF",
+  "w": 4.8,
+  "h": 3.5
+ },
+ {
+  "file": "lamp_disc.svg",
+  "qty": 2,
+  "layers": [
+   4
+  ],
+  "color": "black",
+  "material": "1/8in MDF",
+  "w": 14.7,
+  "h": 7.5
+ },
+ {
+  "file": "lamp_housing_back.svg",
+  "qty": 2,
+  "layers": [
+   5
+  ],
+  "color": "black",
+  "material": "1/8in MDF",
+  "w": 7.3,
+  "h": 3.8
+ },
+ {
+  "file": "lamp_cavity_ring.svg",
+  "qty": 6,
+  "layers": [
+   6,
+   7,
+   8
+  ],
+  "color": "black",
+  "material": "1/8in MDF",
+  "w": 17.8,
+  "h": 7.3
+ },
+ {
+  "file": "lamp_lens_pocket.svg",
+  "qty": 2,
+  "layers": [
+   9
+  ],
+  "color": "black",
+  "material": "1/8in MDF",
+  "w": 7.3,
+  "h": 3.8
+ },
+ {
+  "file": "lens.svg",
+  "qty": 2,
+  "layers": [
+   9
+  ],
+  "color": "red",
+  "material": "1/8in red acrylic",
+  "w": 5.5,
+  "h": 2.9
+ },
+ {
+  "file": "lamp_bezel.svg",
+  "qty": 2,
+  "layers": [
+   10
+  ],
+  "color": "black",
+  "material": "1/8in MDF",
+  "w": 7.3,
+  "h": 3.8
+ },
+ {
+  "file": "lamp_hood.svg",
+  "qty": 8,
+  "layers": [
+   11,
+   12,
+   13,
+   14
+  ],
+  "color": "black",
+  "material": "1/8in MDF",
+  "w": 17.8,
+  "h": 4.85
+ },
+ {
+  "file": "box_frame.svg",
+  "qty": 2,
+  "layers": [
+   4,
+   8
+  ],
+  "color": "grey",
+  "material": "1/8in MDF",
+  "w": 9.1,
+  "h": 3.4
+ },
+ {
+  "file": "box_frame_button.svg",
+  "qty": 3,
+  "layers": [
+   5,
+   6,
+   7
+  ],
+  "color": "grey",
+  "material": "1/8in MDF",
+  "w": 13.5,
+  "h": 3.4
+ },
+ {
+  "file": "box_frame_magnets.svg",
+  "qty": 1,
+  "layers": [
+   9
+  ],
+  "color": "grey",
+  "material": "1/8in MDF",
+  "w": 4.7,
+  "h": 3.4
+ },
+ {
+  "file": "box_lid_1_magnets.svg",
+  "qty": 1,
+  "layers": [
+   10
+  ],
+  "color": "grey",
+  "material": "1/8in MDF",
+  "w": 4.7,
+  "h": 3.4
+ },
+ {
+  "file": "box_lid_2_cover.svg",
+  "qty": 1,
+  "layers": [
+   11
+  ],
+  "color": "grey",
+  "material": "1/8in MDF",
+  "w": 4.7,
+  "h": 3.4
+ },
+ {
+  "file": "box_lid_3_label.svg",
+  "qty": 1,
+  "layers": [
+   12
+  ],
+  "color": "grey",
+  "material": "1/8in MDF",
+  "w": 4.1,
+  "h": 2.8
+ }
+]

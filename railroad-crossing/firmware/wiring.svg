@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="470" viewBox="0 0 900 470" font-family="Helvetica, Arial, sans-serif" font-size="15">
+  <rect width="900" height="470" fill="#fff"/>
+  <text x="20" y="32" font-size="20" font-weight="bold">Flasher wiring (all inside the junction box)</text>
+
+  <!-- battery -->
+  <rect x="30" y="140" width="150" height="120" rx="8" fill="#eee" stroke="#333" stroke-width="2"/>
+  <text x="105" y="180" text-anchor="middle" font-weight="bold">3 x AA holder</text>
+  <text x="105" y="200" text-anchor="middle">with on/off switch</text>
+  <text x="105" y="220" text-anchor="middle">4.5 V</text>
+  <text x="188" y="155" fill="#c00" font-weight="bold">+</text>
+  <text x="112" y="280" font-weight="bold">−</text>
+
+  <!-- ATtiny -->
+  <rect x="340" y="110" width="170" height="200" rx="6" fill="#222"/>
+  <circle cx="425" cy="122" r="7" fill="#555"/>
+  <text x="425" y="215" text-anchor="middle" fill="#fff" font-weight="bold">ATtiny85</text>
+  <g fill="#fff" font-size="13">
+    <text x="348" y="150">1 RST</text><text x="348" y="195">2 PB3</text><text x="348" y="240">3 PB4</text><text x="348" y="285">4 GND</text>
+    <text x="502" y="150" text-anchor="end">VCC 8</text><text x="502" y="195" text-anchor="end">PB2 7</text>
+    <text x="502" y="240" text-anchor="end">PB1 6</text><text x="502" y="285" text-anchor="end">PB0 5</text>
+  </g>
+
+  <!-- power -->
+  <path d="M180 150 H260 V80 H530 V145 H510" fill="none" stroke="#c00" stroke-width="3"/>
+  <path d="M105 260 V420 H860" fill="none" stroke="#000" stroke-width="3"/>
+  <path d="M340 280 H300 V420" fill="none" stroke="#000" stroke-width="3"/>
+
+  <!-- LEDs -->
+    <path d="M510 280 H600" stroke="#06c" stroke-width="3"/>
+  <rect x="600" y="270" width="60" height="20" fill="#f7e7b4" stroke="#333"/><text x="630" y="306" text-anchor="middle" font-size="12">180 Ω</text>
+  <path d="M660 280 H720" stroke="#06c" stroke-width="3"/>
+  <polygon points="720,265 720,295 748,280" fill="#d11"/><path d="M748 265 V295" stroke="#000" stroke-width="3"/>
+  <path d="M748 280 H800 V420" stroke="#000" stroke-width="3" fill="none"/>
+  <text x="732" y="258" text-anchor="middle" font-weight="bold">LEFT lamp</text>
+
+  <path d="M510 235 H560 V200 H600" stroke="#06c" stroke-width="3" fill="none"/>
+  <rect x="600" y="190" width="60" height="20" fill="#f7e7b4" stroke="#333"/><text x="630" y="226" text-anchor="middle" font-size="12">180 Ω</text>
+  <path d="M660 200 H720" stroke="#06c" stroke-width="3"/>
+  <polygon points="720,185 720,215 748,200" fill="#d11"/><path d="M748 185 V215" stroke="#000" stroke-width="3"/>
+  <path d="M748 200 H830 V420" stroke="#000" stroke-width="3" fill="none"/>
+  <text x="732" y="178" text-anchor="middle" font-weight="bold">RIGHT lamp</text>
+  <text x="560" y="400" font-size="13" fill="#555">LED long leg (+) toward the resistor</text>
+
+  <!-- button -->
+  <path d="M510 190 H570 V130 H600" stroke="#090" stroke-width="3" fill="none"/>
+  <circle cx="608" cy="130" r="5" fill="#090"/><circle cx="652" cy="130" r="5" fill="#090"/>
+  <path d="M604 118 H656 M630 118 V106" stroke="#090" stroke-width="3"/>
+  <path d="M660 130 H860 V420" stroke="#000" stroke-width="3" fill="none"/>
+  <text x="630" y="100" text-anchor="middle">push button (optional)</text>
+
+  <!-- piezo -->
+  <path d="M340 235 H215 V320" stroke="#909" stroke-width="3" fill="none"/>
+  <rect x="195" y="320" width="40" height="40" rx="20" fill="#ddd" stroke="#909" stroke-width="3"/>
+  <path d="M215 360 V420" stroke="#000" stroke-width="3" fill="none"/>
+  <text x="240" y="385">piezo bell (optional)</text>
+</svg>
