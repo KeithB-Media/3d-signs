@@ -176,6 +176,8 @@ def main():
                     help="colours darker than this luminance (0-1) run full thickness and block light")
     ap.add_argument("--merge", action="append", default=[],
                     help='print one colour with another filament, e.g. "#f6cf14=#f5f5f2" (fewer AMS slots)')
+    ap.add_argument("--coupon", type=float, nargs=3, metavar=("X", "Y", "D"),
+                    help="test piece: only a D mm circle of the face, centred at X,Y mm (front view)")
     ap.add_argument("--rotate", type=float, default=0.0, help="rotate the art, degrees")
     a = ap.parse_args()
 
@@ -191,6 +193,12 @@ def main():
         vis = {c: affinity.rotate(g, a.rotate, origin=(0, 0)) for c, g in vis.items()}
 
     disc = Point(0, 0).buffer(a.disc / 2, quad_segs=180)
+    if a.coupon:                                                # cut out a small test piece
+        cx, cy, cd = a.coupon
+        cut = Point(cx, cy).buffer(cd / 2, quad_segs=90)
+        vis = {c: affinity.translate(g.intersection(cut), -cx, -cy) for c, g in vis.items()}
+        vis = {c: g for c, g in vis.items() if g.area > 0.5}
+        disc = affinity.translate(disc.intersection(cut), -cx, -cy)
     art = unary_union(list(vis.values()))
     margin = disc.difference(art.buffer(0.01))                 # outside the art: black, no light
     white = max(vis, key=_lum)                                  # lightest colour = backing filament
@@ -204,6 +212,9 @@ def main():
             solids.setdefault(black, []).append((g, 0, T))
         else:
             solids.setdefault(c, []).append((g, 0, a.skin))
+    # white skin: overlap it into the white backing (a hair inside it) so the two merge cleanly
+    if white in solids:
+        solids[white] = [(g.buffer(-0.002), 0, a.skin + 0.1) for g, z0, z1 in solids[white]]
     solids.setdefault(black, []).append((margin, 0, T))
     blackout = unary_union([g for g, z0, z1 in solids[black]])
     solids.setdefault(white, []).append((disc.difference(blackout), a.skin, T))

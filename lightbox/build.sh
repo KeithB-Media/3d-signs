@@ -23,9 +23,16 @@ o stl/wall_projecting/body_a_battery.stl -D 'part="body_a"' -D battery=true  wal
 o stl/wall_projecting/body_b.stl         -D 'part="body_b"'                  wall_projecting.scad
 o stl/wall_projecting/arm.stl            -D 'part="arm_print"'                     wall_projecting.scad
 
+# test set (see test/README.md)
+mkdir -p test/full_size_fit test/mini
+for p in body_arc bezel_arc face_arc; do o test/full_size_fit/$p.stl -D "part=\"$p\"" test_fit.scad; done
+for p in body led_plate bezel stand; do o test/mini/$p.stl -D "part=\"$p\"" test_mini.scad; done
+
 if [ "${NO_RENDERS:-}" = "" ]; then
   r() { echo "  $1"; openscad -q --preview --imgsize=1400,1050 --colorscheme=Tomorrow --viewall --autocenter \
           --projection=p -o "$1" "${@:2}"; }
+  r test/mini/mini_assembly.png --camera=0,0,0,70,0,-25,0  test_mini.scad
+  r test/full_size_fit/fit_parts.png --camera=0,0,0,50,0,20,0 test_fit.scad
   r renders/wall_flat.png        --camera=0,0,0,70,0,-30,0  wall_flat.scad
   r renders/desk_stand.png       --camera=0,0,0,70,0,-25,0  desk_stand.scad
   r renders/wall_projecting.png  --camera=0,0,0,75,0,150,0  wall_projecting.scad

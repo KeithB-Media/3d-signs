@@ -1,0 +1,39 @@
+{
+ "disc_mm": 239.0,
+ "window_mm": 224.0,
+ "art_mm": 226.0,
+ "skin_mm": 0.6,
+ "thickness_mm": 1.6,
+ "filaments": [
+  {
+   "file": "face_141414.stl",
+   "colour": "#141414",
+   "role": "blackout (full thickness)",
+   "visible_area_cm2": 8.1
+  },
+  {
+   "file": "face_f6cf14.stl",
+   "colour": "#f6cf14",
+   "role": "skin",
+   "visible_area_cm2": 4.7
+  },
+  {
+   "file": "face_1f2f82.stl",
+   "colour": "#1f2f82",
+   "role": "skin",
+   "visible_area_cm2": 4.7
+  },
+  {
+   "file": "face_f5f5f2.stl",
+   "colour": "#f5f5f2",
+   "role": "skin + white backing",
+   "visible_area_cm2": 5.2
+  },
+  {
+   "file": "face_d0202e.stl",
+   "colour": "#d0202e",
+   "role": "skin",
+   "visible_area_cm2": 5.6
+  }
+ ]
+}

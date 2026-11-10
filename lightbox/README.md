@@ -20,6 +20,9 @@ Size: about **9.6" (245 mm) across**. The body is 240 mm, the opening shows 224 
 art, and the wired version is about 2" (50 mm) deep. The P1S bed is 256 mm, so this is
 close to the biggest one-piece size it can print. Smaller sizes are covered further down.
 
+**New to this? Start with the [test prints](test/README.md):** a colour coupon, a full-size
+fit test and a working 4" mini box.
+
 ---
 
 ## 1. How the face glows
@@ -187,4 +190,5 @@ picture.
 * `lightbox.scad`: the shared parts library (all sizes are here).
 * `wall_flat.scad`, `desk_stand.scad`, `wall_projecting.scad`: the three styles. Open one
   in OpenSCAD to see the assembly, or set `part = "body"` (etc.) to export a single part.
+* `test_fit.scad`, `test_mini.scad`, `test/`: the test prints.
 * `build.sh`: exports all STLs to `stl/` and the pictures to `renders/`.

@@ -34,7 +34,7 @@ pilot     = 2.6;    // pilot hole the screw cuts its own thread in
 screw_clear = 3.4;
 
 mount_z   = 14;     // height of the cradle/arm screws and cable slot above the back
-mount_sp  = 50;     // spacing of the two cradle/arm screws (around the rim)
+mount_sp  = min(50, od / 4);  // spacing of the two cradle/arm screws (around the rim)
 cable_slot = [15, 9];  // fits a USB-A plug (around, along)
 bezel_screw_angles = [90, 210, 330];
 
@@ -121,7 +121,7 @@ module body(battery = false, port_angle = 270, cable_angle = undef, mount_angle 
         if (battery) at_angle(port_angle, back_t + port_h / 2)
             cube([4 * wall, bank_port[0], port_h], center = true);
         // keyholes for flat wall mounting (screw heads sit in the bay behind the LED plate)
-        if (keyholes) for (x = [-60, 60]) translate([x, 55, -1]) {
+        if (keyholes) for (x = [-1, 1]) translate([x * od / 4, od * 0.23, -1]) {
             cylinder(d = 9.5, h = back_t + 2, $fn = 32);
             hull() for (y = [0, 10]) translate([0, y, 0]) cylinder(d = 4.6, h = back_t + 2, $fn = 24);
         }
@@ -140,7 +140,7 @@ module led_plate() {
     difference() {
         cylinder(r = IR - clear - 0.2, h = plate_t);
         translate([IR - 8, -9, -1]) cube([20, 18, plate_t + 2]);           // cable notch
-        for (r = [95, 50]) for (a = [0 : 120 : 359])                         // tiny marks for
+        for (r = [IR * 0.81, IR * 0.43]) for (a = [0 : 120 : 359])                         // tiny marks for
             rotate([0, 0, a]) translate([r, 0, plate_t - 0.4]) cylinder(d = 2, h = 1, $fn = 12); // the LED rings
     }
 }
@@ -170,13 +170,13 @@ module blank_face() { cylinder(d = face_d, h = face_t); }
 // ------------------------------------------------------------ DESK CRADLE
 // The cup lies in the cradle with its face toward -y. Two screws from inside the cup.
 // battery: power-bank pocket in the base, it slides in from the right-hand side.
-stand_w     = 160;
+stand_w     = round(od * 2 / 3);
 stand_extra = 18;     // how far the base reaches past the body, front and back
 module desk_stand(battery = false, body_battery = false) {
     H  = body_h(body_battery);
     L  = H + 2 * stand_extra;
     hc = battery ? bank[2] + 7 : 7;          // base thickness under the lowest point of the body
-    top = hc + 24;
+    top = hc + min(24, R - sqrt(R * R - pow(stand_w / 2 - 8, 2)));
     ymount = H / 2 - mount_z;                 // body back is at +y
     difference() {
         hull() for (x = [-1, 1], y = [-1, 1])
