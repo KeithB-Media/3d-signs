@@ -44,8 +44,8 @@ Other files:
 * Layers 1–4 are centred squares and a disc. Line up their centres and corners, or drill a small
   pin hole through the centre of each on the laser.
 * Layer 5 is 13 loose pieces. Glue them down one at a time. To place them, use the template, or cut
-  layer 5 again from scrap card and use the sheet with the holes in it as a stencil. Keep the
-  inner parts of the A and R: they come out of the letters and you don't glue them down.
+  layer 5 again from scrap card and use the sheet with the holes in it as a stencil. The small
+  pieces that drop out of the middle of the A and R are scrap.
 * The lettering is about 0.93" tall, with strokes about 0.13" wide. The thinnest parts are the tips
   of the tree's branches (spikes thinner than 0.05" are trimmed). Use hold-downs or tabs so the
   small pieces don't fall through the bed.
