@@ -129,3 +129,14 @@ A simplified, one-tone version of the design for laser-engraving round coasters
 * **Engraving tip.** Slate needs only light power: you're bleaching the surface, not cutting
   into it. Run a small test on the back or a spare tile first. A wipe with a little mineral
   oil afterwards deepens the dark slate and makes the engraving pop.
+
+## Light-box face (`lightbox_face/`)
+
+A flat, multi-colour 3-D-printed face of this design for the round light boxes in
+[`../lightbox`](../lightbox/README.md). It is 239 mm across and 1.6 mm thick, and glows
+when lit from behind.
+
+![lit](lightbox_face/face_lit.png)
+
+`lightbox_face/face.3mf` is ready for Bambu Studio and uses 5 filaments. It was made with:
+`python3 ../lightbox/face.py svg/preview_flat.svg lightbox_face`
