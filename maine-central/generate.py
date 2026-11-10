@@ -3,6 +3,7 @@
 
 * square/  - 18" x 13-1/8" "The Pine Tree Route" herald, orange on green (3 layers)
 * round/   - 14" round herald, yellow on green (4 layers)
+* round-rim/ - 14" round, yellow ring on the outer edge, flush with the lettering (2 layers)
 
 The lettering and trees come from trace.json (traced from the herald images in
 source/ by trace.py); rings, borders and discs are drawn exactly. Units are inches,
@@ -47,6 +48,8 @@ RD_PX = RD_D / 250.0                   # inches per image pixel (0.056")
 RD_R = RD_D / 2
 RD_RING_OUT = 6.38                     # yellow ring, outer radius (measured, 114 px)
 RD_RING_IN = 6.15                      # yellow ring, inner radius = green field (110 px)
+RIM_W = 0.35                           # round-rim: width of the yellow ring on the outer edge
+RIM_ART_SCALE = (RD_R - RIM_W) / RD_RING_IN   # art grows to keep its gap to the ring (~1.08)
 
 
 # ------------------------------------------------------------------ helpers
@@ -152,6 +155,23 @@ def round_layers():
     ]
 
 
+def round_rim_layers():
+    """Round sign with the yellow ring moved to the outer edge. The ring is cut from the
+    same 1/4" sheet as the lettering and glued straight onto the backer, so its top is
+    flush with the top of the letters."""
+    shapes = TRACE["round"]["shapes"]
+    c = RD_R
+    art = unary_union([clean(shape_poly(sh, RD_PX)) for sh in shapes])
+    art = affinity.scale(art, RIM_ART_SCALE, RIM_ART_SCALE, origin=(c, c))
+    ring = circle(c, c, RD_R).difference(circle(c, c, RD_R - RIM_W))
+    return (RD_D, RD_D), [
+        ("layer1_base_green", "green", circle(c, c, RD_R), 0.25,
+         f"{RD_D:.2f}\" disc - green field / backer"),
+        ("layer2_yellow_rim_and_art", "yellow", unary_union([ring, art]), 0.25,
+         f"{RIM_W}\" yellow edge ring + lettering and pine tree (separate pieces)"),
+    ]
+
+
 # ------------------------------------------------------------------ SVG out
 def path_d(geom):
     out = []
@@ -197,7 +217,7 @@ def write_sign(name, size, layers):
         f.write(svg_doc(size, body, "Glue-up placement template (print 1:1)"))
 
     with open(os.path.join(out, "layers.json"), "w") as f:
-        json.dump({"w": size[0], "h": size[1], "round": name == "round",
+        json.dump({"w": size[0], "h": size[1], "round": name.startswith("round"),
                    "layers": [{"stem": s, "color": COLORS[c], "d": d, "z": zz, "t": t}
                               for s, c, d, zz, t in preview]}, f)
     print(f"   total stack height: {z:.3f}\"")
@@ -206,6 +226,7 @@ def write_sign(name, size, layers):
 def main():
     write_sign("square", *square_layers())
     write_sign("round", *round_layers())
+    write_sign("round-rim", *round_rim_layers())
 
 
 if __name__ == "__main__":

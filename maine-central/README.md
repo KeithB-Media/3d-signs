@@ -37,6 +37,26 @@ To change the size, edit `SQ_W` in `generate.py`; the height follows. The ring a
 
 Total thickness is about 3/4". Layers 1–3 are concentric discs. Centre each one on the layer below.
 
+## Round sign, ring on the edge (`round-rim/svg/`)
+
+| Front | Angle |
+|---|---|
+| ![round-rim](round-rim/renders/render_front.png) | ![round-rim angle](round-rim/renders/render_angle.png) |
+
+Same herald, but the yellow ring sits on the outer edge, and its top is flush with the top of the lettering.
+
+| # | File | Paint | Suggested stock | What it is |
+|---|------|-------|-----------------|------------|
+| 1 | `layer1_base_green.svg` | Green (edge yellow) | 1/4" | 14.00" disc – green field and backer |
+| 2 | `layer2_yellow_rim_and_art.svg` | Yellow | 1/4" | 0.35" ring around the edge, plus the lettering and tree (14 pieces) |
+
+* The ring, letters and tree are all cut from the same 1/4" sheet and glued straight onto the
+  backer, so they all finish at the same height. Total thickness is 1/2".
+* Line the ring up with the edge of the backer first, then place the letters and tree inside it.
+* Paint the edge of the backer yellow so the whole side of the sign reads as one tall yellow band.
+* With the outer green rim gone, the lettering and tree are scaled up 8%. That keeps the same
+  gap to the ring as on the herald. Ring width is `RIM_W` in `generate.py`.
+
 ## Files and build notes
 All cut files contain cut lines only (red hairline, no fill), at actual size in inches. All the layers
 of a sign share the same page size, so they line up.
@@ -68,4 +88,5 @@ python3 trace.py           # source/*.png -> trace.json (only needed if the imag
 python3 generate.py        # trace.json  -> square/svg/ and round/svg/
 node render.js square      # renders (needs Playwright + Chromium)
 node render.js round
+node render.js round-rim
 ```
