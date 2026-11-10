@@ -152,22 +152,28 @@ node render.js square           # likewise: square, rectangle, round-ring
 
 | Folder | Sign size | How it cuts | Strips | 4 × 8 sheets |
 |---|---|---|---|---|
-| `cut-sheets/14in_blocks` | 14" (rectangle 24" × 9") | 23.5" blocks, one job each | 16 | 8 |
-| `cut-sheets/14in_full-strip` | 14" | whole 96" strip as one job | 12 | 6 |
-| `cut-sheets/12in_blocks` | 12" (rectangle 20.6" × 7.7") | 23.5" blocks, one job each | 10 | 5 |
-| `cut-sheets/12in_full-strip` | 12" | whole 96" strip as one job | 8 | 4 |
+| `cut-sheets/14in_full-strip` | 14" (rectangle 24" × 9") | **whole 96" strip as one job (feeder)** | 11 | 6 (5½) |
+| `cut-sheets/12in_full-strip` | 12" (rectangle 20.6" × 7.7") | **whole 96" strip as one job (feeder)** | 8 | 4 |
+| `cut-sheets/14in_blocks` | 14" | 23.5" blocks, one job each | 16 | 8 |
+| `cut-sheets/12in_blocks` | 12" | 23.5" blocks, one job each | 9 | 5 |
 
 * **Blocks** are the safe layout. No part crosses a 23.5" block line, so each block can run
   as its own job (`blocks/strip_NN_X.svg`). At 14", the rectangle's base and pinstripe are
   longer than 23.5", so they go in a 72.5" **LONG** section at the start of strips 1–4. Those
   strips need the feeder to cut one part longer than 23.5" in a single job. At 12" every part fits a block.
-* **Full-strip** files assume the feeder cuts the whole 96" in one job. Parts pack more tightly.
+* **Full-strip** files are for a feeder that moves the whole 96" strip through the laser in
+  one job. They're the ones to use with the R1. Parts can sit anywhere along the strip, so the discs are
+  staggered in two rows, 9 or 10 per strip.
+  At 14" the last strip is less than half used. Use the rest for spares or test pieces.
 * Red = cut. Blue = block lines and part labels (for example `RND L4 #3 gray` = round sign,
   layer 4, set 3, paint gray). Set blue to *not output*.
   The labels also give the paint colour, so you can sort pieces for painting by colour.
 * `preview.png` in each folder shows every strip.
 * Smaller parts (the G's, bars and lettering) are cut in the leftover space beside the discs
-  and squares.
+  and squares. Each "Guilford Rail System" line is nested as one unit, so its letters stay
+  together and in order.
+* Greedy packing depends on which parts go first, so `nest.py` tries three orders and keeps
+  the one that uses the fewest strips.
 * `python3 nest.py --rings` cuts the hidden lower layers as rings, with a 0.75" glue land, so that
   parts can be cut from their centres. On these designs it saves at most one strip, because
   the layout is limited by each disc's outside size, not its area. It also leaves the field

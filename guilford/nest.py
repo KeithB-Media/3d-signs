@@ -64,9 +64,18 @@ def pieces():
                 # a ring keeps LAND of glue under the next layer up; the backer (copy a of layer 1) stays solid
                 ring = RINGS and i < field_i and not (i == 1 and c == 0)
                 g = g0.difference(above.buffer(-LAND)) if ring else g0
+                # a layer made of a big part plus small ones (the G and its lettering) is
+                # nested as two units: the G, and the lettering kept together as one line
+                units = [g]
+                if isinstance(g, MultiPolygon):
+                    big = [q for q in g.geoms if q.area > 0.3 * g.area]
+                    rest = [q for q in g.geoms if q.area <= 0.3 * g.area]
+                    units = big + ([MultiPolygon(rest)] if rest else [])
                 for s in range(1, SETS + 1):
-                    tag = f"{code} L{i}{'ab'[c] if copies > 1 else ''}{' ring' if ring else ''} #{s}"
-                    out.append(dict(label=tag, color=color, geom=g))
+                    for u, geom_u in enumerate(units):
+                        part = "" if len(units) == 1 else (" G" if u == 0 else " text")
+                        tag = f"{code} L{i}{'ab'[c] if copies > 1 else ''}{' ring' if ring else ''}{part} #{s}"
+                        out.append(dict(label=tag, color=color, geom=geom_u))
     return out
 
 
@@ -141,14 +150,12 @@ def fits_block(geom):
 def main():
     import shutil
     shutil.rmtree(OUT, ignore_errors=True)
-    os.makedirs(os.path.join(OUT, "blocks"), exist_ok=True)
+    os.makedirs(os.path.join(OUT, "blocks") if not FULL else OUT, exist_ok=True)
 
-    ps = sorted(pieces(), key=lambda p: -p["geom"].area)
+    ps = pieces()
     long_ps = [p for p in ps if not fits_block(p["geom"])]
     short_ps = [p for p in ps if fits_block(p["geom"])]
 
-    strips = []            # each strip: list of (x offset, Region)
-    longs = []
     cache = {}
 
     def var(p):
@@ -157,39 +164,61 @@ def main():
             cache[k] = variants(p["geom"])
         return cache[k]
 
-    for p in long_ps:
-        for reg in longs:
-            g = reg.try_place(var(p))
-            if g:
-                reg.placed.append((p, g))
-                break
-        else:
-            reg = Region(LONG)
-            g = reg.try_place(var(p))
-            if not g:
-                raise SystemExit(f"{p['label']} does not fit a {LONG}\" section")
-            reg.placed.append((p, g))
-            longs.append(reg)
-            strips.append([(0.0, reg), (LONG, Region(BLOCK))])
+    def pack(long_ps, short_ps):
+        strips = []            # each strip: list of (x offset, Region)
+        longs = []
 
-    regions = [r for s in strips for _, r in s]
-    for p in short_ps:
-        for reg in regions:
-            g = reg.try_place(var(p))
-            if g:
+        for p in long_ps:
+            for reg in longs:
+                g = reg.try_place(var(p))
+                if g:
+                    reg.placed.append((p, g))
+                    break
+            else:
+                reg = Region(LONG)
+                g = reg.try_place(var(p))
+                if not g:
+                    raise SystemExit(f"{p['label']} does not fit a {LONG}\" section")
                 reg.placed.append((p, g))
-                break
-        else:
-            reg = Region(BLOCK)
-            g = reg.try_place(var(p))
-            if not g:
-                raise SystemExit(f"{p['label']} does not fit a block")
-            reg.placed.append((p, g))
-            regions.append(reg)
-            per_strip = int(STRIP_L // BLOCK)
-            if not strips or len(strips[-1]) >= per_strip or strips[-1][0][1].length != BLOCK:
-                strips.append([])
-            strips[-1].append((len(strips[-1]) * BLOCK, reg))
+                longs.append(reg)
+                strips.append([(0.0, reg), (LONG, Region(BLOCK))])
+
+        regions = [r for s in strips for _, r in s]
+        for p in short_ps:
+            for reg in regions:
+                g = reg.try_place(var(p))
+                if g:
+                    reg.placed.append((p, g))
+                    break
+            else:
+                reg = Region(BLOCK)
+                g = reg.try_place(var(p))
+                if not g:
+                    raise SystemExit(f"{p['label']} does not fit a block")
+                reg.placed.append((p, g))
+                regions.append(reg)
+                per_strip = int(STRIP_L // BLOCK)
+                if not strips or len(strips[-1]) >= per_strip or strips[-1][0][1].length != BLOCK:
+                    strips.append([])
+                strips[-1].append((len(strips[-1]) * BLOCK, reg))
+        return strips
+
+    # greedy packing depends on the order: try a few and keep the fewest strips
+    def size_key(p):
+        minx, miny, maxx, maxy = p["geom"].bounds
+        return max(maxx - minx, maxy - miny)
+
+    orders = [lambda q: -q["geom"].area, lambda q: -size_key(q),
+              lambda q: -(size_key(q) ** 2 + q["geom"].area)]
+    best = None
+    for key in orders:
+        st = pack(sorted(long_ps, key=key), sorted(short_ps, key=key))
+        last = sum(len(r.placed) for _, r in st[-1])
+        score = (len(st), last)
+        print(f"  order {orders.index(key) + 1}: {len(st)} strips")
+        if best is None or score < best[0]:
+            best = (score, st)
+    strips = best[1]
 
     # ---- write SVGs
     y0 = (STOCK_W - CUT_W) / 2
