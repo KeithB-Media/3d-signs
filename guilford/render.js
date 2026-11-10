@@ -1,6 +1,6 @@
-// Renders a stacked sign from <dir>/svg/layers.json (written by generate.py / generate_square.py).
+// Renders a stacked sign from <dir>/svg/layers.json (written by the generate*.py scripts).
 // Usage: node render.js [dir]   -> <dir>/renders/render_front.png, render_angle.png, ...
-//   node render.js          (round sign)      node render.js square   (square sign)
+//   node render.js  |  node render.js square  |  node render.js rectangle  |  node render.js round-ring
 const { chromium } = require('playwright');
 const fs = require('fs');
 const path = require('path');
@@ -8,11 +8,11 @@ const path = require('path');
 const base = path.join(__dirname, process.argv[2] || '.');
 const meta = JSON.parse(fs.readFileSync(path.join(base, 'svg', 'layers.json')));
 const layers = meta.layers;
-const D = Math.max(meta.w, meta.h), PX = 50;   // 50 px per inch
+const W = meta.w, H = meta.h, D = Math.max(W, H);
 const outDir = path.join(base, 'renders');
 const outlineEl = (attrs) => meta.shape === 'circle'
-  ? `<circle cx="${D / 2}" cy="${D / 2}" r="${D / 2}" ${attrs}/>`
-  : `<rect x="0" y="0" width="${D}" height="${D}" rx="0.3" ${attrs}/>`;
+  ? `<circle cx="${W / 2}" cy="${H / 2}" r="${W / 2}" ${attrs}/>`
+  : `<rect x="0" y="0" width="${W}" height="${H}" rx="0.3" ${attrs}/>`;
 fs.mkdirSync(outDir, { recursive: true });
 
 function shade(hex, f) {
@@ -20,9 +20,10 @@ function shade(hex, f) {
   const c = [n >> 16, (n >> 8) & 255, n & 255].map(v => Math.round(Math.min(255, v * f)));
   return `rgb(${c.join(',')})`;
 }
-const svgURI = (d, fill) => 'data:image/svg+xml;base64,' + Buffer.from(
-  `<svg xmlns="http://www.w3.org/2000/svg" width="${D * PX}" height="${D * PX}" viewBox="0 0 ${D} ${D}">` +
-  `<path d="${d}" fill="${fill}" fill-rule="evenodd"/></svg>`).toString('base64');
+
+// page size for a view of the whole sign: longest side ~900 px (1400 for wide signs)
+const frontW = W > H * 1.3 ? 1400 : Math.round(900 * (W + 2) / (H + 2));
+const frontH = Math.round(frontW * (H + 2) / (W + 2));
 
 // ---- straight-on view: each layer casts a soft shadow onto the layers below
 function frontHTML() {
@@ -33,7 +34,7 @@ function frontHTML() {
       `<feDropShadow dx="${s * 0.8}" dy="${s}" stdDeviation="${s * 0.55}" flood-opacity="0.55"/></filter></defs>`;
   }).join('\n');
   return `<html><body style="margin:0;background:#d9d4cb">
-  <svg width="900" height="900" viewBox="-1 -1 ${D + 2} ${D + 2}">
+  <svg width="${frontW}" height="${frontH}" viewBox="-1 -1 ${W + 2} ${H + 2}">
    <defs>
     <filter id="wall" x="-10%" y="-10%" width="125%" height="125%"><feDropShadow dx="0.2" dy="0.3" stdDeviation="0.3" flood-opacity="0.45"/></filter>
     <radialGradient id="light" cx="0.3" cy="0.25" r="0.9">
@@ -47,12 +48,13 @@ function frontHTML() {
 
 // ---- 3D views: orthographic tilt, slices painted bottom-to-top (exact for a view from above)
 function stackHTML(tiltDeg, rotDeg, gap, w, h) {
+  const PX = Math.min(50, 0.8 * w / D);
   const SL = 0.02, phi = tiltDeg * Math.PI / 180;
   const sin = Math.sin(phi), cos = Math.cos(phi);
   const totalZ = layers.reduce((a, L) => a + L.t, 0) + gap * (layers.length - 1);
   const cy = h / 2 + totalZ * sin * PX / 2;
   let body = '', z = 0;
-  const at = (zz, fill, d) => `<path transform="translate(${w / 2},${cy - zz * sin * PX}) scale(${PX},${PX * cos}) rotate(${rotDeg}) translate(${-D / 2},${-D / 2})" d="${d}" fill="${fill}" fill-rule="evenodd"/>`;
+  const at = (zz, fill, d) => `<path transform="translate(${w / 2},${cy - zz * sin * PX}) scale(${PX},${PX * cos}) rotate(${rotDeg}) translate(${-W / 2},${-H / 2})" d="${d}" fill="${fill}" fill-rule="evenodd"/>`;
   layers.forEach((L, i) => {
     const n = Math.max(2, Math.round(L.t / SL));
     const base = z + i * gap;
@@ -75,14 +77,22 @@ function stackHTML(tiltDeg, rotDeg, gap, w, h) {
     await page.screenshot({ path: path.join(outDir, file) });
     await page.close();
   };
-  await shoot(frontHTML(), 'render_front.png', 900, 900);
-  await shoot(stackHTML(38, 0, 0, 1000, 800), 'render_angle.png', 1000, 800);
-  await shoot(stackHTML(62, -20, 1.5, 1000, 1500), 'render_exploded.png', 1000, 1500);
+  const wide = W > H * 1.3;
+  await shoot(frontHTML(), 'render_front.png', frontW, frontH);
+  if (wide) {
+    await shoot(stackHTML(45, 0, 0, 1400, 800), 'render_angle.png', 1400, 800);
+    await shoot(stackHTML(65, 0, 1.2, 1400, 1100), 'render_exploded.png', 1400, 1100);
+  } else {
+    await shoot(stackHTML(38, 0, 0, 1000, 800), 'render_angle.png', 1000, 800);
+    await shoot(stackHTML(62, -20, 1.5, 1000, 1500), 'render_exploded.png', 1000, 1500);
+  }
+  const cw = 230, ch = Math.round(cw * (H + 0.6) / (W + 0.6)), cols = wide ? 2 : Math.min(4, layers.length);
   const cards = layers.map((L, i) => `<div style="text-align:center;font:600 15px system-ui;color:#333">
-    <svg width="230" height="230" viewBox="-0.3 -0.3 ${D + 0.6} ${D + 0.6}">${outlineEl('fill="none" stroke="#bbb" stroke-width="0.05" stroke-dasharray="0.2 0.2"')}
+    <svg width="${wide ? 2 * cw : cw}" height="${wide ? 2 * ch : ch}" viewBox="-0.3 -0.3 ${W + 0.6} ${H + 0.6}">${outlineEl('fill="none" stroke="#bbb" stroke-width="0.05" stroke-dasharray="0.2 0.2"')}
     <path d="${L.d}" fill="${L.color}" stroke="#555" stroke-width="0.03" fill-rule="evenodd"/></svg>
     <div>Layer ${i + 1}</div><div style="font-weight:400;font-size:13px">${L.stem.replace(/^layer\d_/, '').replace(/_/g, ' ')}</div></div>`).join('');
-  await shoot(`<html><body style="margin:0;background:#eeeae2;padding:20px;display:grid;grid-template-columns:repeat(${Math.min(4, layers.length)},250px);gap:18px">${cards}</body></html>`,
-    'layer_sheet.png', 20 + Math.min(4, layers.length) * 268, 20 + Math.ceil(layers.length / 4) * 310);
+  const cardW = (wide ? 2 * cw : cw) + 20, cardH = (wide ? 2 * ch : ch) + 80;
+  await shoot(`<html><body style="margin:0;background:#eeeae2;padding:20px;display:grid;grid-template-columns:repeat(${cols},${cardW}px);gap:18px">${cards}</body></html>`,
+    'layer_sheet.png', 40 + cols * (cardW + 18), 40 + Math.ceil(layers.length / cols) * (cardH + 18));
   await browser.close();
 })();

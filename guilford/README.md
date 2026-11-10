@@ -5,8 +5,11 @@ sign. Each layer is cut and painted one colour, then the layers are stacked and 
 the bottom up.
 
 * **Round** (this page, `svg/`): an 8-layer disc with the G over an orange-and-white stripe.
+* **Round with orange ring** (`round-ring/`): a 4-layer disc with no stripes. The orange
+  becomes a wide outer border ring around the G.
 * **Square** (`square/`): a 5-layer square with the G, "Guilford Rail System" and the orange
-  bar, adapted from the wide logo. See [Square version](#square-version-square).
+  bar, adapted from the wide logo.
+* **Rectangle** (`rectangle/`): 24" × 9", 5 layers, laid out exactly like the logo.
 
 The G with its arrow is traced from the logo in `reference/guilford_logo.jpg` by
 `trace_g.py`, so its shape matches the logo exactly. Both signs use the logo's colours.
@@ -81,13 +84,59 @@ All files are 14 in × 14 in on the same centre.
   Mark the baseline on the field with a light pencil line, or lay the cut-out
   sheet of layer 5 over the sign as a stencil. The pieces drop back into the holes they were cut from.
 
+## Round version with orange ring (`round-ring/`)
+
+![round ring](round-ring/renders/render_front.png)
+
+| Angle | Exploded |
+|---|---|
+| ![angle](round-ring/renders/render_angle.png) | ![exploded](round-ring/renders/render_exploded.png) |
+
+All files are 14 in × 14 in on the same centre.
+
+| # | File | Paint | Suggested stock | What it is |
+|---|------|-------|-----------------|------------|
+| 1 | `round-ring/svg/layer1_base_orange.svg` | Orange | 1/4" | 14.00" disc – orange outer ring (0.60" showing) and backer |
+| 2 | `round-ring/svg/layer2_white_ring.svg` | White | 1/8" | 12.80" disc – white pinstripe (0.18" showing) |
+| 3 | `round-ring/svg/layer3_gray_field.svg` | Gray | 1/8" | 12.44" disc – gray field |
+| 4 | `round-ring/svg/layer4_white_g.svg` | White | 1/4" | the G (8.4" tall) |
+
+* The G has no stripes to cross, so it needs no outline or hidden support. It goes on 1/4"
+  stock for a deeper shadow. With 1/8" stock it still works, and the sign is 5/8" thick
+  instead of 3/4".
+* Glue order: 1 → 2 → 3 (concentric discs), then the G, using `round-ring/svg/placement_template.svg`.
+
+## Rectangle version (`rectangle/`)
+
+![rectangle](rectangle/renders/render_front.png)
+
+![angle](rectangle/renders/render_angle.png)
+
+All files are 24 in × 9 in on the same centre. The sign fits a 24" × 12" laser bed.
+
+| # | File | Paint | Suggested stock | What it is |
+|---|------|-------|-----------------|------------|
+| 1 | `rectangle/svg/layer1_base_gray.svg` | Gray | 1/4" | 24" × 9" (0.3" corners) – gray border and backer |
+| 2 | `rectangle/svg/layer2_white_pinstripe.svg` | White | 1/8" | 23.6" × 8.6" – white pinstripe |
+| 3 | `rectangle/svg/layer3_gray_field.svg` | Gray | 1/8" | 23.2" × 8.2" – gray field |
+| 4 | `rectangle/svg/layer4_orange_bar.svg` | Orange | 1/8" | orange bar, running to the right edge of the field |
+| 5 | `rectangle/svg/layer5_white_g_lettering.svg` | White | 1/8" | the G (6.2" tall) and "Guilford Rail System" (21 pieces) |
+
+* The G, lettering and bar are placed from pixel measurements of the logo image (`PX_*` in
+  `generate_rectangle.py`), scaled to fit the field. The capital letters are 0.95" tall.
+* Place the lettering as on the square sign: drop the pieces back into the cut-out sheet of layer
+  5, used as a stencil, or use `rectangle/svg/placement_template.svg`.
+* For another size, change `SIGN_W` / `SIGN_H`. The layout scales to fit.
+
 ## Regenerating
 ```
 pip install shapely numpy fonttools
 python3 generate.py          # round  -> svg/
-python3 generate_square.py   # square -> square/svg/
-node render.js               # round renders  -> renders/
-node render.js square        # square renders -> square/renders/
+python3 generate_square.py      # square -> square/svg/
+python3 generate_rectangle.py   # rectangle -> rectangle/svg/
+python3 generate_round_ring.py  # round with orange ring -> round-ring/svg/
+node render.js                  # round renders -> renders/
+node render.js square           # likewise: square, rectangle, round-ring
 ```
 * `G_HEIGHT` / `G_CENTER` (round) and `G_HEIGHT`, the gaps and `BAR_H` (square) set the layout.
   `STRIPE_*` / `PIN` set the round sign's stripes.
