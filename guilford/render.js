@@ -1,12 +1,18 @@
-// Renders the stacked sign from svg/layers.json (written by generate.py).
-// Usage: node render.js   -> renders/render_front.png, render_angle.png, render_exploded.png
+// Renders a stacked sign from <dir>/svg/layers.json (written by generate.py / generate_square.py).
+// Usage: node render.js [dir]   -> <dir>/renders/render_front.png, render_angle.png, ...
+//   node render.js          (round sign)      node render.js square   (square sign)
 const { chromium } = require('playwright');
 const fs = require('fs');
 const path = require('path');
 
-const layers = JSON.parse(fs.readFileSync(path.join(__dirname, 'svg', 'layers.json')));
-const D = 14, PX = 50;                       // 50 px per inch
-const outDir = path.join(__dirname, 'renders');
+const base = path.join(__dirname, process.argv[2] || '.');
+const meta = JSON.parse(fs.readFileSync(path.join(base, 'svg', 'layers.json')));
+const layers = meta.layers;
+const D = Math.max(meta.w, meta.h), PX = 50;   // 50 px per inch
+const outDir = path.join(base, 'renders');
+const outlineEl = (attrs) => meta.shape === 'circle'
+  ? `<circle cx="${D / 2}" cy="${D / 2}" r="${D / 2}" ${attrs}/>`
+  : `<rect x="0" y="0" width="${D}" height="${D}" rx="0.3" ${attrs}/>`;
 fs.mkdirSync(outDir, { recursive: true });
 
 function shade(hex, f) {
@@ -27,7 +33,7 @@ function frontHTML() {
       `<feDropShadow dx="${s * 0.8}" dy="${s}" stdDeviation="${s * 0.55}" flood-opacity="0.55"/></filter></defs>`;
   }).join('\n');
   return `<html><body style="margin:0;background:#d9d4cb">
-  <svg width="900" height="900" viewBox="-1 -1 16 16">
+  <svg width="900" height="900" viewBox="-1 -1 ${D + 2} ${D + 2}">
    <defs>
     <filter id="wall" x="-10%" y="-10%" width="125%" height="125%"><feDropShadow dx="0.2" dy="0.3" stdDeviation="0.3" flood-opacity="0.45"/></filter>
     <radialGradient id="light" cx="0.3" cy="0.25" r="0.9">
@@ -35,7 +41,7 @@ function frontHTML() {
       <stop offset="1" stop-color="#000" stop-opacity="0.18"/></radialGradient>
    </defs>
    ${groups}
-   <circle cx="7" cy="7" r="7" fill="url(#light)" style="mix-blend-mode:soft-light"/>
+   ${outlineEl('fill="url(#light)" style="mix-blend-mode:soft-light"')}
   </svg></body></html>`;
 }
 
@@ -46,7 +52,7 @@ function stackHTML(tiltDeg, rotDeg, gap, w, h) {
   const totalZ = layers.reduce((a, L) => a + L.t, 0) + gap * (layers.length - 1);
   const cy = h / 2 + totalZ * sin * PX / 2;
   let body = '', z = 0;
-  const at = (zz, fill, d) => `<path transform="translate(${w / 2},${cy - zz * sin * PX}) scale(${PX},${PX * cos}) rotate(${rotDeg}) translate(-7,-7)" d="${d}" fill="${fill}" fill-rule="evenodd"/>`;
+  const at = (zz, fill, d) => `<path transform="translate(${w / 2},${cy - zz * sin * PX}) scale(${PX},${PX * cos}) rotate(${rotDeg}) translate(${-D / 2},${-D / 2})" d="${d}" fill="${fill}" fill-rule="evenodd"/>`;
   layers.forEach((L, i) => {
     const n = Math.max(2, Math.round(L.t / SL));
     const base = z + i * gap;
@@ -73,10 +79,10 @@ function stackHTML(tiltDeg, rotDeg, gap, w, h) {
   await shoot(stackHTML(38, 0, 0, 1000, 800), 'render_angle.png', 1000, 800);
   await shoot(stackHTML(62, -20, 1.5, 1000, 1500), 'render_exploded.png', 1000, 1500);
   const cards = layers.map((L, i) => `<div style="text-align:center;font:600 15px system-ui;color:#333">
-    <svg width="230" height="230" viewBox="-0.3 -0.3 14.6 14.6"><circle cx="7" cy="7" r="7" fill="none" stroke="#bbb" stroke-width="0.05" stroke-dasharray="0.2 0.2"/>
+    <svg width="230" height="230" viewBox="-0.3 -0.3 ${D + 0.6} ${D + 0.6}">${outlineEl('fill="none" stroke="#bbb" stroke-width="0.05" stroke-dasharray="0.2 0.2"')}
     <path d="${L.d}" fill="${L.color}" stroke="#555" stroke-width="0.03" fill-rule="evenodd"/></svg>
     <div>Layer ${i + 1}</div><div style="font-weight:400;font-size:13px">${L.stem.replace(/^layer\d_/, '').replace(/_/g, ' ')}</div></div>`).join('');
-  await shoot(`<html><body style="margin:0;background:#eeeae2;padding:20px;display:grid;grid-template-columns:repeat(4,250px);gap:18px">${cards}</body></html>`,
-    'layer_sheet.png', 1100, 640);
+  await shoot(`<html><body style="margin:0;background:#eeeae2;padding:20px;display:grid;grid-template-columns:repeat(${Math.min(4, layers.length)},250px);gap:18px">${cards}</body></html>`,
+    'layer_sheet.png', 20 + Math.min(4, layers.length) * 268, 20 + Math.ceil(layers.length / 4) * 310);
   await browser.close();
 })();
