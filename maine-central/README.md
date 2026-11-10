@@ -106,6 +106,7 @@ pip install shapely numpy opencv-python-headless
 python3 trace.py           # source/*.png -> trace.json (only needed if the images change)
 python3 generate.py        # trace.json  -> square/svg/ and round/svg/
 node render.js square      # renders (needs Playwright + Chromium)
+node render.js square-rim
 node render.js round
 node render.js round-rim
 ```
