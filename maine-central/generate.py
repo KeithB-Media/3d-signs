@@ -3,6 +3,7 @@
 
 * square/  - 18" x 13-1/8" "The Pine Tree Route" herald, orange on green (3 layers)
 * round/   - 14" round herald, yellow on green (4 layers)
+* square-rim/ - 18" x 13-1/8", orange border frame flush with the lettering (2 layers)
 * round-rim/ - 14" round, yellow ring on the outer edge, flush with the lettering (2 layers)
 
 The lettering and trees come from trace.json (traced from the herald images in
@@ -101,7 +102,7 @@ def thin_report(name, g):
 
 
 # ------------------------------------------------------------------ square
-def square_layers():
+def square_art():
     shapes = TRACE["square"]["shapes"]
     s = SQ_PX
     # the herald is 219 px tall -> 13.14"; centre it vertically on the 13.125" sign
@@ -122,8 +123,11 @@ def square_layers():
     rmid = (ro + ri) / 2 * s
     ring_g = circle(ccx, ccy, rmid + SQ_RING_W / 2).difference(circle(ccx, ccy, rmid - SQ_RING_W / 2))
     print(f"   ring: centre ({ccx:.2f}, {ccy:.2f}), {2 * rmid + SQ_RING_W:.2f}\" OD, {SQ_RING_W}\" wide")
-    art_g = unary_union(art + [ring_g])
+    return unary_union(art + [ring_g])
 
+
+def square_layers():
+    art_g = square_art()
     base = rounded_rect(0, 0, SQ_W, SQ_H, SQ_CORNER)
     b = SQ_BORDER
     field = rounded_rect(b, b, SQ_W - b, SQ_H - b, SQ_FIELD_CORNER)
@@ -134,6 +138,20 @@ def square_layers():
          f"{SQ_W - 2 * b:g}\" x {SQ_H - 2 * b:g}\" green field"),
         ("layer3_orange_art", "orange", art_g, 0.25,
          "lettering, ring and pine tree (separate pieces)"),
+    ]
+
+
+def square_rim_layers():
+    """Square sign with the orange border cut as a frame from the same 1/4" sheet as the
+    lettering and glued straight onto the backer, so its top is flush with the letters."""
+    b = SQ_BORDER
+    base = rounded_rect(0, 0, SQ_W, SQ_H, SQ_CORNER)
+    frame = base.difference(rounded_rect(b, b, SQ_W - b, SQ_H - b, SQ_FIELD_CORNER))
+    return (SQ_W, SQ_H), [
+        ("layer1_base_green", "green", base, 0.25,
+         f"{SQ_W:g}\" x {SQ_H:g}\" green field / backer"),
+        ("layer2_orange_frame_and_art", "orange", unary_union([frame, square_art()]), 0.25,
+         f"{b}\" orange border frame + lettering, ring and pine tree (separate pieces)"),
     ]
 
 
@@ -225,6 +243,7 @@ def write_sign(name, size, layers):
 
 def main():
     write_sign("square", *square_layers())
+    write_sign("square-rim", *square_rim_layers())
     write_sign("round", *round_layers())
     write_sign("round-rim", *round_rim_layers())
 

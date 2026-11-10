@@ -37,6 +37,25 @@ To change the size, edit `SQ_W` in `generate.py`; the height follows. The ring a
 
 Total thickness is about 3/4". Layers 1–3 are concentric discs. Centre each one on the layer below.
 
+## Square sign, border on the edge (`square-rim/svg/`)
+
+| Front | Angle |
+|---|---|
+| ![square-rim](square-rim/renders/render_front.png) | ![square-rim angle](square-rim/renders/render_angle.png) |
+
+Same layout as the square sign, but the orange border is a raised frame flush with the top of the lettering.
+
+| # | File | Paint | Suggested stock | What it is |
+|---|------|-------|-----------------|------------|
+| 1 | `layer1_base_green.svg` | Green (edge orange) | 1/4" | 18" × 13.125" green field and backer |
+| 2 | `layer2_orange_frame_and_art.svg` | Orange | 1/4" | 1/2" border frame, plus the lettering, ring and tree (28 pieces) |
+
+* The frame, letters, ring and tree are all cut from the same 1/4" sheet and glued straight onto
+  the backer, so they all finish at the same height. Total thickness is 1/2".
+* Glue the frame on first, lined up with the edges of the backer, then place the artwork inside it.
+* Paint the edge of the backer orange so the whole side reads as one tall orange band.
+* The frame is a single 18" × 13-1/8" piece only 1/2" wide. Handle it carefully until it is glued down.
+
 ## Round sign, ring on the edge (`round-rim/svg/`)
 
 | Front | Angle |
