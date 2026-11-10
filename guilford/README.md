@@ -143,3 +143,38 @@ node render.js square           # likewise: square, rectangle, round-ring
 * `COLORS` in `common.py` is used for the previews only. The cut files carry no colour.
 * To re-trace the G from another image, run
   `pip install pillow scikit-image scipy`, then `python3 trace_g.py image.jpg`.
+
+## Production cut sheets (`cut-sheets/`)
+
+`nest.py` packs every piece for a run (default: 5 of each of the four designs) onto
+24" × 96" strips of 1/8" MDF (a 4 × 8 sheet cut in half lengthwise) for a feeder laser with a
+23.5" cutting width. Layers drawn for 1/4" stock are cut twice and laminated.
+
+| Folder | Sign size | How it cuts | Strips | 4 × 8 sheets |
+|---|---|---|---|---|
+| `cut-sheets/14in_blocks` | 14" (rectangle 24" × 9") | 23.5" blocks, one job each | 16 | 8 |
+| `cut-sheets/14in_full-strip` | 14" | whole 96" strip as one job | 12 | 6 |
+| `cut-sheets/12in_blocks` | 12" (rectangle 20.6" × 7.7") | 23.5" blocks, one job each | 10 | 5 |
+| `cut-sheets/12in_full-strip` | 12" | whole 96" strip as one job | 8 | 4 |
+
+* **Blocks** are the safe layout. No part crosses a 23.5" block line, so each block can run
+  as its own job (`blocks/strip_NN_X.svg`). At 14", the rectangle's base and pinstripe are
+  longer than 23.5", so they go in a 72.5" **LONG** section at the start of strips 1–4. Those
+  strips need the feeder to cut one part longer than 23.5" in a single job. At 12" every part fits a block.
+* **Full-strip** files assume the feeder cuts the whole 96" in one job. Parts pack more tightly.
+* Red = cut. Blue = block lines and part labels (for example `RND L4 #3 gray` = round sign,
+  layer 4, set 3, paint gray). Set blue to *not output*.
+  The labels also give the paint colour, so you can sort pieces for painting by colour.
+* `preview.png` in each folder shows every strip.
+* Smaller parts (the G's, bars and lettering) are cut in the leftover space beside the discs
+  and squares.
+* `python3 nest.py --rings` cuts the hidden lower layers as rings, with a 0.75" glue land, so that
+  parts can be cut from their centres. On these designs it saves at most one strip, because
+  the layout is limited by each disc's outside size, not its area. It also leaves the field
+  layer unsupported in the middle, so it isn't recommended.
+
+```
+python3 nest.py [sets] [--size=12] [--full-strip] [--rings]
+node preview_sheets.js cut-sheets/12in_blocks
+```
+`--size` scales the parts in the cut sheets only. The per-design files above stay at 14".
