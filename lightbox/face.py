@@ -10,7 +10,7 @@ matte, sparkly finish). Light from the box shines through it:
     black areas run the full thickness, so they stay black when lit
 
 Usage:
-    python3 face.py ART.svg OUTDIR [--window 224] [--disc 239] [--skin 0.6] [--back 1.0]
+    python3 face.py ART.svg OUTDIR [--window 230.6] [--disc 239] [--skin 0.6] [--back 1.0]
                     [--merge "#F6CF14=#F5F5F2"] [--blackout 0.12] [--rotate 0]
 
 ART.svg  flat artwork: filled paths, later paths painted over earlier ones (e.g. the
@@ -18,7 +18,7 @@ ART.svg  flat artwork: filled paths, later paths painted over earlier ones (e.g.
 OUTDIR   gets face_<colour>.stl per filament, face.3mf (all parts in one object) and
          face_preview.svg.
 
-Sizes are millimetres. The defaults match lightbox.scad (239 mm disc, 224 mm window).
+Sizes are millimetres. The defaults match lightbox.scad (239 mm disc, 230.6 mm window).
 Needs: pip install shapely numpy trimesh svgelements mapbox_earcut manifold3d
 """
 import argparse
@@ -168,7 +168,7 @@ def main():
     ap.add_argument("svg")
     ap.add_argument("outdir")
     ap.add_argument("--disc", type=float, default=239.0, help="face disc diameter, mm (lightbox face_d)")
-    ap.add_argument("--window", type=float, default=224.0, help="visible window in the bezel, mm")
+    ap.add_argument("--window", type=float, default=230.6, help="visible window in the bezel, mm")
     ap.add_argument("--art", type=float, default=None, help="art diameter, mm (default window + 2)")
     ap.add_argument("--skin", type=float, default=0.6, help="colour skin thickness, mm (3 layers @0.2)")
     ap.add_argument("--back", type=float, default=1.0, help="white backing thickness, mm")

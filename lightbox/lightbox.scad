@@ -11,13 +11,14 @@
 // This file is the library; open one of the style files above, not this one.
 
 // ------------------------------------------------------------ shared sizes
-od        = 240;    // body outside diameter (bezel adds ~6 mm)
-wall      = 2.4;    // body wall
-face_d    = 239;    // printed face disc (face.py --disc)
+od        = 240;    // body outside diameter (bezel adds ~4 mm)
+wall      = 3.2;    // body wall; thick enough for the bezel screws to bite (no bosses inside)
+face_d    = od - 1; // printed face disc (face.py --disc)
 face_t    = 1.6;    // printed face thickness (face.py skin + back)
-window_d  = 224;    // visible opening in the bezel (face.py --window)
+window_d  = od - 2 * wall - 3;  // visible opening (face.py --window): the lip just covers
+                    // the body wall, so the front rim is only ~6.6 mm wide
 clear     = 0.3;    // sliding clearance
-bezel_wall  = 2.4;
+bezel_wall  = 1.6;
 bezel_lip   = 2.0;  // front lip thickness
 bezel_skirt = 10;   // how far the bezel slides down the body
 cavity    = 40;     // LEDs to face. Deeper = more even light; 40 suits COB strip
@@ -97,12 +98,6 @@ module body(battery = false, port_angle = 270, cable_angle = undef, mount_angle 
                     rotate([0, 0, -port_halfang]) rotate_extrude(angle = 2 * port_halfang)
                         square([R, H]);
             }
-            // bosses for the bezel screws (chamfered underneath so they print)
-            for (a = bezel_screw_angles) rotate([0, 0, a])
-                translate([IR, 0, H - 14]) hull() {
-                    translate([-4.5, -5, 6]) cube([5, 10, 8]);
-                    translate([-0.01, -5, 0]) cube([0.5, 10, 14]);
-                }
             // battery: rails that keep the bank against the port opening
             if (battery) rotate([0, 0, port_angle])
                 for (s = [-1, 1]) translate([IR - bank[0] - 2, s * (bank[1] / 2 + 1.2) - 1.2, back_t - 0.01])
@@ -111,7 +106,7 @@ module body(battery = false, port_angle = 270, cable_angle = undef, mount_angle 
             if (join) for (x = [-1, 1], y = [-1, 1]) translate([x * 45, y * 45, back_t - 0.01])
                 cylinder(d = 9, h = 2, $fn = 32);
         }
-        // bezel screw pilots
+        // bezel screw pilots: straight into the wall, so nothing inside shades the face edge
         for (a = bezel_screw_angles) radial_hole(a, H - 5, pilot);
         // cradle / arm screws (heads inside) + their cable slot
         if (mount_angle != undef) for (s = [-1, 1])
@@ -147,7 +142,7 @@ module led_plate() {
 
 // ------------------------------------------------------------ BEZEL
 // Printed front-down (looks best on the textured plate). Slides over the body and
-// clamps the face; three M3 x 8 screws go in from the side.
+// clamps the face; three M3 x 6 screws go in from the side.
 module bezel() {
     pocket = bezel_lip + face_t + 0.2;
     h = pocket + bezel_skirt;

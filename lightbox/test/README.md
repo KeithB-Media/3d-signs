@@ -51,7 +51,7 @@ When you are happy with it, use the same `--skin` / `--back` values for the full
 ## 2. Full-size fit test: `full_size_fit/`
 60-degree slices of the real 240 mm parts. One colour, any filament. Print all three on
 one plate:
-* `body_arc.stl`: the top 20 mm of the body wall, with one bezel screw boss
+* `body_arc.stl`: the top 20 mm of the body wall, with one bezel screw hole
 * `bezel_arc.stl`: the matching slice of the bezel (prints front-down)
 * `face_arc.stl`: a slice of the face's edge
 
@@ -59,8 +59,8 @@ one plate:
 
 **Check:** lay the face slice on the body rim, then slide the bezel slice over both.
 * The bezel should slide on by hand with a little friction, no rattle, and clamp the face
-  flat. Its screw hole should line up with the boss: drive an M3 × 8 self-tapping screw
-  in.
+  flat. Its screw hole should line up with the hole in the body: drive an M3 × 6
+  self-tapping screw in. It should bite firmly into the 3.2 mm wall.
 * **Too tight:** raise `clear` in `lightbox.scad` (0.3 → 0.4). **Loose:** lower it (→ 0.2).
 * **Face rattles:** the face pocket is 0.2 mm deeper than the face. If the face is loose,
   set the `+ 0.2` in `module bezel()` to `+ 0.1`.
@@ -87,7 +87,7 @@ LED plate separately in white.
 **You also need:**
 * About 40 cm of 5 V USB COB LED strip (one ring at r ≈ 38 mm and one at r ≈ 20 mm; the
   plate has small marks), plus a USB plug/cable and ideally an inline dimmer
-* 3 × M3 × 8 self-tapping screws (bezel) + 2 more (body to stand)
+* 3 × M3 × 6 self-tapping screws (bezel) + 2 × M3 × 8 (body to stand)
 
 **Assembly:**
 1. Drop the LED plate into the body, stick the strip on and feed the cable out through
@@ -105,7 +105,7 @@ how bright it is with your strip and power supply.
 The yellow-S artwork is `../../susquehanna-s/svg/preview_yellow_s.svg`, written by
 `susquehanna-s/yellow_s.py`. Rebuild the mini face with:
 ```
-python3 face.py ../susquehanna-s/svg/preview_yellow_s.svg test/mini --disc 99 --window 84 --backing "#f5f5f2"
+python3 face.py ../susquehanna-s/svg/preview_yellow_s.svg test/mini --disc 99 --window 90.6 --backing "#f5f5f2"
 ```
 The other test files are rebuilt by `../build.sh`. Their sources are `../test_fit.scad`
 and `../test_mini.scad`.

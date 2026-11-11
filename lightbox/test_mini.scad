@@ -3,8 +3,6 @@
 // Wired (USB) only: a power bank doesn't fit at this size.
 include <lightbox.scad>
 od       = 100;
-face_d   = 99;
-window_d = 84;
 cavity   = 25;
 stand_extra = 12;
 part = "assembly";   // body | led_plate | bezel | stand | assembly

@@ -1,7 +1,7 @@
 {
  "disc_mm": 99.0,
- "window_mm": 84.0,
- "art_mm": 86.0,
+ "window_mm": 90.6,
+ "art_mm": 92.6,
  "skin_mm": 0.6,
  "thickness_mm": 1.6,
  "filaments": [
@@ -9,13 +9,13 @@
    "file": "face_141414.stl",
    "colour": "#141414",
    "role": "blackout (full thickness)",
-   "visible_area_cm2": 50.9
+   "visible_area_cm2": 59.1
   },
   {
    "file": "face_f6cf14.stl",
    "colour": "#f6cf14",
    "role": "skin",
-   "visible_area_cm2": 7.1
+   "visible_area_cm2": 8.3
   },
   {
    "file": "face_f5f5f2.stl",

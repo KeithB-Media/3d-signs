@@ -16,8 +16,8 @@ Face as printed (left) and lit (right):
 |---|---|
 | ![day](../susquehanna-s/lightbox_face/face_daylight.png) | ![lit](../susquehanna-s/lightbox_face/face_lit.png) |
 
-Size: about **9.6" (245 mm) across**. The body is 240 mm, the opening shows 224 mm of
-art, and the wired version is about 2" (50 mm) deep. The P1S bed is 256 mm, so this is
+Size: about **9.6" (244 mm) across**. The body is 240 mm, the opening shows 231 mm of
+art (the bezel's front rim is only about 6.6 mm wide), and the wired version is about 2" (50 mm) deep. The P1S bed is 256 mm, so this is
 close to the biggest one-piece size it can print. Smaller sizes are covered further down.
 
 **New to this? Start with the [test prints](test/README.md):** a yellow-S colour coupon, a
@@ -95,7 +95,7 @@ Every box is made from the same parts:
 | Part | File | Print in | Notes |
 |---|---|---|---|
 | Face | from `face.py` | see above | your design |
-| Bezel | `stl/common/bezel.stl` | black / grey | prints front-down, held by 3 × M3 × 8 screws from the side |
+| Bezel | `stl/common/bezel.stl` | black / grey | prints front-down, held by 3 × M3 × 6 screws from the side, straight into the body wall |
 | LED plate | `stl/common/led_plate.stl` | **white** PETG (or PLA) | the reflector; the LED strip sticks to it |
 | Body ("cup") | per style, below | black, or white for brighter edges | prints open side up, no supports |
 | Blank face | `stl/common/blank_face.stl` | black | blanks off the second side of the projecting box |
@@ -166,8 +166,9 @@ aluminium tape under the LEDs, so it doesn't soften.
 ---
 
 ## Hardware per box
-* M3 × 8 self-tapping (or #4 × 3/8" pan-head) screws: 3 per bezel; +2 for the desk stand;
-  +4 for the projecting arm
+* Bezel: 3 × M3 × 6 self-tapping (or #4 × 1/4" pan-head) screws per bezel
+* M3 × 8 self-tapping (or #4 × 3/8" pan-head) screws: 2 for the desk stand, 4 for the
+  projecting arm
 * Projecting: 4 × M3 × 10 bolts + nuts (joining the bodies), 2 × #8 countersunk wall screws + anchors
 * Flat on the wall: 2 × #8 pan-head screws + anchors (for the keyholes)
 * 5 V USB COB LED strip (~1 m per lit side), inline USB dimmer, USB charger or power bank
@@ -177,9 +178,9 @@ aluminium tape under the LEDs, so it doesn't soften.
 Every size is a variable at the top of `lightbox.scad`. Change it there, then run
 `./build.sh` (`xvfb-run ./build.sh` on a computer with no screen) to rebuild every STL and
 picture.
-* **Smaller sign:** reduce `od`, `face_d` (= od − 1) and `window_d` (= od − 16) together,
-  then make the face with the same `--disc` and `--window`. Example for a 200 mm box:
-  `python3 face.py art.svg out --disc 199 --window 184`.
+* **Smaller sign:** change `od`. `face_d` (od − 1) and `window_d` (od − 9.4) follow it.
+  Then make the face with the matching `--disc` and `--window`. Example for a 200 mm box:
+  `python3 face.py art.svg out --disc 199 --window 190.6`.
 * `cavity` is the distance from the LEDs to the face. Making it deeper gives more even
   light with spotty strips.
 * `arm_gap` is the distance from the wall on the projecting box. `stand_w` and
